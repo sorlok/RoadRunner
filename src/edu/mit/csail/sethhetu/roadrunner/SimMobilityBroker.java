@@ -11,8 +11,14 @@ import java.io.Reader;
 import java.io.Writer;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import android.os.AsyncTask;
 
 import edu.mit.csail.jasongao.roadrunner.Globals;
+import edu.mit.csail.jasongao.roadrunner.ResRequest;
 
 /**
  * The SimMobilityBroker is used by RoadRunner to communicate with Sim Mobility. 
@@ -36,33 +42,76 @@ public class SimMobilityBroker  {
 	private BufferedWriter writer;
 	
 	
+	//Helper class for connecting to the Sim Mobility server.
+	public class SimMobServerConnectTask extends AsyncTask<Void, Void, Boolean> {
+		private BufferedReader reader;
+		private BufferedWriter writer;
+		private boolean error;
+		private Exception errorEx;
+		
+		boolean isError() { return error; }
+		
+		protected void onPreExecute() {
+			super.onPreExecute();
+			this.error = false;
+		}
+		
+		protected Boolean doInBackground(Void... unused) {
+			smSocket = new Socket();
+			try {
+				smSocket.connect(new InetSocketAddress(Globals.SM_HOST, Globals.SM_PORT), Globals.SM_TIMEOUT);
+
+				//Retrieve underlying input/output streams.
+				InputStream in = smSocket.getInputStream();
+				OutputStream out = smSocket.getOutputStream();
+
+				//Wrap these with Buffered readers/writers.
+				this.reader = new BufferedReader(new InputStreamReader(in));
+				this.writer = new BufferedWriter(new OutputStreamWriter(out));
+				
+				//Now we read one line, and see if the Sim Mobility server will accept us.
+				String firstResponse = reader.readLine();
+				if (firstResponse!="OK") {
+					throw new IOException("Sim Mobility Server refused to accept us.");
+				}
+			} catch (IOException ex) {
+				this.error = true;
+				this.errorEx = ex;
+			}
+			
+			return !this.error;
+		}
+
+		protected void onProgressUpdate(Void unused) {}
+		
+		protected void onPostExecute(Boolean success) {
+			SimMobilityBroker.this.reader = this.reader;
+			SimMobilityBroker.this.writer = this.writer;
+			
+			if (this.error) {
+				//Close our streams.
+				SimMobilityBroker.this.closeStreams();
+			}
+		}
+	}
+	
+	
+	
 	/**
 	 * Create the broker entity and connect to the server.
 	 */
 	public SimMobilityBroker() {
-		smSocket = new Socket();
+		SimMobServerConnectTask task = new SimMobServerConnectTask();
+		task.execute();
 		try {
-			smSocket.connect(new InetSocketAddress(Globals.SM_HOST, Globals.SM_PORT), Globals.SM_TIMEOUT);
-
-			//Retrieve underlying input/output streams.
-			InputStream in = smSocket.getInputStream();
-			OutputStream out = smSocket.getOutputStream();
-
-			//Wrap these with Buffered readers/writers.
-			this.reader = new BufferedReader(new InputStreamReader(in));
-			this.writer = new BufferedWriter(new OutputStreamWriter(out));
-			
-			//Now we read one line, and see if the Sim Mobility server will accept us.
-			String firstResponse = reader.readLine();
-			if (firstResponse!="OK") {
-				throw new IOException("Sim Mobility Server refused to accept us.");
-			}
-		} catch (IOException ex) {
-			//Close our streams.
-			this.closeStreams();
-			
-			//TODO: Shut down the app? Or...
+			task.get(10, TimeUnit.SECONDS);
+		} catch (Exception ex) { //TimeoutException,ExecutionException,InterruptedException
+			//TODO: What now?
 			throw new RuntimeException(ex);
+		}
+		if (task.isError()) {
+			//TODO: Shut down the app? Or...
+			throw new RuntimeException(task.errorEx);
 		}
 	}
 	
