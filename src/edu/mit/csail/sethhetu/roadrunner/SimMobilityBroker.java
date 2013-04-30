@@ -71,8 +71,8 @@ public class SimMobilityBroker  {
 				
 				//Now we read one line, and see if the Sim Mobility server will accept us.
 				String firstResponse = reader.readLine();
-				if (firstResponse!="OK") {
-					throw new IOException("Sim Mobility Server refused to accept us.");
+				if (!firstResponse.equals("OK")) {
+					throw new IOException("Sim Mobility Server refused to accept us; received \"" + firstResponse + "\"");
 				}
 			} catch (IOException ex) {
 				this.error = true;
