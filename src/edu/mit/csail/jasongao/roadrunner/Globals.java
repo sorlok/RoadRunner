@@ -1,6 +1,12 @@
 package edu.mit.csail.jasongao.roadrunner;
 
 public class Globals {
+	/** Enable communication via Sim Mobility, including time-step synchronization. */
+	public static final boolean SIM_MOBILITY = true;
+	public static final String SM_HOST = "127.0.0.1";
+	public static final int SM_PORT = 6745;
+	public static final int SM_TIMEOUT = 0;  //0=infinite
+	
 	/** Adhoc wireless communication parameters */
 	static final long ADHOC_ANNOUNCE_PERIOD = 2000 * 1;
 	static final boolean ADHOC_UDP_ONLY = true; // false to use TCP for transfer

@@ -22,6 +22,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker;
+
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -41,6 +43,9 @@ import android.telephony.TelephonyManager;
 
 public class RoadRunnerService extends Service implements LocationListener {
 	public static final String TAG = "RoadRunnerService";
+	
+	//Used for communicating with Sim Mobility.
+	SimMobilityBroker simmob = null;
 
 	// Android system
 	PowerManager.WakeLock wl = null;
@@ -1039,7 +1044,7 @@ public class RoadRunnerService extends Service implements LocationListener {
 		this.adhocEnabled = adhocEnabled_;
 		this.onDemand = onDemand_;
 		this.directionCcw = directionCcw_;
-
+		
 		log(String
 				.format("Service started with adhocEnabled %b, onDemand %b, directionCcw %b",
 						this.adhocEnabled, this.onDemand, this.directionCcw));
@@ -1047,7 +1052,11 @@ public class RoadRunnerService extends Service implements LocationListener {
 		// say("Service started.");
 
 		// Set up regions
-		this.regions = experimentARegions();
+		if (Globals.SIM_MOBILITY) {
+			this.regions = experimentARegions();
+		} else {
+			this.regions = simMobilityRegions();
+		}
 
 		// Initialize state
 		this.reservationsInUse = new ConcurrentHashMap<String, ResRequest>();
@@ -1055,6 +1064,12 @@ public class RoadRunnerService extends Service implements LocationListener {
 		this.offers = new ConcurrentLinkedQueue<ResRequest>();
 		this.penalties = new ConcurrentLinkedQueue<ResRequest>();
 		this.noncesHeard = new HashMap<Long, HashSet<Long>>();
+		
+		//Connect to the Sim Mobility server.
+		if (Globals.SIM_MOBILITY) {
+			simmob = new SimMobilityBroker();
+			log("Sim Mobility server connected.");
+		}
 
 		// Start recurring runnables
 		myHandler.postDelayed(cloudDirectGetRequestCheck,
@@ -1144,6 +1159,14 @@ public class RoadRunnerService extends Service implements LocationListener {
 
 		return rs;
 	}
+	
+	
+	/** Regions for our Sim Mobility network */
+	private List<Region> simMobilityRegions() {
+		//TODO: Actually add regions.
+		return new ArrayList<Region>();
+	}
+	
 
 	/** Test regions in Stata courtyard */
 	private List<Region> experimentARegions() {
@@ -1734,3 +1757,4 @@ public class RoadRunnerService extends Service implements LocationListener {
 		}
 	}
 }
+
