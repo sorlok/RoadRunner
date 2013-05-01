@@ -22,7 +22,6 @@ public class SimMobServerConnectTask extends AsyncTask<Socket, Void, Boolean> {
 	
 	private BufferedReader reader;
 	private BufferedWriter writer;
-	private boolean error;
 	private Exception errorEx;
 	private PostExecuteAction onComplete;
 
@@ -31,11 +30,8 @@ public class SimMobServerConnectTask extends AsyncTask<Socket, Void, Boolean> {
 		this.onComplete = onComplete;
 	}
 	
-	boolean isError() { return error; }
-	
 	protected void onPreExecute() {
 		super.onPreExecute();
-		this.error = false;
 	}
 	
 	protected Boolean doInBackground(Socket... smSocket) {
@@ -57,11 +53,10 @@ public class SimMobServerConnectTask extends AsyncTask<Socket, Void, Boolean> {
 				throw new IOException("Sim Mobility Server refused to accept us; received \"" + firstResponse + "\"");
 			}
 		} catch (IOException ex) {
-			this.error = true;
 			this.errorEx = ex;
 		}
 		
-		return !this.error;
+		return this.errorEx!=null;
 	}
 
 	protected void onProgressUpdate(Void unused) {}

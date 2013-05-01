@@ -5,8 +5,11 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.TimeUnit;
+
+import android.os.Handler;
 import edu.mit.csail.jasongao.roadrunner.Globals;
 import edu.mit.csail.jasongao.roadrunner.ResRequest;
+import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.Logger;
 import edu.mit.csail.sethhetu.roadrunner.SimMobServerConnectTask.PostExecuteAction;
 
 /**
@@ -29,6 +32,13 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	//Open streams for communicating with the server.
 	private BufferedReader reader;
 	private BufferedWriter writer;
+	
+	//For communicating back to the RoadRunner service.
+	private Handler myHandler;
+	private Logger logger;
+	
+	//What's the time according to Sim Mobility?
+	private long currTimeMs;
 
 	@Override
 	public void onPostExecute(Exception thrownException, BufferedReader reader, BufferedWriter writer) {
@@ -41,22 +51,28 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		//Save objects locally.
 		this.reader = reader;
 		this.writer = writer;
+		
+		System.out.println("TEST1: " + this.reader);
+		
+		//Assuming everything went ok, start our simulation loop. It looks like this:
+		//   1) Send out an Async task waiting for the "tick done" message.
+		//   2) When that's done, process it and send "android done" for this time step.
+		//As always, messages are sent before the final "done" message.
+		this.currTimeMs = 0;
+		new SimMobTickRequest(myHandler, new ServerTickDoneRunnable()).execute(this.reader);
 	}
 	
 	
 	/**
 	 * Create the broker entity and connect to the server.
 	 */
-	public SimMobilityBroker() {
+	public SimMobilityBroker(Handler myHandler, Logger logger) {
+		this.myHandler = myHandler;
+		this.logger = logger;
+		
 		smSocket = new Socket();
 		SimMobServerConnectTask task = new SimMobServerConnectTask(this);
 		task.execute(smSocket);
-		try {
-			task.get(10, TimeUnit.SECONDS);
-		} catch (Exception ex) { //TimeoutException,ExecutionException,InterruptedException
-			//TODO: What now?
-			throw new RuntimeException(ex);
-		}
 	}
 	
 	private void closeStreams() {
@@ -69,7 +85,26 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	}
 	
 	
-	
+	//Called when the server states that a time tick has completed.
+	public class ServerTickDoneRunnable implements Runnable {
+		//The line received from the server.
+		private String line;
+		
+		public ServerTickDoneRunnable() {}
+		
+		public void setLine(String line) {
+			this.line = line;
+		}
+		
+		public void run() {
+			if (line==null) { throw new RuntimeException("ServerTick line ignored!"); }
+			
+			logger.log("Line received: \"" + line + "\"");
+			
+			// TODO Auto-generated method stub
+			
+		}
+	};
 	
 	
 	

@@ -862,6 +862,15 @@ public class RoadRunnerService extends Service implements LocationListener {
 	public void log(String message) {
 		mainHandler.obtainMessage(MainActivity.LOG, message).sendToTarget();
 	}
+	
+	
+	//Helper: encapsulate logging into a class.
+	public class Logger {
+		public void log(String msg) {
+			RoadRunnerService.this.log(msg);
+		}
+	}
+	
 
 	public void updateDisplay() {
 		List<String> update = new ArrayList<String>();
@@ -1067,7 +1076,7 @@ public class RoadRunnerService extends Service implements LocationListener {
 		
 		//Connect to the Sim Mobility server.
 		if (Globals.SIM_MOBILITY) {
-			simmob = new SimMobilityBroker();
+			simmob = new SimMobilityBroker(myHandler, new Logger());
 			log("Sim Mobility server connected.");
 		}
 
