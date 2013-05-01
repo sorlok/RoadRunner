@@ -378,6 +378,11 @@ public class MainActivity extends Activity implements OnInitListener {
 		findViewById(R.id.ipv4_button).setOnClickListener(mClicked);
 		findViewById(R.id.debug_offer_button).setOnClickListener(mClicked);
 		findViewById(R.id.debug_request_button).setOnClickListener(mClicked);
+		
+		//Override for Sim Mobility; "cloud" makes no sense.
+		if (Globals.SIM_MOBILITY) {
+			((CheckBox) findViewById(R.id.adhoc_checkbox)).setChecked(true);
+		}
 
 		receivedMessages = new ArrayAdapter<String>(this, R.layout.message);
 		((ListView) findViewById(R.id.msgList)).setAdapter(receivedMessages);

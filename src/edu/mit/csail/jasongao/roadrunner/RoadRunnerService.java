@@ -1089,7 +1089,7 @@ public class RoadRunnerService extends Service implements LocationListener {
 		
 		//Connect to the Sim Mobility server.
 		if (Globals.SIM_MOBILITY) {
-			simmob = new SimMobilityBroker(myHandler, new Logger(), new AdHocAnnouncer());
+			simmob = new SimMobilityBroker(myHandler, new Logger(), new AdHocAnnouncer(), new LocationSpoofer());
 			log("Sim Mobility server connected.");
 		}
 
@@ -1471,12 +1471,29 @@ public class RoadRunnerService extends Service implements LocationListener {
 	public long getTime() {
 		return MainActivity.getTime();
 	}
+	
+	
+	//Spoof location changed, as an object.
+	public class LocationSpoofer {
+		public void setLocation(double lat, double lng) {
+			Location l = new Location("simmob");
+			l.setLatitude(lat);
+			l.setLongitude(lng);
+			l.setTime(System.currentTimeMillis());
+			onLocationChanged(l);
+		}
+	}
+	
 
 	/** Location - location changed */
 	@Override
 	public void onLocationChanged(Location loc) {
 		// log GPS traces
 		log_nodisplay(String.format("loc=%s", loc.toString()));
+		
+		if (Globals.SIM_MOBILITY) {
+			log("My location updated to: " + loc.getLatitude() + "," + loc.getLongitude());
+		}
 
 		// sync internal clock to GPS on first fix
 		/*

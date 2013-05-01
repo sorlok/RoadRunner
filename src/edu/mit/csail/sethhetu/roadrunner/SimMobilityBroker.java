@@ -10,6 +10,7 @@ import android.os.Handler;
 import edu.mit.csail.jasongao.roadrunner.Globals;
 import edu.mit.csail.jasongao.roadrunner.ResRequest;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.AdHocAnnouncer;
+import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.Logger;
 import edu.mit.csail.sethhetu.roadrunner.SimMobServerConnectTask.PostExecuteAction;
 
@@ -38,6 +39,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	private Handler myHandler;
 	private Logger logger;
 	private AdHocAnnouncer adhoc;
+	private LocationSpoofer locspoof;
 	
 	//What's the time according to Sim Mobility?
 	private long currTimeMs;
@@ -72,10 +74,11 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	/**
 	 * Create the broker entity and connect to the server.
 	 */
-	public SimMobilityBroker(Handler myHandler, Logger logger, AdHocAnnouncer adhoc) {
+	public SimMobilityBroker(Handler myHandler, Logger logger, AdHocAnnouncer adhoc, LocationSpoofer locspoof) {
 		this.myHandler = myHandler;
 		this.logger = logger;
 		this.adhoc = adhoc;
+		this.locspoof = locspoof;
 		
 		smSocket = new Socket();
 		SimMobServerConnectTask task = new SimMobServerConnectTask(this);
@@ -126,8 +129,15 @@ public class SimMobilityBroker  implements PostExecuteAction {
 				if (type.equals("SM_TICK_DONE")) {
 					//body="curr_tick_len", in ms
 					curr_tick_len = Integer.parseInt(body);
-				} else if (type.equals("")) {
+				} else if (type.equals("LOC_UPDATE")) {
+					//body="lat,lng", in N/E latitude/longitude coordinates
+					String[] latlng = body.split(",");
+					if (latlng.length!=2) { throw new RuntimeException("lat/lng pair missing"); }
+					double lat = Double.parseDouble(latlng[0]);
+					double lng = Double.parseDouble(latlng[1]);
 					
+					//Propagate.
+					locspoof.setLocation(lat, lng);
 				} else {
 					throw new RuntimeException("Unknown message type: \"" + type + "\""); 
 				}
