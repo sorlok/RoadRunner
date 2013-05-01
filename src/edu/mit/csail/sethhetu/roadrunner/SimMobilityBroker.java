@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import android.os.Handler;
 import edu.mit.csail.jasongao.roadrunner.Globals;
 import edu.mit.csail.jasongao.roadrunner.ResRequest;
+import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.AdHocAnnouncer;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.Logger;
 import edu.mit.csail.sethhetu.roadrunner.SimMobServerConnectTask.PostExecuteAction;
 
@@ -36,9 +37,13 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	//For communicating back to the RoadRunner service.
 	private Handler myHandler;
 	private Logger logger;
+	private AdHocAnnouncer adhoc;
 	
 	//What's the time according to Sim Mobility?
 	private long currTimeMs;
+	
+	//We send announce packets every 2 seconds (2000 ms)
+	private long lastAnnouncePacket;
 
 	@Override
 	public void onPostExecute(Exception thrownException, BufferedReader reader, BufferedWriter writer) {
@@ -59,6 +64,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		//   2) When that's done, process it and send "android done" for this time step.
 		//As always, messages are sent before the final "done" message.
 		this.currTimeMs = 0;
+		this.lastAnnouncePacket = -1 * Globals.ADHOC_ANNOUNCE_PERIOD; //Immediately dispatch an announce packet.
 		new SimMobTickRequest(myHandler, new ServerTickDoneRunnable()).execute(this.reader);
 	}
 	
@@ -66,9 +72,10 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	/**
 	 * Create the broker entity and connect to the server.
 	 */
-	public SimMobilityBroker(Handler myHandler, Logger logger) {
+	public SimMobilityBroker(Handler myHandler, Logger logger, AdHocAnnouncer adhoc) {
 		this.myHandler = myHandler;
 		this.logger = logger;
+		this.adhoc = adhoc;
 		
 		smSocket = new Socket();
 		SimMobServerConnectTask task = new SimMobServerConnectTask(this);
@@ -99,10 +106,47 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		public void run() {
 			if (line==null) { throw new RuntimeException("ServerTick line ignored!"); }
 			
-			logger.log("Line received: \"" + line + "\"");
+			//Handle ticks last
+			int curr_tick_len = 0;
 			
-			// TODO Auto-generated method stub
+			//Each communication from the server can span multiple messages, separated by ";"
+			String[] messages = line.split(";");
+			for (String msg : messages) {
+				//A trailing ";" may generate an empty message; that's ok.
+				msg = msg.trim();
+				if (msg.isEmpty()) { continue; }
+				
+				//Messages are usually defined as "TYPE:BODY", where body is type-defined. 
+				String[] temp = msg.split(":");
+				if (temp.length!=2) { throw new RuntimeException("Unexpected message: \"" + msg + "\""); }
+				
+				//Dispatch on the type. Switches are for losers!
+				String type = temp[0];
+				String body = temp[1];
+				if (type.equals("SM_TICK_DONE")) {
+					//body="curr_tick_len", in ms
+					curr_tick_len = Integer.parseInt(body);
+				} else if (type.equals("")) {
+					
+				} else {
+					throw new RuntimeException("Unknown message type: \"" + type + "\""); 
+				}
+			}
 			
+			//Move the tick forward.
+			if (curr_tick_len==0) {
+				throw new RuntimeException("Server sent messages, but no tick update!");
+			} else {
+				currTimeMs += curr_tick_len;
+				
+				//Time for an announce packet?
+				if (currTimeMs-lastAnnouncePacket >= Globals.ADHOC_ANNOUNCE_PERIOD) {
+					lastAnnouncePacket += Globals.ADHOC_ANNOUNCE_PERIOD;
+					
+					//Send announce packet!
+					adhoc.announce(false);
+				}
+			}
 		}
 	};
 	

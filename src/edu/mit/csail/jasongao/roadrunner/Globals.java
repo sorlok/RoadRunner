@@ -8,7 +8,7 @@ public class Globals {
 	public static final int SM_TIMEOUT = 0;  //0=infinite
 	
 	/** Adhoc wireless communication parameters */
-	static final long ADHOC_ANNOUNCE_PERIOD = 2000 * 1;
+	public static final long ADHOC_ANNOUNCE_PERIOD = 2000 * 1;
 	static final boolean ADHOC_UDP_ONLY = true; // false to use TCP for transfer
 	static final int ADHOC_MAX_PACKET_SIZE = 1024; // bytes
 	final static public String ADHOC_SEND_REMOTE_ADDRESS = "192.168.42.255";

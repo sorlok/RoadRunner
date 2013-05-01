@@ -793,12 +793,25 @@ public class RoadRunnerService extends Service implements LocationListener {
 	/***********************************************
 	 * Adhoc announcements
 	 ***********************************************/
+	
+	//Wrap it in an object.
+	public class AdHocAnnouncer {
+		public void announce(boolean triggerAnnounceback) {
+			adhocAnnounce(triggerAnnounceback);
+		}
+	}
+	
 
 	private void adhocAnnounce(boolean triggerAnnounce_) {
 		if (!this.adhocEnabled) {
 			return;
 		}
 
+		//Just need to make sure we're not tied to the 2s clock but rather simulation time.
+		if (Globals.SIM_MOBILITY) {
+			log("ad-hoc announcement sending...");
+		}
+		
 		// myHandler.removeCallbacks(adhocAnnounceR);
 
 		AdhocPacket p = new AdhocPacket(mId, mLoc);
@@ -1076,7 +1089,7 @@ public class RoadRunnerService extends Service implements LocationListener {
 		
 		//Connect to the Sim Mobility server.
 		if (Globals.SIM_MOBILITY) {
-			simmob = new SimMobilityBroker(myHandler, new Logger());
+			simmob = new SimMobilityBroker(myHandler, new Logger(), new AdHocAnnouncer());
 			log("Sim Mobility server connected.");
 		}
 
@@ -1112,7 +1125,9 @@ public class RoadRunnerService extends Service implements LocationListener {
 			 */
 
 			// Start recurring UDP adhoc announcements
-			myHandler.post(adhocAnnounceR);
+			if (!Globals.SIM_MOBILITY) {
+				myHandler.post(adhocAnnounceR);
+			}
 		} else {
 			mId = 255; // cloud-only doesn't need unique IDs
 		}
