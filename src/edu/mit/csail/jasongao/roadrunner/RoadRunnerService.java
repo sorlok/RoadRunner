@@ -12,6 +12,7 @@ import java.io.Writer;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -22,6 +23,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import edu.mit.csail.sethhetu.roadrunner.SimMobTickResponse;
 import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker;
 
 import android.app.Service;
@@ -38,11 +40,17 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
+import android.provider.Settings.Secure;
 import android.speech.tts.TextToSpeech;
 import android.telephony.TelephonyManager;
 
 public class RoadRunnerService extends Service implements LocationListener {
 	public static final String TAG = "RoadRunnerService";
+	
+	private String uniqueId;
+	public void setUniqueId(String uniqueId) {
+		this.uniqueId = uniqueId;
+	}
 	
 	//Used for communicating with Sim Mobility.
 	SimMobilityBroker simmob = null;
@@ -825,7 +833,11 @@ public class RoadRunnerService extends Service implements LocationListener {
 		}
 
 		// AdhocPacket what tokens we are offering
-		p.tokensOffered = queueKeySet(this.offers);
+		if (Globals.SIM_MOBILITY) {
+			p.tokensOffered = queueKeySet(this.offers);
+		} else {
+			p.tokensOffered = SimMobilityBroker.RandomTokens(Globals.SM_TOKEN_RANGE, Globals.SM_NUM_TOKENS_LOWER, Globals.SM_NUM_TOKENS_UPPER);
+		}
 
 		p.triggerAnnounce = triggerAnnounce_;
 
@@ -992,13 +1004,19 @@ public class RoadRunnerService extends Service implements LocationListener {
 					out.close();
 					byte[] data = bos.toByteArray();
 					publishProgress((int) i + 1, (int) count);
-					if (aat != null) {
+					
+					//Dispatch through Sim Mobility, or through the AdHoc's broadcast port.
+					if (Globals.SIM_MOBILITY) {
+						simmob.sendBroadcastPacket(uniqueId, data);
+					} else if (aat != null) {
 						aat.sendData(data);
 					}
+					
 					sent++;
 					log_nodisplay(String.format(
 							"sent %d byte adhoc packet type %d", data.length,
 							adhocPacket.type));
+					
 				} catch (Exception e) {
 					log("error sending adhoc announcement:" + e.getMessage());
 				}

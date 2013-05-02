@@ -20,6 +20,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
+import android.provider.Settings.Secure;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.TextToSpeech.OnInitListener;
 import android.util.Log;
@@ -464,6 +465,9 @@ public class MainActivity extends Activity implements OnInitListener {
 
 			Toast.makeText(getApplicationContext(), "Service connected.",
 					Toast.LENGTH_LONG).show();
+			
+			//One more thing..
+			mService.setUniqueId(Secure.getString(getContentResolver(), Secure.ANDROID_ID));
 
 			// Start the service
 			CheckBox adhocCheckBox = (CheckBox) findViewById(R.id.adhoc_checkbox);

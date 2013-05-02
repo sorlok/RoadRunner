@@ -7,6 +7,14 @@ public class Globals {
 	public static final int SM_PORT = 6745;
 	public static final int SM_TIMEOUT = 0;  //0=infinite
 	
+	/** We offer single-letter tokens, sampled from this range. 
+	 *  NOTE: Tokens are *not* consistent at the moment; vehicles will offer them randomly. */
+	public static final String SM_TOKEN_RANGE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	
+	/** The minimum (inclusive) and maximum (exclusive) number of tokens we send each "announce" */
+	public static final int SM_NUM_TOKENS_LOWER = 0;
+	public static final int SM_NUM_TOKENS_UPPER = 5;
+	
 	/** Adhoc wireless communication parameters */
 	public static final long ADHOC_ANNOUNCE_PERIOD = 2000 * 1;
 	static final boolean ADHOC_UDP_ONLY = true; // false to use TCP for transfer
