@@ -13,6 +13,8 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 
+import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.Logger;
+
 import android.os.Handler;
 
 public class AdhocPacketThread extends Thread {
@@ -195,7 +197,7 @@ public class AdhocPacketThread extends Thread {
 	 * 
 	 * @throws Exception
 	 */
-	private AdhocPacket readPacket(byte[] data, int length) {
+	public static AdhocPacket ReadPacket(Logger logger, byte[] data, int length) {
 		AdhocPacket adhocPacket = null;
 		ByteArrayInputStream bis = new ByteArrayInputStream(data);
 		ObjectInputStream ois = null;
@@ -204,13 +206,17 @@ public class AdhocPacketThread extends Thread {
 			adhocPacket = (AdhocPacket) ois.readObject();
 			ois.close();
 		} catch (IOException e) {
-			log("error on new ObjectInputStream: " + e.getMessage());
+			logger.log("error on new ObjectInputStream: " + e.getMessage());
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
-			log("ClassNotFoundException from ois: " + e.getMessage());
+			logger.log("ClassNotFoundException from ois: " + e.getMessage());
 			e.printStackTrace();
 		}
 		adhocPacket.length = length;
 		return adhocPacket;
+	}
+	
+	public AdhocPacket readPacket(byte[] data, int length) {
+		return ReadPacket(rrs.new Logger(), data, length);
 	}
 }

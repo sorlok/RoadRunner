@@ -137,7 +137,7 @@ public class RoadRunnerService extends Service implements LocationListener {
 	/***********************************************
 	 * Handle messages from other components and threads
 	 ***********************************************/
-	protected final static int ADHOC_PACKET_RECV = 4;
+	public final static int ADHOC_PACKET_RECV = 4;
 
 	public final Handler myHandler = new Handler() {
 		@Override
@@ -1104,7 +1104,7 @@ public class RoadRunnerService extends Service implements LocationListener {
 		
 		//Connect to the Sim Mobility server.
 		if (Globals.SIM_MOBILITY) {
-			simmob = new SimMobilityBroker(myHandler, new Logger(), new AdHocAnnouncer(), new LocationSpoofer());
+			simmob = new SimMobilityBroker(uniqueId, myHandler, new Logger(), new AdHocAnnouncer(), new LocationSpoofer());
 			log("Sim Mobility server connected.");
 		}
 

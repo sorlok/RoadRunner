@@ -3,6 +3,8 @@ package edu.mit.csail.sethhetu.roadrunner;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.lang.Character.UnicodeBlock;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -12,8 +14,12 @@ import java.util.concurrent.TimeUnit;
 
 import android.os.Handler;
 import android.text.TextUtils.StringSplitter;
+import android.util.Base64;
+import edu.mit.csail.jasongao.roadrunner.AdhocPacket;
+import edu.mit.csail.jasongao.roadrunner.AdhocPacketThread;
 import edu.mit.csail.jasongao.roadrunner.Globals;
 import edu.mit.csail.jasongao.roadrunner.ResRequest;
+import edu.mit.csail.jasongao.roadrunner.RoadRunnerService;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.AdHocAnnouncer;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.Logger;
@@ -57,6 +63,9 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	
 	//Returned messages.
 	private ArrayList<String> returnedMessages;
+	
+	//Same as the one in RoadRunnerService
+	private String uniqueId;
 
 	@Override
 	public void onPostExecute(Exception thrownException, BufferedReader reader, BufferedWriter writer) {
@@ -83,11 +92,13 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	/**
 	 * Create the broker entity and connect to the server.
 	 */
-	public SimMobilityBroker(Handler myHandler, Logger logger, AdHocAnnouncer adhoc, LocationSpoofer locspoof) {
+	public SimMobilityBroker(String uniqueId, Handler myHandler, Logger logger, AdHocAnnouncer adhoc, LocationSpoofer locspoof) {
 		this.myHandler = myHandler;
 		this.logger = logger;
 		this.adhoc = adhoc;
 		this.locspoof = locspoof;
+		this.uniqueId = uniqueId;
+		if (uniqueId==null) { throw new RuntimeException("Unique Id cannot be null."); }
 		
 		SimMobilityBroker.rand = new Random();
 		this.smSocket = new Socket();
@@ -97,6 +108,56 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		SimMobServerConnectTask task = new SimMobServerConnectTask(this);
 		task.execute(smSocket);
 	}
+	
+	/**
+	 * Convert a byte array to a String, escaping the semicolons.
+	 */
+	private static String bytes2string(byte[] bytes) {
+		//First, just convert using Base64
+		String raw = Base64.encodeToString(bytes, Base64.NO_WRAP);
+		
+		//Now escape as follows:
+		//  . becomes ".."
+		//  ; becomes ".1"
+		//  : becomes ".2"
+		//  \n becomes ".3"
+		//(some of these are leftover from UTF-8, and won't occur in Base64)
+		StringBuilder res = new StringBuilder();
+		for (int i=0; i<raw.length(); i++) {
+			char c = raw.charAt(i);
+			if (c=='.') { res.append(".."); }
+			else if (c==';') { res.append(".1"); }
+			else if (c==':') { res.append(".2"); }
+			else if (c=='\n') { res.append(".3"); }
+			else { res.append(c); }
+		}
+		return res.toString();
+	}
+	
+	/**
+	 * Convert a String to a byte array, un-escaping the semicolons.
+	 */
+	private static byte[] string2bytes(String str) {
+		//First, remove our escape sequences.
+		StringBuilder unescaped = new StringBuilder();
+		for (int i=0; i<str.length(); i++) {
+			char c = str.charAt(i);
+			if (c=='.') {
+				char next = str.charAt(i+1);
+				if (next=='.') { unescaped.append("."); }
+				else if (next=='1') { unescaped.append(";"); }
+				else if (next=='2') { unescaped.append(":"); }
+				else if (next=='3') { unescaped.append("\n"); }
+				else { throw new RuntimeException("Bad escape sequence."); }
+			} else {
+				unescaped.append(c);
+			}
+		}
+		
+		//Next, just convert using Base64
+		return Base64.decode(unescaped.toString(), Base64.NO_WRAP);
+	}
+	
 	
 	
 	/**
@@ -139,9 +200,9 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		//Prepare the packet.
 		StringBuilder sb = new StringBuilder();
 		sb.append("ANDROID_BROADCAST:");
-		sb.append(myId+":");
+		sb.append(myId+",");
 		sb.append("[");
-		sb.append(packet); //TODO: May have to serialize differently.
+		sb.append(bytes2string(packet));
 		sb.append("]");
 		
 		//Save it for later.
@@ -198,8 +259,34 @@ public class SimMobilityBroker  implements PostExecuteAction {
 					//Propagate.
 					locspoof.setLocation(lat, lng);
 				} else if (type.equals("SM_ADHOC_BROADCAST")) {
-					//body="ag_id:[packet]"
+					//body="ag_id,[packet]"
 					//The result of an ad-hoc announce message.
+					String[] parts = body.split(",", 2);
+					if (parts.length!=2) { throw new RuntimeException("Bad broadcast message body: " + body); }
+					
+					//Get the ID of the agent sending this message, along with the packet.
+					String agId = parts[0];
+					String packet = parts[1];
+					if (packet.charAt(0)!='[' || packet.charAt(packet.length()-1)!=']') {
+						throw new RuntimeException("Incorrect broadcast packet string: " + packet);
+					}
+					
+					//Ignore packets sent to yourself.
+					if (agId==uniqueId) {
+						logger.log("Ignoring packet sent to self.");
+						continue;
+					}
+					
+					//Extract the packet.
+					packet = packet.substring(1, packet.length()-1);
+					byte[] packetB = string2bytes(packet);
+					AdhocPacket p = AdhocPacketThread.ReadPacket(logger, packetB, packetB.length);
+					
+					
+					myHandler.obtainMessage(
+							RoadRunnerService.ADHOC_PACKET_RECV, p).sendToTarget();
+					
+					
 					//TODO
 				} else {
 					throw new RuntimeException("Unknown message type: \"" + type + "\""); 
@@ -234,7 +321,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 					//TODO: This is risky; the "packet" in a broadcast may randomly contain a ";". 
 					//      We can reduce/eliminate the risk of this later via escaping or choosing a better
 					//      control code. For now we just close the emulator.
-					if (msg.contains(";")) { throw new RuntimeException("Message contains a separator character!"); }
+					if (msg.contains(";")) { throw new RuntimeException("Message contains a separator character: \"" + msg + "\""); }
 					sb.append(sep+msg);
 					sep = ";";
 				}
