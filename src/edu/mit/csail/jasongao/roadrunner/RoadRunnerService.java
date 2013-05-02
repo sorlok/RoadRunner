@@ -163,7 +163,6 @@ public class RoadRunnerService extends Service implements LocationListener {
 				
 				boolean linkIsViable = Globals.SIM_MOBILITY ? simmob.linkIsViable() : linkIsViableDSRC(mLoc, other);
 				if (!linkIsViable) {
-					log("LINK NOT VIABLE");
 					break;
 				}
 
@@ -1450,11 +1449,16 @@ public class RoadRunnerService extends Service implements LocationListener {
 
 	// http://stackoverflow.com/questions/1066589/java-iterate-through-hashmap
 	private String getRegion(List<Region> rs, Location loc) {
-		Iterator<Region> it = rs.iterator();
-		while (it.hasNext()) {
-			Region r = (Region) it.next();
-			if (r.contains(loc)) {
-				return r.id;
+		if (Globals.SIM_MOBILITY && simmob!=null) {
+			String newRegionId = simmob.getRegion();
+			if (newRegionId!=null) { return newRegionId; }
+		} else {
+			Iterator<Region> it = rs.iterator();
+			while (it.hasNext()) {
+				Region r = (Region) it.next();
+				if (r.contains(loc)) {
+					return r.id;
+				}
 			}
 		}
 		return "FREE";
@@ -1506,10 +1510,6 @@ public class RoadRunnerService extends Service implements LocationListener {
 	public void onLocationChanged(Location loc) {
 		// log GPS traces
 		log_nodisplay(String.format("loc=%s", loc.toString()));
-		
-		if (Globals.SIM_MOBILITY) {
-			log("My location updated to: " + loc.getLatitude() + "," + loc.getLongitude());
-		}
 
 		// sync internal clock to GPS on first fix
 		/*
@@ -1524,6 +1524,11 @@ public class RoadRunnerService extends Service implements LocationListener {
 		// did we enter a new region?
 		String oldRegion = this.mRegion;
 		String newRegion = getRegion(this.regions, loc);
+		
+		if (Globals.SIM_MOBILITY) {
+			log("My location updated to: " + loc.getLatitude() + "," + loc.getLongitude() + " ; region: " + newRegion);
+		}
+		
 		if (!oldRegion.equals(newRegion)) {
 			regionTransition(oldRegion, newRegion);
 		}
