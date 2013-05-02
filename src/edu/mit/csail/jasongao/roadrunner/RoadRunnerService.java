@@ -148,21 +148,22 @@ public class RoadRunnerService extends Service implements LocationListener {
 					break;
 				}
 				AdhocPacket other = (AdhocPacket) msg.obj;
-
+				
 				// filter out messages not addressed to us or broadcast
 				if (other.dst != -1 && other.dst != mId) {
 					break;
 				}
-
+				
 				long now = getTime();
 				log_nodisplay(String.format("Received UDP %s", other));
 
 				if (other.triggerAnnounce) {
 					adhocAnnounce(false);
 				}
-
-				// if (!linkIsViableWiFi(mLoc, other)) {
-				if (!linkIsViableDSRC(mLoc, other)) {
+				
+				boolean linkIsViable = Globals.SIM_MOBILITY ? simmob.linkIsViable() : linkIsViableDSRC(mLoc, other);
+				if (!linkIsViable) {
+					log("LINK NOT VIABLE");
 					break;
 				}
 

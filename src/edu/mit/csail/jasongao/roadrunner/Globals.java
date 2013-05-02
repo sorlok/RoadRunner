@@ -15,6 +15,9 @@ public class Globals {
 	public static final int SM_NUM_TOKENS_LOWER = 0;
 	public static final int SM_NUM_TOKENS_UPPER = 5;
 	
+	/** With what (flat) percentage is a link considered viable? */
+	public static final double SM_VIABILITY_PERCENT = 0.7;
+	
 	/** Adhoc wireless communication parameters */
 	public static final long ADHOC_ANNOUNCE_PERIOD = 2000 * 1;
 	static final boolean ADHOC_UDP_ONLY = true; // false to use TCP for transfer
