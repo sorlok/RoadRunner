@@ -12,7 +12,6 @@ import java.io.Writer;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -23,7 +22,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import edu.mit.csail.sethhetu.roadrunner.SimMobTickResponse;
 import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker;
 
 import android.app.Service;
@@ -40,7 +38,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
-import android.provider.Settings.Secure;
 import android.speech.tts.TextToSpeech;
 import android.telephony.TelephonyManager;
 

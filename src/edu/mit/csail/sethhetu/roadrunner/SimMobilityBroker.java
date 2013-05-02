@@ -197,6 +197,10 @@ public class SimMobilityBroker  implements PostExecuteAction {
 					
 					//Propagate.
 					locspoof.setLocation(lat, lng);
+				} else if (type.equals("SM_ADHOC_BROADCAST")) {
+					//body="ag_id:[packet]"
+					//The result of an ad-hoc announce message.
+					//TODO
 				} else {
 					throw new RuntimeException("Unknown message type: \"" + type + "\""); 
 				}
@@ -227,6 +231,9 @@ public class SimMobilityBroker  implements PostExecuteAction {
 				//Combine all messages.
 				String sep = "";
 				for (String msg : returnedMessages) {
+					//TODO: This is risky; the "packet" in a broadcast may randomly contain a ";". 
+					//      We can reduce/eliminate the risk of this later via escaping or choosing a better
+					//      control code. For now we just close the emulator.
 					if (msg.contains(";")) { throw new RuntimeException("Message contains a separator character!"); }
 					sb.append(sep+msg);
 					sep = ";";
