@@ -69,9 +69,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		//Save objects locally.
 		this.reader = reader;
 		this.writer = writer;
-		
-		System.out.println("TEST1: " + this.reader);
-		
+				
 		//Assuming everything went ok, start our simulation loop. It looks like this:
 		//   1) Send out an Async task waiting for the "tick done" message.
 		//   2) When that's done, process it and send "android done" for this time step.
@@ -108,7 +106,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		Set<String> res = new HashSet<String>();
 		
 		//How many tokens?
-		int numTokens = rand.nextInt(upper-lower)+lower;
+		int numTokens = rand.nextInt(upper-lower)+lower;		
 		for (int i=0; i<numTokens; i++) {
 			//Which letter?
 			res.add(Character.toString(token_range.charAt(rand.nextInt(token_range.length()))));

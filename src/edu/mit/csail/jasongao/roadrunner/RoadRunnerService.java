@@ -833,7 +833,7 @@ public class RoadRunnerService extends Service implements LocationListener {
 		}
 
 		// AdhocPacket what tokens we are offering
-		if (Globals.SIM_MOBILITY) {
+		if (!Globals.SIM_MOBILITY) {
 			p.tokensOffered = queueKeySet(this.offers);
 		} else {
 			p.tokensOffered = SimMobilityBroker.RandomTokens(Globals.SM_TOKEN_RANGE, Globals.SM_NUM_TOKENS_LOWER, Globals.SM_NUM_TOKENS_UPPER);
