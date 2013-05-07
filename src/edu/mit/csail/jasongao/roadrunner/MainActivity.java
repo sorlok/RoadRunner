@@ -418,6 +418,9 @@ public class MainActivity extends Activity implements OnInitListener {
 		mTts = new TextToSpeech(this, this);
 		mTts.setLanguage(Locale.US);
 		// mTts.setLanguage(Locale.ENGLISH);
+		
+		//Jumpstart our tests.
+		mClicked.onClick(findViewById(R.id.connect_button));
 	}
 
 	@Override

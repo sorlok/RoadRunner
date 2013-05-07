@@ -35,10 +35,12 @@ public class MinaConnector implements Connector {
     private IoSession session;
     private MessageListener messageListener;
     private HandlerFactory handlerFactory;
+    private int clientID;
     private final int BUFFER_SIZE = 2048;
     private final Logger LOG = Logger.getLogger(getClass().getCanonicalName());
 
-    public MinaConnector() {
+    public MinaConnector(int clientID_) {
+        clientID = clientID_;
         this.handlerFactory = new JsonHandlerFactory();
     }
 
@@ -60,34 +62,34 @@ public class MinaConnector implements Connector {
                 @Override
                 public void sessionCreated(IoSession is) throws Exception {
                     session = is;
-                    LOG.info("Created");
+                    LOG.info("client "+ clientID + " Session Created");
                 }
 
                 @Override
                 public void sessionOpened(IoSession is) throws Exception {
                     session = is;
-                    LOG.info("Opened");
+                    LOG.info("client "+ clientID + " Session Opened");
                 }
 
                 @Override
                 public void sessionClosed(IoSession is) throws Exception {
-                     LOG.info("Closed");
+                     LOG.info("client "+ clientID + " Session Closed");
                 }
 
                 @Override
                 public void sessionIdle(IoSession is, IdleStatus is1) throws Exception {
-                     LOG.info("Idle");
+                     LOG.info("client "+ clientID + " Session Idle");
                 }
 
                 @Override
                 public void exceptionCaught(IoSession is, Throwable thrwbl) throws Exception {
-                    LOG.info("Exception" + thrwbl.toString());
+                    LOG.info("client "+ clientID + " Exception" + thrwbl.toString());
                 }
 
                 @Override
                 public void messageReceived(IoSession is, Object o) throws Exception {
-                    LOG.info("Message received in the client..:" + o.toString());
-                    Handler handler = handlerFactory.create(MinaConnector.this, o);
+                    LOG.info("client "+ clientID + " received[" + o.toString() + "]");
+                    Handler handler = handlerFactory.create(MinaConnector.this, o, clientID);
 //                    LOG.info("A handler was created,  ... handling");
 //                    handler.handle();
                     MinaConnector.this.messageListener.onMessage(/*handler.getMessage()*/ o);
@@ -95,7 +97,7 @@ public class MinaConnector implements Connector {
 
                 @Override
                 public void messageSent(IoSession is, Object o) throws Exception {
-                    LOG.info(String.format("Message: %s was sent.", o));
+                    LOG.info(String.format("client %d Message: %s was sent.", clientID, o));
                 }
             });
             ConnectFuture future = connector.connect(new InetSocketAddress(host, port));
@@ -132,7 +134,7 @@ public class MinaConnector implements Connector {
         }
         else
         {
-            System.out.println("we are NOT connected");
+            System.out.println("client "+ clientID + " we are NOT connected");
         }
         if(data != null) 
         {
@@ -140,7 +142,7 @@ public class MinaConnector implements Connector {
         }
         else
         {
-          System.out.println("data is null");  
+          System.out.println("client "+ clientID + " data is null");  
         }
         if(session != null) 
         {
@@ -148,7 +150,7 @@ public class MinaConnector implements Connector {
         }  
         else
         {
-            System.out.println("session is null");
+            System.out.println("client "+ clientID + " session is null");
         }
         
         if(session.isConnected())
@@ -157,7 +159,7 @@ public class MinaConnector implements Connector {
         }
         else
         {
-            System.out.println("session is not Connected");
+            System.out.println("client "+ clientID + " session is not Connected");
         }
         
         if (connected && data != null && session != null && session.isConnected()) {

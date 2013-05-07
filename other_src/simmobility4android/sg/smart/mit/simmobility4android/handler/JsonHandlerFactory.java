@@ -17,14 +17,14 @@ import sg.smart.mit.simmobility4android.message.*;
 public class JsonHandlerFactory implements HandlerFactory {
 
     @Override
-    public Handler create(Connector connector, Object message) {
+    public Handler create(Connector connector, Object message, int clientID) {
         System.out.println("in JsonHandlerFactory.create-> "+ message.toString());
         Gson gson = new Gson();
         Message result = gson.fromJson(message.toString(), Message.class);
         switch (result.getMessageType()) {
             
             case WhoAreYou: {
-                return new WhoAreYouHandler(null, connector);
+                return new WhoAreYouHandler(null, connector, clientID);
             }
                 
             case TimeData: {

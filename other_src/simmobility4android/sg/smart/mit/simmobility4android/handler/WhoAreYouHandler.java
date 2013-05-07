@@ -12,9 +12,10 @@ import sg.smart.mit.simmobility4android.message.WhoAreYouMessage;
  * @author gandola, vahid
  */
 public class WhoAreYouHandler extends Handler<WhoAreYouMessage> {
-
-    public WhoAreYouHandler(WhoAreYouMessage message, Connector connector) {
+    private int clientID;
+    public WhoAreYouHandler(WhoAreYouMessage message, Connector connector, int clientID_) {
         super(message, connector);
+        clientID = clientID_;
         System.out.println("creating WhoAreYouHandler");
     }
 
@@ -27,7 +28,7 @@ public class WhoAreYouHandler extends Handler<WhoAreYouMessage> {
          * Note that it will be received as unsidned int 
          * on the other side
          */
-        obj.addProperty("ID", 116);
+        obj.addProperty("ID", clientID);
         getConnector().send(obj.toString());
     }
 }
