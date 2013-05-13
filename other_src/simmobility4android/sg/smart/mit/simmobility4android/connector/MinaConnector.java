@@ -8,7 +8,6 @@ import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.mina.core.future.ConnectFuture;
 import org.apache.mina.core.future.WriteFuture;
 import org.apache.mina.core.service.IoConnector;
@@ -19,6 +18,9 @@ import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.codec.textline.TextLineCodecFactory;
 import org.apache.mina.filter.logging.LoggingFilter;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
+
+import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
+import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.Logger;
 import sg.smart.mit.simmobility4android.handler.Handler;
 import sg.smart.mit.simmobility4android.handler.HandlerFactory;
 import sg.smart.mit.simmobility4android.handler.JsonHandlerFactory;
@@ -37,11 +39,15 @@ public class MinaConnector implements Connector {
     private HandlerFactory handlerFactory;
     private int clientID;
     private final int BUFFER_SIZE = 2048;
-    private final Logger LOG = Logger.getLogger(getClass().getCanonicalName());
+    private final java.util.logging.Logger LOG = java.util.logging.Logger.getLogger(getClass().getCanonicalName());
+    private Logger logger;
+    
+    public int getClientID() { return clientID; }
 
-    public MinaConnector(int clientID_) {
+    public MinaConnector(int clientID_, LocationSpoofer locspoof, Logger logger) {
         clientID = clientID_;
-        this.handlerFactory = new JsonHandlerFactory();
+        this.logger = logger;
+        this.handlerFactory = new JsonHandlerFactory(locspoof);
     }
 
     @Override
@@ -102,7 +108,10 @@ public class MinaConnector implements Connector {
             });
             ConnectFuture future = connector.connect(new InetSocketAddress(host, port));
             connected = true; //todo: is this a good place to set the flag?
+            logger.log("Future waiting...");
             future.awaitUninterruptibly();
+            logger.log("Done. Connected? " + future.isConnected());
+            logger.log("Exception: " + future.getException().toString());
             if (future.isConnected()) {
                 session = future.getSession();
                 session.getConfig().setUseReadOperation(true);

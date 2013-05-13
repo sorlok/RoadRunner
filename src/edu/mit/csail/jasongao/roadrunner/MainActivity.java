@@ -421,6 +421,7 @@ public class MainActivity extends Activity implements OnInitListener {
 		
 		//Jumpstart our tests.
 		mClicked.onClick(findViewById(R.id.connect_button));
+		//mClicked.onClick(findViewById(R.id.start_stop_button));
 	}
 
 	@Override

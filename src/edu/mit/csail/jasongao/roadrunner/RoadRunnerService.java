@@ -9,6 +9,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -90,6 +92,7 @@ public class RoadRunnerService extends Service implements LocationListener {
 	private Location mLoc;
 	private String mRegion = "FREE";
 	private long mId = -1000;
+	private Random rand = new Random();
 
 	private long udpStartTime = 0;
 
@@ -1130,7 +1133,10 @@ public class RoadRunnerService extends Service implements LocationListener {
 			}
 
 			// take last octet of IPv4 address as my id
-			mId = (aat.getLocalAddress().getAddress()[3] & 0xff);
+			//InetAddress addr = aat.getLocalAddress();
+			//byte[] addrses = addr.getAddress();
+			//mId = (addrses[3] & 0xff);
+			mId = rand.nextInt(0xFF);
 			log("mId=" + mId);
 
 			/*

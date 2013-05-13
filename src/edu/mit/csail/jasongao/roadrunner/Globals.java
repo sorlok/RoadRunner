@@ -3,7 +3,9 @@ package edu.mit.csail.jasongao.roadrunner;
 public class Globals {
 	/** Enable communication via Sim Mobility, including time-step synchronization. */
 	public static final boolean SIM_MOBILITY = true;
-	public static final String SM_HOST = "192.160.228.190";
+	public static final String SM_HOST = "10.0.0.3";
+	//public static final String SM_HOST = "192.160.228.190";
+	//public static final String SM_HOST = "192.168.42.165";
 	public static final int SM_PORT = 6745;
 	public static final int SM_TIMEOUT = 0;  //0=infinite
 	
@@ -34,7 +36,8 @@ public class Globals {
 	static int CLOUD_PORT = 50000; // 50001 for wifi, 50000 for dsrc
 	
 	/** Cloud parameters */
-	static final String CLOUD_HOST = "128.30.87.68";
+	//static final String CLOUD_HOST = "128.30.87.68";
+	static final String CLOUD_HOST = "10.0.0.2";
 	static final int CLOUD_SOCKET_TIMEOUT = 3000;
 	static final byte[] CLOUD_PUBLIC_KEY = null; // TODO
 	static final byte[] MY_PRIVATE_KEY = null; // TODO

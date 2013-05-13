@@ -46,11 +46,12 @@ import edu.mit.csail.sethhetu.roadrunner.SimMobServerConnectTask.PostExecuteActi
 public class SimMobilityBroker  implements PostExecuteAction {	
 	//We need to maintain an open connection to the Sim Mobility server, since we are in a 
 	//  tight time loop.
-	private Socket smSocket;
+	//private Socket smSocket;
+	Connector conn;
 	
 	//Open streams for communicating with the server.
-	private BufferedReader reader;
-	private BufferedWriter writer;
+	//private BufferedReader reader;
+	//private BufferedWriter writer;
 	
 	//For communicating back to the RoadRunner service.
 	private Handler myHandler;
@@ -72,6 +73,8 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	
 	//Same as the one in RoadRunnerService
 	private String uniqueId;
+	
+	private HandlerFactory handlerFactory;
 
 	@Override
 	public void onPostExecute(Exception thrownException, BufferedReader reader, BufferedWriter writer) {
@@ -82,8 +85,8 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		}
 		
 		//Save objects locally.
-		this.reader = reader;
-		this.writer = writer;
+		//this.reader = reader;
+		//this.writer = writer;
 				
 		//Assuming everything went ok, start our simulation loop. It looks like this:
 		//   1) Send out an Async task waiting for the "tick done" message.
@@ -91,7 +94,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		//As always, messages are sent before the final "done" message.
 		this.currTimeMs = 0;
 		this.lastAnnouncePacket = -1 * Globals.ADHOC_ANNOUNCE_PERIOD; //Immediately dispatch an announce packet.
-		new SimMobTickRequest(myHandler, new ServerTickDoneRunnable()).execute(this.reader);
+		//new SimMobTickRequest(myHandler, new ServerTickDoneRunnable()).execute(reader);
 	}
 	
 	
@@ -99,6 +102,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	 * Create the broker entity and connect to the server.
 	 */
 	public SimMobilityBroker(String uniqueId, Handler myHandler, Logger logger, AdHocAnnouncer adhoc, LocationSpoofer locspoof) {
+		this.handlerFactory = new JsonHandlerFactory(locspoof);
 		this.myHandler = myHandler;
 		this.logger = logger;
 		this.adhoc = adhoc;
@@ -106,13 +110,17 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		this.uniqueId = uniqueId;
 		if (uniqueId==null) { throw new RuntimeException("Unique Id cannot be null."); }
 		
+		//Make a fake ID
 		SimMobilityBroker.rand = new Random();
-		this.smSocket = new Socket();
+		int clientID = SimMobilityBroker.rand.nextInt(100000)+100;
+		
+		//this.smSocket = new Socket();
+		this.conn = new MinaConnector(clientID, locspoof, logger);
 		this.returnedMessages = new ArrayList<String>();
 		
 		//Connect our socket.
-		SimMobServerConnectTask task = new SimMobServerConnectTask(this);
-		task.execute(smSocket);
+		SimMobServerConnectTask task = new SimMobServerConnectTask(this, this.handlerFactory);
+		task.execute(this.conn);
 	}
 	
 	/**
@@ -203,12 +211,12 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	
 	
 	private void closeStreams() {
-		try {
+		/*try {
 			if (this.reader!=null) { this.reader.close(); }
 		} catch (IOException e2) {}
 		try {
 			if (this.writer!=null) { this.writer.close(); }
-		} catch (IOException e2) {}
+		} catch (IOException e2) {}*/
 	}
 	
 	
@@ -356,6 +364,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 			}
 			
 			//Send all messages.
+			BufferedWriter writer = null; //TEMP
 			new SimMobTickResponse(sb.toString()).execute(writer);
 		}
 	};
