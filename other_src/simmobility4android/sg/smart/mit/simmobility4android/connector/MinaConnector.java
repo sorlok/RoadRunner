@@ -44,8 +44,14 @@ public class MinaConnector implements Connector {
     
     public int getClientID() { return clientID; }
 
+    /**
+     * Create a new connector based on Apache Mina
+     * @param clientID_  The unique ID of this client. Used for communication.
+     * @param locspoof   A handler for spoofing location-based updates. Used to set software lat/lng.
+     * @param logger     A handler for logging.
+     */
     public MinaConnector(int clientID_, LocationSpoofer locspoof, Logger logger) {
-        clientID = clientID_;
+        this.clientID = clientID_;
         this.logger = logger;
         this.handlerFactory = new JsonHandlerFactory(locspoof);
     }
@@ -108,14 +114,14 @@ public class MinaConnector implements Connector {
             });
             ConnectFuture future = connector.connect(new InetSocketAddress(host, port));
             connected = true; //todo: is this a good place to set the flag?
-            logger.log("Future waiting...");
             future.awaitUninterruptibly();
-            logger.log("Done. Connected? " + future.isConnected());
-            logger.log("Exception: " + future.getException().toString());
             if (future.isConnected()) {
                 session = future.getSession();
                 session.getConfig().setUseReadOperation(true);
                 session.getCloseFuture().awaitUninterruptibly();
+            } else {
+                logger.log("Connection could not be established:");
+                logger.log(future.getException().toString());
             }
         }
     }

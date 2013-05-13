@@ -25,13 +25,11 @@ public class LocationHandler extends Handler<LocationMessage> {
     public void handle() {
         
         /*
-         * if you need to use the simMobility's information about
-         * your current location, here is your chance.
-         * you have a "LocationMessage message" or "LocationMessage getMessage()"
-         * filled with the data you need
+         * TODO: This currently uses X/Y coordinates. We need to reverse project back to lat/lng
+         *       (but randomized networks need a fallback, as there is no projection matrix). 
          */  
         LocationMessage message = getMessage();
-        //System.out.println("Current location is "+ message.getX() + ":" + message.getY());
+        System.out.println("Current location is "+ message.getX() + ":" + message.getY());
         locspoof.setLocation(message.getX(), message.getY());
     }
     
