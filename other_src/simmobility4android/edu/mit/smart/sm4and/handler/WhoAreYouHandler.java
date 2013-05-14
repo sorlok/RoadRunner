@@ -6,15 +6,20 @@ package edu.mit.smart.sm4and.handler;
 
 import com.google.gson.JsonObject;
 
-import edu.mit.smart.sm4and.connector.Connector;
-import edu.mit.smart.sm4and.message.WhoAreYouMessage;
+import edu.mit.smart.sm4and.Connector;
+import edu.mit.smart.sm4and.Handler;
+import edu.mit.smart.sm4and.message.Message;
 
 
 /**
+ * Handle a "who are you?" query from the server.
  * @author Pedro Gandola
  * @author Vahid
  */
 public class WhoAreYouHandler extends Handler {
+	/** A message from the server requesting that the client identify itself. */
+	public static class WhoAreYouMessage extends Message { }
+	
     private int clientID;
     
     public WhoAreYouHandler(WhoAreYouMessage message, Connector connector, int clientID) {

@@ -10,10 +10,10 @@ import java.io.BufferedWriter;
 
 import android.os.AsyncTask;
 import edu.mit.csail.jasongao.roadrunner.Globals;
-import edu.mit.smart.sm4and.connector.Connector;
-import edu.mit.smart.sm4and.connector.MinaConnector;
-import edu.mit.smart.sm4and.handler.HandlerFactory;
+import edu.mit.smart.sm4and.Connector;
+import edu.mit.smart.sm4and.HandlerFactory;
 import edu.mit.smart.sm4and.listener.MessageListener;
+import edu.mit.smart.sm4and.mina.connect.MinaConnector;
 
 /**
  * Helper class for connecting to the Sim Mobility server.

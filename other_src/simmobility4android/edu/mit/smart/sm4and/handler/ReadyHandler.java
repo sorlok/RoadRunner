@@ -4,13 +4,18 @@
 
 package edu.mit.smart.sm4and.handler;
 
-import edu.mit.smart.sm4and.connector.Connector;
-import edu.mit.smart.sm4and.message.ReadyMessage;
+import edu.mit.smart.sm4and.Connector;
+import edu.mit.smart.sm4and.Handler;
+import edu.mit.smart.sm4and.message.Message;
 
 /**
+ * Handle a "ready" message from the server.
  * @author Vahid
  */
 public class ReadyHandler extends Handler {
+	/** A message from the server indicating that the client may proceed. */
+	public static class ReadyMessage extends Message {}
+	
     public ReadyHandler(ReadyMessage message, Connector connector) {
         super(message, connector);
     }

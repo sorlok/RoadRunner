@@ -9,10 +9,16 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
-import edu.mit.smart.sm4and.connector.Connector;
-import edu.mit.smart.sm4and.message.*;
+import edu.mit.smart.sm4and.Connector;
+import edu.mit.smart.sm4and.Handler;
+import edu.mit.smart.sm4and.HandlerFactory;
+import edu.mit.smart.sm4and.handler.LocationHandler.LocationMessage;
+import edu.mit.smart.sm4and.handler.TimeHandler.TimeMessage;
+import edu.mit.smart.sm4and.message.Message;
 
 /**
+ * A specific handler factory for dealing with Json-formatted messages.
+ * 
  * @author Pedro Gandola
  * @author Vahid
  */

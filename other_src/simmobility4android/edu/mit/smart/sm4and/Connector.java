@@ -2,17 +2,21 @@
 //Licensed under the terms of the MIT License, as described in the file:
 //   license.txt   (http://opensource.org/licenses/MIT)
 
-package edu.mit.smart.sm4and.connector;
+package edu.mit.smart.sm4and;
 
 /**
- * Interface for connector implementation.
+ * Any connector implementation can handle server connections. 
+ * A Connector can handle connecting/disconnecting, as well as sending 
+ * data to the server and receiving data from the server.
+ * 
+ * Currently we support Apache MINA.
  * 
  * @author Pedro Gandola
  * @author Vahid
  */
 public interface Connector {
     /**
-     * Connects to server. 
+     * Connects to server.
      * @param host of the server.
      * @param port of the server.
      */

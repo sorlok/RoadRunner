@@ -4,14 +4,21 @@
 
 package edu.mit.smart.sm4and.handler;
 
-import edu.mit.smart.sm4and.connector.Connector;
-import edu.mit.smart.sm4and.message.TimeMessage;
+import edu.mit.smart.sm4and.Connector;
+import edu.mit.smart.sm4and.Handler;
+import edu.mit.smart.sm4and.message.Message;
 
 /**
+ * Handle a time-tick update from the server.
  * @author Pedro Gandola
  * @author Vahid
  */
 public class TimeHandler extends Handler {
+	/** A message from the server indicating that the current time has advanced. */
+	public static class TimeMessage extends Message {
+	    private int tick;    
+	}
+	
     public TimeHandler(TimeMessage message, Connector connector) {
         super (message, connector);
     }
@@ -22,6 +29,6 @@ public class TimeHandler extends Handler {
          * if you need to use the simMobility current time, here is your chance.
          * you have a "TimeMessage message" filled with the data you need
          */  
-        System.out.println("current tick is " + ((TimeMessage)getMessage()).getTick());
+        System.out.println("current tick is " + ((TimeMessage)getMessage()).tick);
     }
 }

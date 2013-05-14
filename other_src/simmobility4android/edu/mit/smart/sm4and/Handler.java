@@ -2,9 +2,8 @@
 //Licensed under the terms of the MIT License, as described in the file:
 //   license.txt   (http://opensource.org/licenses/MIT)
 
-package edu.mit.smart.sm4and.handler;
+package edu.mit.smart.sm4and;
 
-import edu.mit.smart.sm4and.connector.Connector;
 import edu.mit.smart.sm4and.message.Message;
 
 /**
@@ -26,6 +25,10 @@ public abstract class Handler {
         this.connector = connector;
     }
 
+    /**
+     * Subclasses should handle Message here, relying on the Connector for response
+     *  functionality.
+     */
     public abstract void handle();
 
     protected Connector getConnector() {

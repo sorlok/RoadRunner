@@ -2,10 +2,15 @@
 //Licensed under the terms of the MIT License, as described in the file:
 //   license.txt   (http://opensource.org/licenses/MIT)
 
-package edu.mit.smart.sm4and.connector;
+package edu.mit.smart.sm4and.mina.connect;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
+
+import edu.mit.smart.sm4and.Connector;
+import edu.mit.smart.sm4and.HandlerFactory;
+import edu.mit.smart.sm4and.listener.MessageListener;
+
 import org.apache.mina.core.future.ConnectFuture;
 import org.apache.mina.core.service.IoConnector;
 import org.apache.mina.core.service.IoHandler;
@@ -16,9 +21,6 @@ import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 import edu.mit.csail.sethhetu.roadrunner.LoggerI;
-import edu.mit.smart.sm4and.handler.HandlerFactory;
-import edu.mit.smart.sm4and.handler.JsonHandlerFactory;
-import edu.mit.smart.sm4and.listener.MessageListener;
 
 /**
  * A connector which targets Apache Mina.
@@ -50,11 +52,11 @@ public class MinaConnector implements Connector {
      * @param locspoof   A handler for spoofing location-based updates. Used to set software lat/lng.
      * @param logger     A handler for logging.
      */
-    public MinaConnector(int clientID_, LocationSpoofer locspoof, LoggerI logger, MessageListener listener) {
-        this.clientID = clientID_;
+    public MinaConnector(int clientID, HandlerFactory handlerFactory, LocationSpoofer locspoof, LoggerI logger, MessageListener listener) {
+        this.clientID = clientID;
         this.logger = logger;
-        this.handlerFactory = new JsonHandlerFactory(locspoof);
-        this.ioHandler = new MinaHandler(this, LOG);
+        this.handlerFactory = handlerFactory;
+        this.ioHandler = new MinaIoHandler(this, LOG);
         this.messageListener = listener;
     }
 

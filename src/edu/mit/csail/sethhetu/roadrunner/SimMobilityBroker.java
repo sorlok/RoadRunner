@@ -18,11 +18,11 @@ import edu.mit.csail.jasongao.roadrunner.*;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.AdHocAnnouncer;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 import edu.mit.csail.sethhetu.roadrunner.SimMobServerConnectTask.PostExecuteAction;
-import edu.mit.smart.sm4and.connector.Connector;
-import edu.mit.smart.sm4and.connector.MinaConnector;
-import edu.mit.smart.sm4and.handler.HandlerFactory;
+import edu.mit.smart.sm4and.Connector;
+import edu.mit.smart.sm4and.HandlerFactory;
 import edu.mit.smart.sm4and.handler.JsonHandlerFactory;
 import edu.mit.smart.sm4and.listener.MessageListener;
+import edu.mit.smart.sm4and.mina.connect.MinaConnector;
 
 /**
  * The SimMobilityBroker is used by RoadRunner to communicate with Sim Mobility. 
@@ -123,7 +123,8 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		
 		//TODO: These 3 lines need to be simplified.
 		MessageListener listen = new MessageListener(handlerFactory, clientID);
-		this.conn = new MinaConnector(clientID, locspoof, logger, listen);
+		HandlerFactory hf = new JsonHandlerFactory(locspoof);
+		this.conn = new MinaConnector(clientID, hf, locspoof, logger, listen);
 		listen.setParent(this.conn);
 		
 		this.returnedMessages = new ArrayList<String>();

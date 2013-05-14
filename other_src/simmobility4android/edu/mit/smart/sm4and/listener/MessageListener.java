@@ -4,16 +4,19 @@
 
 package edu.mit.smart.sm4and.listener;
 
-import edu.mit.smart.sm4and.connector.Connector;
-import edu.mit.smart.sm4and.connector.MinaConnector;
-import edu.mit.smart.sm4and.handler.Handler;
-import edu.mit.smart.sm4and.handler.HandlerFactory;
+import edu.mit.smart.sm4and.Connector;
+import edu.mit.smart.sm4and.Handler;
+import edu.mit.smart.sm4and.HandlerFactory;
 
 /**
+ * Class that listens for messages and Handles them.
+ * 
+ * NOTE: I will probably remove this; it's a little bit too much indirection for me. ~Seth
+ * 
  * @author Pedro Gandola
  */
 public class MessageListener {
-	private Connector mnc;
+	private Connector conn;
 	private HandlerFactory handlerFactory;
 	private int clientId;
 	
@@ -22,19 +25,19 @@ public class MessageListener {
 	 *       We can abstract this back to an interface later if needed, but actually the interface performs
 	 *       generic enough tasks that we might keep it as a class.
 	 * @param handlerFactory
-	 * @param mnc
+	 * @param conn
 	 */
 	public MessageListener(HandlerFactory handlerFactory, int clientId) {
 		this.handlerFactory = handlerFactory;
 		this.clientId = clientId;
 	}
 	
-	public void setParent(Connector mnc) {
-		this.mnc = mnc;
+	public void setParent(Connector conn) {
+		this.conn = conn;
 	}
 
     public void onMessage(String message) {
-        Handler handler = handlerFactory.create(mnc, message, clientId);
+        Handler handler = handlerFactory.create(conn, message, clientId);
         handler.handle();
     }
 }

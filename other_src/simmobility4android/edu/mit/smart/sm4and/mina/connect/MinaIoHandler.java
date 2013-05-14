@@ -2,7 +2,7 @@
 //Licensed under the terms of the MIT License, as described in the file:
 //   license.txt   (http://opensource.org/licenses/MIT)
 
-package edu.mit.smart.sm4and.connector;
+package edu.mit.smart.sm4and.mina.connect;
 
 import org.apache.mina.core.service.*;
 import org.apache.mina.core.session.*;
@@ -10,14 +10,15 @@ import org.apache.mina.core.session.*;
 import java.util.logging.Logger;
 
 /**
- * A very simple handler that traces all callbacks and does the following:
+ * A very simple handler intended for use with a MinaConnector which traces all 
+ * callbacks and does the following:
  *   * Calls parent.setSession() when the session is created or opened.
  *   * Calls parent.handleMessage() when a message has been received.
  *
  * @author Pedro Gandola
  * @author Vahid
  */
-public class MinaHandler implements IoHandler {
+public class MinaIoHandler implements IoHandler {
 	private MinaConnector parent;
 	private Logger logger;
     
@@ -26,7 +27,7 @@ public class MinaHandler implements IoHandler {
      * @param parent The parent MinaHandler.
      * @param logger Logging handle.
      */
-    public MinaHandler(MinaConnector parent, Logger logger) {
+    public MinaIoHandler(MinaConnector parent, Logger logger) {
         this.parent = parent;
         this.logger = logger;
     }

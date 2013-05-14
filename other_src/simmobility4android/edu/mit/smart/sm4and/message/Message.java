@@ -5,10 +5,16 @@
 package edu.mit.smart.sm4and.message;
 
 /**
+ * Parent class for all Messages.
+ * 
+ * TODO: Enum-switching defeats the entire purpose of object-oriented inheritance.
+ * 
  * @author Pedro Gandola
  */
-public class Message {
-
+public abstract class Message {
+	//The actual type of the message.
+	private MessageType msgType;
+	
     public enum MessageType {
         WhoAreYou,
         TimeData,
@@ -17,12 +23,10 @@ public class Message {
     }
 
     public MessageType getMessageType() {
-        return MessageType;
+        return msgType;
     }
 
     public void setMessageType(MessageType MessageType) {
-        this.MessageType = MessageType;
+        this.msgType = MessageType;
     }
-    
-    private MessageType MessageType;
 }
