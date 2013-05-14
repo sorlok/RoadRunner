@@ -10,25 +10,21 @@ import sg.smart.mit.simmobility4android.message.LocationMessage;
  *
  * @author vahid
  */
-public class LocationHandler extends Handler<LocationMessage> {
-    private LocationMessage message;
+public class LocationHandler extends Handler {
     private LocationSpoofer locspoof;
     
-    public LocationHandler(LocationSpoofer locspoof, LocationMessage message_, Connector connector)
-    {
-        super(message_, connector);
-        message = message_;
+    public LocationHandler(LocationSpoofer locspoof, LocationMessage message, Connector connector) {
+        super(message, connector);
         this.locspoof = locspoof;
     }
 
     @Override
     public void handle() {
-        
         /*
          * TODO: This currently uses X/Y coordinates. We need to reverse project back to lat/lng
          *       (but randomized networks need a fallback, as there is no projection matrix). 
          */  
-        LocationMessage message = getMessage();
+        LocationMessage message = (LocationMessage)getMessage();
         System.out.println("Current location is "+ message.getX() + ":" + message.getY());
         locspoof.setLocation(message.getX(), message.getY());
     }

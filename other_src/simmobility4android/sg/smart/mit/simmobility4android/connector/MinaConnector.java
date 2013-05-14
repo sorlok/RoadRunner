@@ -101,10 +101,10 @@ public class MinaConnector implements Connector {
                 @Override
                 public void messageReceived(IoSession is, Object o) throws Exception {
                     LOG.info("client "+ clientID + " received[" + o.toString() + "]");
-                    Handler handler = handlerFactory.create(MinaConnector.this, o, clientID);
+//                    Handler handler = handlerFactory.create(MinaConnector.this, o, clientID);
 //                    LOG.info("A handler was created,  ... handling");
 //                    handler.handle();
-                    MinaConnector.this.messageListener.onMessage(/*handler.getMessage()*/ o);
+                    MinaConnector.this.messageListener.onMessage(o);
                 }
 
                 @Override
@@ -143,37 +143,25 @@ public class MinaConnector implements Connector {
     public void send(Object data) {
         System.out.println("outgoing data : " + data.toString());
         
-        if(connected) 
-        {
+        if(connected) {
 //            System.out.println("we are connected");
-        }
-        else
-        {
+        } else {
             System.out.println("client "+ clientID + " we are NOT connected");
         }
-        if(data != null) 
-        {
-//            System.out.println("data not null");
-        }
-        else
-        {
+        
+        if(data == null) {
           System.out.println("client "+ clientID + " data is null");  
         }
-        if(session != null) 
-        {
+        
+        if(session != null) {
 //            System.out.println("session not null");
-        }  
-        else
-        {
+        } else {
             System.out.println("client "+ clientID + " session is null");
         }
         
-        if(session.isConnected())
-        {
+        if(session.isConnected()){
 //            System.out.println("session.isConnected");
-        }
-        else
-        {
+        } else {
             System.out.println("client "+ clientID + " session is not Connected");
         }
         

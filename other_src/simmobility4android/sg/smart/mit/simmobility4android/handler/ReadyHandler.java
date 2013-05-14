@@ -11,15 +11,14 @@ import sg.smart.mit.simmobility4android.message.ReadyMessage;
  *
  * @author vahid
  */
-public class ReadyHandler extends Handler<ReadyMessage> {
-    public ReadyHandler(ReadyMessage message, Connector connector)
-    {
+public class ReadyHandler extends Handler {
+    public ReadyHandler(ReadyMessage message, Connector connector) {
         super(message, connector);
     }
+    
     @Override
-    public void handle()
-    {
-        /*set, if you want your emulator set any flag to make sure 
+    public void handle() {
+        /*Seth, if you want your emulator set any flag to make sure 
          * it is successfully registered with the simMobility server(Broker)
          * here is your chance
          */
