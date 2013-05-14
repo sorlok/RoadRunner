@@ -21,7 +21,6 @@ import android.util.Base64;
 import edu.mit.csail.jasongao.roadrunner.*;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.AdHocAnnouncer;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
-import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.Logger;
 import edu.mit.csail.sethhetu.roadrunner.SimMobServerConnectTask.PostExecuteAction;
 
 /**
@@ -56,7 +55,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	
 	//For communicating back to the RoadRunner service.
 	private Handler myHandler;
-	private Logger logger;
+	private LoggerI logger;
 	private AdHocAnnouncer adhoc;
 	private LocationSpoofer locspoof;
 	
@@ -103,7 +102,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	/**
 	 * Create the broker entity and connect to the server.
 	 */
-	public SimMobilityBroker(String uniqueId, Handler myHandler, Logger logger, AdHocAnnouncer adhoc, LocationSpoofer locspoof) {
+	public SimMobilityBroker(String uniqueId, Handler myHandler, LoggerI logger, AdHocAnnouncer adhoc, LocationSpoofer locspoof) {
 		this.handlerFactory = new JsonHandlerFactory(locspoof);
 		this.myHandler = myHandler;
 		this.logger = logger;

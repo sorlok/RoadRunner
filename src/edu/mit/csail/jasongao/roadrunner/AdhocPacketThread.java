@@ -13,7 +13,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 
-import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.Logger;
+import edu.mit.csail.sethhetu.roadrunner.LoggerI;
 
 import android.os.Handler;
 
@@ -21,7 +21,7 @@ public class AdhocPacketThread extends Thread {
 	private static final String TAG = "AdhocPacketThread";
 
 	private Handler parentHandler;
-	private RoadRunnerService rrs;
+	private LoggerI logger;
 
 	private boolean recvSocketOK = false;
 	private boolean sendSocketOK = false;
@@ -44,13 +44,15 @@ public class AdhocPacketThread extends Thread {
 	}
 
 	private void log(String s) {
-		if (rrs != null)
-			rrs.log(s);
+		if (logger != null) {
+			logger.log(s);
+		}
 	}
 
 	private void log_nodisplay(String s) {
-		if (rrs != null)
-			rrs.log(s);
+		if (logger != null) {
+			logger.log_nodisplay(s);
+		}
 	}
 
 	/** Set a socket's buffer sizes */
@@ -66,9 +68,9 @@ public class AdhocPacketThread extends Thread {
 	}
 
 	/** AdhocPacketThread constructor */
-	public AdhocPacketThread(Handler p_, RoadRunnerService rrs_) {
+	public AdhocPacketThread(Handler p_, LoggerI logger) {
 		this.parentHandler = p_;
-		this.rrs = rrs_;
+		this.logger = logger;
 		
 	//	log("determined local IPv4 address: " + localIPAddress.getHostAddress());
 
@@ -203,7 +205,7 @@ public class AdhocPacketThread extends Thread {
 	 * 
 	 * @throws Exception
 	 */
-	public static AdhocPacket ReadPacket(Logger logger, byte[] data, int length) {
+	public static AdhocPacket ReadPacket(LoggerI logger, byte[] data, int length) {
 		AdhocPacket adhocPacket = null;
 		ByteArrayInputStream bis = new ByteArrayInputStream(data);
 		ObjectInputStream ois = null;
@@ -223,6 +225,6 @@ public class AdhocPacketThread extends Thread {
 	}
 	
 	public AdhocPacket readPacket(byte[] data, int length) {
-		return ReadPacket(rrs.new Logger(), data, length);
+		return ReadPacket(logger, data, length);
 	}
 }

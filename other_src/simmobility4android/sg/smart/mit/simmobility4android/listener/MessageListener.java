@@ -5,10 +5,8 @@
 package sg.smart.mit.simmobility4android.listener;
 
 import sg.smart.mit.simmobility4android.connector.Connector;
-import sg.smart.mit.simmobility4android.connector.MinaConnector;
 import sg.smart.mit.simmobility4android.handler.Handler;
 import sg.smart.mit.simmobility4android.handler.HandlerFactory;
-import sg.smart.mit.simmobility4android.message.Message;
 
 /**
  * @author Pedro Gandola

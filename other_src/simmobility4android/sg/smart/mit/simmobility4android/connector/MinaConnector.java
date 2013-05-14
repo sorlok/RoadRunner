@@ -16,7 +16,7 @@ import org.apache.mina.filter.codec.textline.TextLineCodecFactory;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
-import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.Logger;
+import edu.mit.csail.sethhetu.roadrunner.LoggerI;
 import sg.smart.mit.simmobility4android.handler.Handler;
 import sg.smart.mit.simmobility4android.handler.HandlerFactory;
 import sg.smart.mit.simmobility4android.handler.JsonHandlerFactory;
@@ -37,7 +37,7 @@ public class MinaConnector implements Connector {
     private int clientID;
     private final int BUFFER_SIZE = 2048;
     private final java.util.logging.Logger LOG = java.util.logging.Logger.getLogger(getClass().getCanonicalName());
-    private Logger logger;
+    private LoggerI logger;
     
     public int getClientID() { return clientID; }
 
@@ -47,7 +47,7 @@ public class MinaConnector implements Connector {
      * @param locspoof   A handler for spoofing location-based updates. Used to set software lat/lng.
      * @param logger     A handler for logging.
      */
-    public MinaConnector(int clientID_, LocationSpoofer locspoof, Logger logger) {
+    public MinaConnector(int clientID_, LocationSpoofer locspoof, LoggerI logger) {
         this.clientID = clientID_;
         this.logger = logger;
         this.handlerFactory = new JsonHandlerFactory(locspoof);
@@ -98,7 +98,7 @@ public class MinaConnector implements Connector {
                 @Override
                 public void messageReceived(IoSession is, Object o) throws Exception {
                     LOG.info("client "+ clientID + " received[" + o.toString() + "]");
-//                    Handler handler = handlerFactory.create(MinaConnector.this, o, clientID);
+                    /*Handler handler = */handlerFactory.create(MinaConnector.this, o, clientID);
 //                    LOG.info("A handler was created,  ... handling");
 //                    handler.handle();
                     MinaConnector.this.messageListener.onMessage(o);

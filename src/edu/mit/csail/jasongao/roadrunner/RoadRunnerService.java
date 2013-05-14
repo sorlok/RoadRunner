@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import edu.mit.csail.sethhetu.roadrunner.LoggerI;
 import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker;
 
 import android.app.Service;
@@ -43,7 +44,7 @@ import android.os.PowerManager;
 import android.speech.tts.TextToSpeech;
 import android.telephony.TelephonyManager;
 
-public class RoadRunnerService extends Service implements LocationListener {
+public class RoadRunnerService extends Service implements LocationListener, LoggerI {
 	public static final String TAG = "RoadRunnerService";
 	
 	private String uniqueId;
@@ -888,14 +889,6 @@ public class RoadRunnerService extends Service implements LocationListener {
 		mainHandler.obtainMessage(MainActivity.LOG, message).sendToTarget();
 	}
 	
-	
-	//Helper: encapsulate logging into a class.
-	public class Logger {
-		public void log(String msg) {
-			RoadRunnerService.this.log(msg);
-		}
-	}
-	
 
 	public void updateDisplay() {
 		List<String> update = new ArrayList<String>();
@@ -1107,7 +1100,7 @@ public class RoadRunnerService extends Service implements LocationListener {
 		
 		//Connect to the Sim Mobility server.
 		if (Globals.SIM_MOBILITY) {
-			simmob = new SimMobilityBroker(uniqueId, myHandler, new Logger(), new AdHocAnnouncer(), new LocationSpoofer());
+			simmob = new SimMobilityBroker(uniqueId, myHandler, this, new AdHocAnnouncer(), new LocationSpoofer());
 			log("Sim Mobility server connected.");
 		}
 

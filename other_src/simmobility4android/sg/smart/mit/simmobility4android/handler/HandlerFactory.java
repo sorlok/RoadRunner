@@ -11,6 +11,5 @@ import sg.smart.mit.simmobility4android.connector.Connector;
  * @author Vahid
  */
 public interface HandlerFactory {
-
     Handler create(Connector connector, Object message, int ID);
 }

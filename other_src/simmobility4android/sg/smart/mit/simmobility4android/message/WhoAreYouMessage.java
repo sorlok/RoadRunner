@@ -8,5 +8,5 @@ package sg.smart.mit.simmobility4android.message;
  * @author Pedro Gandola
  * @author Vahid
  */
-public class WhoAreYouMessage extends Message{
+public class WhoAreYouMessage extends Message {
 }
