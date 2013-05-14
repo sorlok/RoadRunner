@@ -1,3 +1,7 @@
+//Copyright (c) 2013 Singapore-MIT Alliance for Research and Technology
+//Licensed under the terms of the MIT License, as described in the file:
+//   license.txt   (http://opensource.org/licenses/MIT)
+
 package sg.smart.mit.simmobility4android.handler;
 
 import sg.smart.mit.simmobility4android.connector.Connector;
@@ -11,7 +15,7 @@ import sg.smart.mit.simmobility4android.message.Message;
  * for a generic <T extends Message> which really only serves to simplify "getMessage()".
  * Now, you can just have the subclass cast the result of "getMessage()".
  *
- * @author gandola
+ * @author Pedro Gandola
  */
 public abstract class Handler {
     private final Message message;

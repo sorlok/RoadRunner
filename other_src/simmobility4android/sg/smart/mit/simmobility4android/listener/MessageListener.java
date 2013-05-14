@@ -1,7 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+//Copyright (c) 2013 Singapore-MIT Alliance for Research and Technology
+//Licensed under the terms of the MIT License, as described in the file:
+//   license.txt   (http://opensource.org/licenses/MIT)
+
 package sg.smart.mit.simmobility4android.listener;
 
 import sg.smart.mit.simmobility4android.connector.Connector;
@@ -11,8 +11,7 @@ import sg.smart.mit.simmobility4android.handler.HandlerFactory;
 import sg.smart.mit.simmobility4android.message.Message;
 
 /**
- *
- * @author gandola
+ * @author Pedro Gandola
  */
 public class MessageListener {
 	private Connector mnc;

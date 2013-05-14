@@ -1,12 +1,19 @@
+//Copyright (c) 2013 Singapore-MIT Alliance for Research and Technology
+//Licensed under the terms of the MIT License, as described in the file:
+//   license.txt   (http://opensource.org/licenses/MIT)
+
 package edu.mit.csail.sethhetu.roadrunner;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import android.os.AsyncTask;
 
-
-//Helper class for managing Sim Mobility time ticks (response from the emulator)
-//This is a one-shot Task, unlike TickRequest.
+/**
+ * Helper class for managing Sim Mobility time ticks (response from the emulator)
+ * This is a one-shot Task, unlike TickRequest.
+ *  
+ * @author Seth N. Hetu
+ */
 public class SimMobTickResponse extends AsyncTask<BufferedWriter, Void, Boolean> {	
 	private String line;
 	

@@ -1,31 +1,24 @@
+//Copyright (c) 2013 Singapore-MIT Alliance for Research and Technology
+//Licensed under the terms of the MIT License, as described in the file:
+//   license.txt   (http://opensource.org/licenses/MIT)
+
 package edu.mit.csail.sethhetu.roadrunner;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.lang.Character.UnicodeBlock;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import sg.smart.mit.simmobility4android.connector.Connector;
 import sg.smart.mit.simmobility4android.connector.MinaConnector;
 import sg.smart.mit.simmobility4android.handler.HandlerFactory;
 import sg.smart.mit.simmobility4android.handler.JsonHandlerFactory;
-import sg.smart.mit.simmobility4android.listener.MessageListener;
 
 import android.os.Handler;
-import android.text.TextUtils.StringSplitter;
 import android.util.Base64;
-import edu.mit.csail.jasongao.roadrunner.AdhocPacket;
-import edu.mit.csail.jasongao.roadrunner.AdhocPacketThread;
-import edu.mit.csail.jasongao.roadrunner.Globals;
-import edu.mit.csail.jasongao.roadrunner.ResRequest;
-import edu.mit.csail.jasongao.roadrunner.RoadRunnerService;
+import edu.mit.csail.jasongao.roadrunner.*;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.AdHocAnnouncer;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.Logger;
@@ -42,6 +35,8 @@ import edu.mit.csail.sethhetu.roadrunner.SimMobServerConnectTask.PostExecuteActi
  *        A) Any number of additional messages may be bundled with this update.
  *     5) Steps 3 and 4 continue for time ticks 2, 3, 4, etc.
  * This behavior can be enabled by setting Globals.SIM_MOBILITY to "true".
+ * 
+ * @author Seth N. Hetu
  * 
  * TODO: At the moment, the Broker will handle all messages via the post-back methods
  *       of the MinaConnector, meaning that it will NOT operate in lock step.

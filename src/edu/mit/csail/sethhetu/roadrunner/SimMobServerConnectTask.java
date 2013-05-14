@@ -1,25 +1,25 @@
+//Copyright (c) 2013 Singapore-MIT Alliance for Research and Technology
+//Licensed under the terms of the MIT License, as described in the file:
+//   license.txt   (http://opensource.org/licenses/MIT)
+
 package edu.mit.csail.sethhetu.roadrunner;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 
 import sg.smart.mit.simmobility4android.connector.Connector;
 import sg.smart.mit.simmobility4android.connector.MinaConnector;
-import sg.smart.mit.simmobility4android.handler.Handler;
 import sg.smart.mit.simmobility4android.handler.HandlerFactory;
 import sg.smart.mit.simmobility4android.listener.MessageListener;
 
 import android.os.AsyncTask;
 import edu.mit.csail.jasongao.roadrunner.Globals;
 
-//Helper class for connecting to the Sim Mobility server.
+/**
+ * Helper class for connecting to the Sim Mobility server.
+ * 
+ * @author Seth N. Hetu
+ */
 public class SimMobServerConnectTask extends AsyncTask<Connector, Void, Boolean> {
 	//Callback for task completion
 	public interface PostExecuteAction {

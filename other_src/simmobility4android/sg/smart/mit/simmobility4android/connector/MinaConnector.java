@@ -1,22 +1,18 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+//Copyright (c) 2013 Singapore-MIT Alliance for Research and Technology
+//Licensed under the terms of the MIT License, as described in the file:
+//   license.txt   (http://opensource.org/licenses/MIT)
+
 package sg.smart.mit.simmobility4android.connector;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import org.apache.mina.core.future.ConnectFuture;
-import org.apache.mina.core.future.WriteFuture;
 import org.apache.mina.core.service.IoConnector;
 import org.apache.mina.core.service.IoHandler;
 import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.codec.textline.TextLineCodecFactory;
-import org.apache.mina.filter.logging.LoggingFilter;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
@@ -28,7 +24,8 @@ import sg.smart.mit.simmobility4android.listener.MessageListener;
 
 /**
  *
- * @author gandola, vahid
+ * @author Pedro Gandola
+ * @author Vahid
  */
 public class MinaConnector implements Connector {
 

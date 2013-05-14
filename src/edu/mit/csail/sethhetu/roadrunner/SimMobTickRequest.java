@@ -1,21 +1,23 @@
+//Copyright (c) 2013 Singapore-MIT Alliance for Research and Technology
+//Licensed under the terms of the MIT License, as described in the file:
+//   license.txt   (http://opensource.org/licenses/MIT)
+
 package edu.mit.csail.sethhetu.roadrunner;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 
 import android.os.AsyncTask;
 import android.os.Handler;
-import edu.mit.csail.jasongao.roadrunner.Globals;
 import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker.ServerTickDoneRunnable;
 
-//Helper class for managing Sim Mobility time ticks (request from the server)
+
+/**
+ * Helper class for managing Sim Mobility time ticks (request from the server).
+ * Runs in a tight loop.
+ * 
+ * @author Seth N. Hetu
+ */
 public class SimMobTickRequest extends AsyncTask<BufferedReader, Void, Boolean> {
 	private Handler handler;
 	private ServerTickDoneRunnable onComplete;
