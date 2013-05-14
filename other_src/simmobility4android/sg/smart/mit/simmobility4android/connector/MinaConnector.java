@@ -21,7 +21,8 @@ import sg.smart.mit.simmobility4android.handler.JsonHandlerFactory;
 import sg.smart.mit.simmobility4android.listener.MessageListener;
 
 /**
- *
+ * A connector which targets Apache Mina.
+ * 
  * @author Pedro Gandola
  * @author Vahid
  */
@@ -116,15 +117,15 @@ public class MinaConnector implements Connector {
     }
 
     @Override
-    public void send(Object data) {        
+    public void send(String data) {        
         if (connected && (data!=null) && (session!=null) && session.isConnected()) {
-            String str = String.format("%8h%s", data.toString().length(), data.toString());
+            String str = String.format("%8h%s", data.length(), data);
             System.out.println("Outgoing data: ***" + str + "***");
             session.write(str);
         } else {
         	StringBuilder sb = new StringBuilder("Can't send data to server:");
         	sb.append("  connected=").append(connected);
-        	sb.append("  data=").append(data!=null ? data.toString() : "<NULL>");
+        	sb.append("  data=").append(data!=null ? data : "<NULL>");
         	sb.append("  session=").append(session!=null ? session.isConnected() : "<NULL>");
         	System.out.println(sb.toString());
         }
@@ -134,11 +135,12 @@ public class MinaConnector implements Connector {
     	return messageListener;
     }
     
-    public void handleMessage(Object o) {
+    @Override
+    public void handleMessage(String data) {
     	//TODO: This is a remarkably hackish way of doing things; it's not even
     	//      apparent that the "result" of handlerFactory.create() is used.
-        handlerFactory.create(this, o, this.getClientID());
-        getMessageListener().onMessage(o);
+        handlerFactory.create(this, data, this.getClientID());
+        getMessageListener().onMessage(data);
     }
     
 }

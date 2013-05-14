@@ -27,7 +27,13 @@ public interface Connector {
     
     /**
      * Sends the given object.
-     * @param data
+     * @param data The message you want to send.
      */
-    void send(Object data);
+    void send(String data);
+    
+    /**
+     * Handle a message sent from the server.
+     * @param data The message that was received.
+     */
+    void handleMessage(String data);
 }

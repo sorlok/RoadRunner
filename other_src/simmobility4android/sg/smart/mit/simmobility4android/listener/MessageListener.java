@@ -33,7 +33,7 @@ public class MessageListener {
 		this.mnc = mnc;
 	}
 
-    public void onMessage(Object message) {
+    public void onMessage(String message) {
         Handler handler = handlerFactory.create(mnc, message, clientId);
         handler.handle();
     }

@@ -61,7 +61,7 @@ public class MinaHandler implements IoHandler {
     @Override
     public void messageReceived(IoSession is, Object o) throws Exception {
     	logger.info("client "+ parent.getClientID() + " received[" + o.toString() + "]");
-    	parent.handleMessage(o);
+    	parent.handleMessage(o.toString());
     }
 
     @Override
