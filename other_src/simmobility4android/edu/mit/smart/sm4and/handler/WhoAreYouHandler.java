@@ -7,7 +7,7 @@ package edu.mit.smart.sm4and.handler;
 import com.google.gson.JsonObject;
 
 import edu.mit.smart.sm4and.Connector;
-import edu.mit.smart.sm4and.Handler;
+import edu.mit.smart.sm4and.AbstractMessageHandler;
 import edu.mit.smart.sm4and.message.Message;
 
 
@@ -16,20 +16,19 @@ import edu.mit.smart.sm4and.message.Message;
  * @author Pedro Gandola
  * @author Vahid
  */
-public class WhoAreYouHandler extends Handler {
+public class WhoAreYouHandler extends AbstractMessageHandler {
 	/** A message from the server requesting that the client identify itself. */
 	public static class WhoAreYouMessage extends Message { }
 	
     private int clientID;
     
     public WhoAreYouHandler(WhoAreYouMessage message, Connector connector, int clientID) {
-        super(message, connector);
         this.clientID = clientID;
         System.out.println("creating WhoAreYouHandler");
     }
 
     @Override
-    public void handle() {
+    public void handle(Message message, Connector connector) {
         System.out.println("WhoAreYouHandler is handling");
         
         JsonObject obj = new JsonObject();
@@ -40,6 +39,6 @@ public class WhoAreYouHandler extends Handler {
          * on the other side
          */
         obj.addProperty("ID", clientID);
-        getConnector().send(obj.toString());
+        connector.send(obj.toString());
     }
 }

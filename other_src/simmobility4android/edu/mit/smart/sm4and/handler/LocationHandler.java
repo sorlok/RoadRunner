@@ -6,14 +6,14 @@ package edu.mit.smart.sm4and.handler;
 
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 import edu.mit.smart.sm4and.Connector;
-import edu.mit.smart.sm4and.Handler;
+import edu.mit.smart.sm4and.AbstractMessageHandler;
 import edu.mit.smart.sm4and.message.Message;
 
 /**
  * Handle a location-update message.
  * @author Vahid
  */
-public class LocationHandler extends Handler {
+public class LocationHandler extends AbstractMessageHandler {
 	/** A location update message. Uses projected (x,y) coordinates, not Latitude/Longitude. */
 	public static class LocationMessage extends Message { 
 	    private int x;
@@ -23,19 +23,18 @@ public class LocationHandler extends Handler {
     private LocationSpoofer locspoof;
     
     public LocationHandler(LocationSpoofer locspoof, LocationMessage message, Connector connector) {
-        super(message, connector);
         this.locspoof = locspoof;
     }
 
     @Override
-    public void handle() {
+    public void handle(Message message, Connector connector) {
         /*
          * TODO: This currently uses X/Y coordinates. We need to reverse project back to lat/lng
          *       (but randomized networks need a fallback, as there is no projection matrix). 
          */  
-        LocationMessage message = (LocationMessage)getMessage();
-        System.out.println("Current location is "+ message.x + ":" + message.y);
-        locspoof.setLocation(message.x, message.y);
+        LocationMessage locMsg = (LocationMessage)message;
+        System.out.println("Current location is "+ locMsg.x + ":" + locMsg.y);
+        locspoof.setLocation(locMsg.x, locMsg.y);
     }
     
 }

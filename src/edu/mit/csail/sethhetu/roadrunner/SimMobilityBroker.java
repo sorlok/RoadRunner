@@ -19,8 +19,10 @@ import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.AdHocAnnouncer;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 import edu.mit.csail.sethhetu.roadrunner.SimMobServerConnectTask.PostExecuteAction;
 import edu.mit.smart.sm4and.Connector;
-import edu.mit.smart.sm4and.HandlerFactory;
-import edu.mit.smart.sm4and.handler.JsonHandlerFactory;
+import edu.mit.smart.sm4and.MessageHandlerFactory;
+import edu.mit.smart.sm4and.MessageParser;
+import edu.mit.smart.sm4and.handler.SimpleHandlerFactory;
+import edu.mit.smart.sm4and.json.message.JsonMessageParser;
 import edu.mit.smart.sm4and.listener.MessageListener;
 import edu.mit.smart.sm4and.mina.connect.MinaConnector;
 
@@ -75,7 +77,8 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	//Same as the one in RoadRunnerService
 	private String uniqueId;
 	
-	private HandlerFactory handlerFactory;
+	private MessageParser messageParser;
+	private MessageHandlerFactory handlerFactory;
 
 	@Override
 	public void onPostExecute(Exception thrownException, BufferedReader reader, BufferedWriter writer) {
@@ -104,7 +107,8 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	 * Create the broker entity and connect to the server.
 	 */
 	public SimMobilityBroker(String uniqueId, Handler myHandler, LoggerI logger, AdHocAnnouncer adhoc, LocationSpoofer locspoof) {
-		this.handlerFactory = new JsonHandlerFactory(locspoof);
+		this.handlerFactory = new SimpleHandlerFactory(locspoof);
+		this.messageParser = new JsonMessageParser();
 		this.myHandler = myHandler;
 		this.logger = logger;
 		this.adhoc = adhoc;
@@ -122,9 +126,9 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		//this.smSocket = new Socket();
 		
 		//TODO: These 3 lines need to be simplified.
-		MessageListener listen = new MessageListener(handlerFactory, clientID);
-		HandlerFactory hf = new JsonHandlerFactory(locspoof);
-		this.conn = new MinaConnector(clientID, hf, locspoof, logger, listen);
+		MessageListener listen = new MessageListener(messageParser, handlerFactory, clientID);
+		MessageHandlerFactory hf = new SimpleHandlerFactory(locspoof);
+		this.conn = new MinaConnector(clientID, messageParser, hf, locspoof, logger, listen);
 		listen.setParent(this.conn);
 		
 		this.returnedMessages = new ArrayList<String>();

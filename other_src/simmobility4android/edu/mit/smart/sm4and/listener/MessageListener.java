@@ -5,8 +5,10 @@
 package edu.mit.smart.sm4and.listener;
 
 import edu.mit.smart.sm4and.Connector;
-import edu.mit.smart.sm4and.Handler;
-import edu.mit.smart.sm4and.HandlerFactory;
+import edu.mit.smart.sm4and.AbstractMessageHandler;
+import edu.mit.smart.sm4and.MessageHandlerFactory;
+import edu.mit.smart.sm4and.MessageParser;
+import edu.mit.smart.sm4and.message.Message;
 
 /**
  * Class that listens for messages and Handles them.
@@ -16,8 +18,9 @@ import edu.mit.smart.sm4and.HandlerFactory;
  * @author Pedro Gandola
  */
 public class MessageListener {
-	private Connector conn;
-	private HandlerFactory handlerFactory;
+	private Connector connector;
+	private MessageParser parser;
+	private MessageHandlerFactory handlerFactory;
 	private int clientId;
 	
 	/**
@@ -27,17 +30,18 @@ public class MessageListener {
 	 * @param handlerFactory
 	 * @param conn
 	 */
-	public MessageListener(HandlerFactory handlerFactory, int clientId) {
+	public MessageListener(MessageParser parser, MessageHandlerFactory handlerFactory, int clientId) {
+		this.parser = parser;
 		this.handlerFactory = handlerFactory;
 		this.clientId = clientId;
 	}
 	
-	public void setParent(Connector conn) {
-		this.conn = conn;
+	public void setParent(Connector connector) {
+		this.connector = connector;
 	}
 
-    public void onMessage(String message) {
-        Handler handler = handlerFactory.create(conn, message, clientId);
-        handler.handle();
+    public void onMessage(Message message) {
+        AbstractMessageHandler handler = handlerFactory.create(connector, message, clientId);
+        handler.handle(message, connector);
     }
 }

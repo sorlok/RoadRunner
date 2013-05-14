@@ -7,7 +7,7 @@ package edu.mit.smart.sm4and;
 import edu.mit.smart.sm4and.message.Message;
 
 /**
- * Interface for all handler implementations.
+ * Interface for all message handler implementations.
  * 
  * Note that the message can only be set in the constructor (which is protected), 
  * and then only retrieved with the "getMessage()" function. Thus, we avoid the need
@@ -16,26 +16,13 @@ import edu.mit.smart.sm4and.message.Message;
  *
  * @author Pedro Gandola
  */
-public abstract class Handler {
-    private final Message message;
-    private final Connector connector;
-
-    protected Handler(Message message, Connector connector) {
-        this.message = message;
-        this.connector = connector;
+public abstract class AbstractMessageHandler {
+    protected AbstractMessageHandler() {
     }
 
     /**
      * Subclasses should handle Message here, relying on the Connector for response
      *  functionality.
      */
-    public abstract void handle();
-
-    protected Connector getConnector() {
-        return connector;
-    }
-
-    public Message getMessage() {
-        return message;
-    }
+    public abstract void handle(Message message, Connector connector);
 }

@@ -8,8 +8,10 @@ import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 
 import edu.mit.smart.sm4and.Connector;
-import edu.mit.smart.sm4and.HandlerFactory;
+import edu.mit.smart.sm4and.MessageHandlerFactory;
+import edu.mit.smart.sm4and.MessageParser;
 import edu.mit.smart.sm4and.listener.MessageListener;
+import edu.mit.smart.sm4and.message.Message;
 
 import org.apache.mina.core.future.ConnectFuture;
 import org.apache.mina.core.service.IoConnector;
@@ -34,7 +36,8 @@ public class MinaConnector implements Connector {
     private IoSession session;
     private IoHandler ioHandler;
     private MessageListener messageListener;
-    private HandlerFactory handlerFactory;
+    private MessageParser parser;
+    private MessageHandlerFactory handlerFactory;
     private int clientID;
     private final int BUFFER_SIZE = 2048;
     private final java.util.logging.Logger LOG = java.util.logging.Logger.getLogger(getClass().getCanonicalName());
@@ -52,9 +55,10 @@ public class MinaConnector implements Connector {
      * @param locspoof   A handler for spoofing location-based updates. Used to set software lat/lng.
      * @param logger     A handler for logging.
      */
-    public MinaConnector(int clientID, HandlerFactory handlerFactory, LocationSpoofer locspoof, LoggerI logger, MessageListener listener) {
+    public MinaConnector(int clientID, MessageParser parser, MessageHandlerFactory handlerFactory, LocationSpoofer locspoof, LoggerI logger, MessageListener listener) {
         this.clientID = clientID;
         this.logger = logger;
+        this.parser = parser;
         this.handlerFactory = handlerFactory;
         this.ioHandler = new MinaIoHandler(this, LOG);
         this.messageListener = listener;
@@ -141,8 +145,9 @@ public class MinaConnector implements Connector {
     public void handleMessage(String data) {
     	//TODO: This is a remarkably hackish way of doing things; it's not even
     	//      apparent that the "result" of handlerFactory.create() is used.
-        handlerFactory.create(this, data, this.getClientID());
-        getMessageListener().onMessage(data);
+    	Message message = parser.parse(data);
+        handlerFactory.create(this, message, this.getClientID());
+        getMessageListener().onMessage(message);
     }
     
 }

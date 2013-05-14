@@ -11,7 +11,7 @@ import java.io.BufferedWriter;
 import android.os.AsyncTask;
 import edu.mit.csail.jasongao.roadrunner.Globals;
 import edu.mit.smart.sm4and.Connector;
-import edu.mit.smart.sm4and.HandlerFactory;
+import edu.mit.smart.sm4and.MessageHandlerFactory;
 import edu.mit.smart.sm4and.listener.MessageListener;
 import edu.mit.smart.sm4and.mina.connect.MinaConnector;
 
@@ -26,14 +26,14 @@ public class SimMobServerConnectTask extends AsyncTask<Connector, Void, Boolean>
 		public void onPostExecute(Exception thrownException, BufferedReader reader, BufferedWriter writer);
 	}
 	
-    private HandlerFactory handlerFactory;
+    private MessageHandlerFactory handlerFactory;
 	private BufferedReader reader;
 	private BufferedWriter writer;
 	private Exception errorEx;
 	private PostExecuteAction onComplete;
 
 	
-	public SimMobServerConnectTask(PostExecuteAction onComplete, HandlerFactory handlerFactory) {
+	public SimMobServerConnectTask(PostExecuteAction onComplete, MessageHandlerFactory handlerFactory) {
 		this.onComplete = onComplete;
 		this.handlerFactory = handlerFactory;
 	}

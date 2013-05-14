@@ -4,13 +4,16 @@
 
 package edu.mit.smart.sm4and;
 
+import edu.mit.smart.sm4and.message.Message;
+
 
 /**
- * Used for creating a variety of Handlers to respond to a variety of messages.
+ * Interface for parsing Messages. Turns a String into a Message, which is independent 
+ *   of encoding.
  * 
  * @author Pedro Gandola
  * @author Vahid
  */
-public interface HandlerFactory {
-    Handler create(Connector connector, String message, int ID);
+public interface MessageParser {
+	Message parse(String src);
 }
