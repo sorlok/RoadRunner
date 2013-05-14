@@ -2,12 +2,12 @@
 //Licensed under the terms of the MIT License, as described in the file:
 //   license.txt   (http://opensource.org/licenses/MIT)
 
-package sg.smart.mit.simmobility4android.listener;
+package edu.mit.smart.sm4and.listener;
 
-import sg.smart.mit.simmobility4android.connector.Connector;
-import sg.smart.mit.simmobility4android.connector.MinaConnector;
-import sg.smart.mit.simmobility4android.handler.Handler;
-import sg.smart.mit.simmobility4android.handler.HandlerFactory;
+import edu.mit.smart.sm4and.connector.Connector;
+import edu.mit.smart.sm4and.connector.MinaConnector;
+import edu.mit.smart.sm4and.handler.Handler;
+import edu.mit.smart.sm4and.handler.HandlerFactory;
 
 /**
  * @author Pedro Gandola

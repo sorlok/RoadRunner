@@ -7,13 +7,13 @@ package edu.mit.csail.sethhetu.roadrunner;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 
-import sg.smart.mit.simmobility4android.connector.Connector;
-import sg.smart.mit.simmobility4android.connector.MinaConnector;
-import sg.smart.mit.simmobility4android.handler.HandlerFactory;
-import sg.smart.mit.simmobility4android.listener.MessageListener;
 
 import android.os.AsyncTask;
 import edu.mit.csail.jasongao.roadrunner.Globals;
+import edu.mit.smart.sm4and.connector.Connector;
+import edu.mit.smart.sm4and.connector.MinaConnector;
+import edu.mit.smart.sm4and.handler.HandlerFactory;
+import edu.mit.smart.sm4and.listener.MessageListener;
 
 /**
  * Helper class for connecting to the Sim Mobility server.

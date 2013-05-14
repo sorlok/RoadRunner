@@ -2,15 +2,15 @@
 //Licensed under the terms of the MIT License, as described in the file:
 //   license.txt   (http://opensource.org/licenses/MIT)
 
-package sg.smart.mit.simmobility4android.handler;
+package edu.mit.smart.sm4and.handler;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
-import sg.smart.mit.simmobility4android.connector.Connector;
-import sg.smart.mit.simmobility4android.message.*;
+import edu.mit.smart.sm4and.connector.Connector;
+import edu.mit.smart.sm4and.message.*;
 
 /**
  * @author Pedro Gandola

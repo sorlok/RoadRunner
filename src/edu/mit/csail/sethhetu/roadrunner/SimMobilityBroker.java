@@ -11,11 +11,6 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
-import sg.smart.mit.simmobility4android.connector.Connector;
-import sg.smart.mit.simmobility4android.connector.MinaConnector;
-import sg.smart.mit.simmobility4android.handler.HandlerFactory;
-import sg.smart.mit.simmobility4android.handler.JsonHandlerFactory;
-import sg.smart.mit.simmobility4android.listener.MessageListener;
 
 import android.os.Handler;
 import android.util.Base64;
@@ -23,6 +18,11 @@ import edu.mit.csail.jasongao.roadrunner.*;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.AdHocAnnouncer;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 import edu.mit.csail.sethhetu.roadrunner.SimMobServerConnectTask.PostExecuteAction;
+import edu.mit.smart.sm4and.connector.Connector;
+import edu.mit.smart.sm4and.connector.MinaConnector;
+import edu.mit.smart.sm4and.handler.HandlerFactory;
+import edu.mit.smart.sm4and.handler.JsonHandlerFactory;
+import edu.mit.smart.sm4and.listener.MessageListener;
 
 /**
  * The SimMobilityBroker is used by RoadRunner to communicate with Sim Mobility. 

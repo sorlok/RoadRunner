@@ -2,7 +2,7 @@
 //Licensed under the terms of the MIT License, as described in the file:
 //   license.txt   (http://opensource.org/licenses/MIT)
 
-package sg.smart.mit.simmobility4android.connector;
+package edu.mit.smart.sm4and.connector;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
@@ -16,9 +16,9 @@ import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 import edu.mit.csail.sethhetu.roadrunner.LoggerI;
-import sg.smart.mit.simmobility4android.handler.HandlerFactory;
-import sg.smart.mit.simmobility4android.handler.JsonHandlerFactory;
-import sg.smart.mit.simmobility4android.listener.MessageListener;
+import edu.mit.smart.sm4and.handler.HandlerFactory;
+import edu.mit.smart.sm4and.handler.JsonHandlerFactory;
+import edu.mit.smart.sm4and.listener.MessageListener;
 
 /**
  * A connector which targets Apache Mina.

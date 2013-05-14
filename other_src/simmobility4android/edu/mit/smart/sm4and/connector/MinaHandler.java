@@ -2,7 +2,7 @@
 //Licensed under the terms of the MIT License, as described in the file:
 //   license.txt   (http://opensource.org/licenses/MIT)
 
-package sg.smart.mit.simmobility4android.connector;
+package edu.mit.smart.sm4and.connector;
 
 import org.apache.mina.core.service.*;
 import org.apache.mina.core.session.*;
