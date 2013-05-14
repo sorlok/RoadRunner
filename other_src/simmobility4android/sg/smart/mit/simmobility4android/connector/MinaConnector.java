@@ -84,13 +84,16 @@ public class MinaConnector implements Connector {
         connector.getFilterChain().addLast("codec", new ProtocolCodecFilter(new TextLineCodecFactory(Charset.forName("UTF-8"))));
         connector.setHandler(ioHandler);
         
+        //Connect to the server and wait forever until it makes contact.
         ConnectFuture future = connector.connect(new InetSocketAddress(host, port));
-        connected = true; //todo: is this a good place to set the flag?
         future.awaitUninterruptibly();
+        
+        //Check if an actual connection was made, or if some error occurred.
         if (future.isConnected()) {
             session = future.getSession();
             session.getConfig().setUseReadOperation(true);
             session.getCloseFuture().awaitUninterruptibly();
+            connected = true;
         } else {
             logger.log("Connection could not be established:");
             logger.log(future.getException().toString());
@@ -101,38 +104,29 @@ public class MinaConnector implements Connector {
     public void disconnect() {
         if (connected) {
             if (session != null) {
-                session.close(true);
-                session.getCloseFuture().awaitUninterruptibly();
+                session.close(true).awaitUninterruptibly();
                 session = null;
-                connector.dispose();
+            }
+            if (connector != null) { //Not likely, but check anyway.
+            	connector.dispose();
+            	connector = null;
             }
             connected = false;
         }
     }
 
     @Override
-    public void send(Object data) {
-        System.out.println("outgoing data : " + data.toString());
-        
-        if(!connected) {
-            System.out.println("client "+ clientID + " we are NOT connected");
-        }
-        
-        if(data == null) {
-          System.out.println("client "+ clientID + " data is null");  
-        }
-        
-        if(session == null) {
-            System.out.println("client "+ clientID + " session is null");
-        }
-        
-        if(!session.isConnected()){
-            System.out.println("client "+ clientID + " session is not Connected");
-        }
-        
-        if (connected && data != null && session != null && session.isConnected()) {
+    public void send(Object data) {        
+        if (connected && (data!=null) && (session!=null) && session.isConnected()) {
             String str = String.format("%8h%s", data.toString().length(), data.toString());
+            System.out.println("Outgoing data: ***" + str + "***");
             session.write(str);
+        } else {
+        	StringBuilder sb = new StringBuilder("Can't send data to server:");
+        	sb.append("  connected=").append(connected);
+        	sb.append("  data=").append(data!=null ? data.toString() : "<NULL>");
+        	sb.append("  session=").append(session!=null ? session.isConnected() : "<NULL>");
+        	System.out.println(sb.toString());
         }
     }
     

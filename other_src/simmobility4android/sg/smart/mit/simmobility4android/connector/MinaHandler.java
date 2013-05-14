@@ -10,6 +10,9 @@ import org.apache.mina.core.session.*;
 import java.util.logging.Logger;
 
 /**
+ * A very simple handler that traces all callbacks and does the following:
+ *   * Calls parent.setSession() when the session is created or opened.
+ *   * Calls parent.handleMessage() when a message has been received.
  *
  * @author Pedro Gandola
  * @author Vahid
@@ -21,6 +24,7 @@ public class MinaHandler implements IoHandler {
     /**
      * Create a new handler for Apache Mina IO.
      * @param parent The parent MinaHandler.
+     * @param logger Logging handle.
      */
     public MinaHandler(MinaConnector parent, Logger logger) {
         this.parent = parent;
