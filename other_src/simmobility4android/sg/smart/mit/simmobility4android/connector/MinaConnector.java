@@ -49,11 +49,12 @@ public class MinaConnector implements Connector {
      * @param locspoof   A handler for spoofing location-based updates. Used to set software lat/lng.
      * @param logger     A handler for logging.
      */
-    public MinaConnector(int clientID_, LocationSpoofer locspoof, LoggerI logger) {
+    public MinaConnector(int clientID_, LocationSpoofer locspoof, LoggerI logger, MessageListener listener) {
         this.clientID = clientID_;
         this.logger = logger;
         this.handlerFactory = new JsonHandlerFactory(locspoof);
         this.ioHandler = new MinaHandler(this, LOG);
+        this.messageListener = listener;
     }
 
     
@@ -134,20 +135,15 @@ public class MinaConnector implements Connector {
             session.write(str);
         }
     }
-
-    @Override
-    public void listen(MessageListener listener) {
-        messageListener = listener;
-    }
     
     public MessageListener getMessageListener() {
     	return messageListener;
     }
     
     public void handleMessage(Object o) {
-        /*Handler handler = */handlerFactory.create(this, o, this.getClientID());
-        //LOG.info("A handler was created,  ... handling");
-        //handler.handle();
+    	//TODO: This is a remarkably hackish way of doing things; it's not even
+    	//      apparent that the "result" of handlerFactory.create() is used.
+        handlerFactory.create(this, o, this.getClientID());
         getMessageListener().onMessage(o);
     }
     

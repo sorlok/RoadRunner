@@ -15,6 +15,7 @@ import sg.smart.mit.simmobility4android.connector.Connector;
 import sg.smart.mit.simmobility4android.connector.MinaConnector;
 import sg.smart.mit.simmobility4android.handler.HandlerFactory;
 import sg.smart.mit.simmobility4android.handler.JsonHandlerFactory;
+import sg.smart.mit.simmobility4android.listener.MessageListener;
 
 import android.os.Handler;
 import android.util.Base64;
@@ -119,7 +120,12 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		int clientID = SimMobilityBroker.rand.nextInt(100000)+100;
 		
 		//this.smSocket = new Socket();
-		this.conn = new MinaConnector(clientID, locspoof, logger);
+		
+		//TODO: These 3 lines need to be simplified.
+		MessageListener listen = new MessageListener(handlerFactory, clientID);
+		this.conn = new MinaConnector(clientID, locspoof, logger, listen);
+		listen.setParent(this.conn);
+		
 		this.returnedMessages = new ArrayList<String>();
 		
 		//Connect our socket.

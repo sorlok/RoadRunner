@@ -5,6 +5,7 @@
 package sg.smart.mit.simmobility4android.listener;
 
 import sg.smart.mit.simmobility4android.connector.Connector;
+import sg.smart.mit.simmobility4android.connector.MinaConnector;
 import sg.smart.mit.simmobility4android.handler.Handler;
 import sg.smart.mit.simmobility4android.handler.HandlerFactory;
 
@@ -23,10 +24,13 @@ public class MessageListener {
 	 * @param handlerFactory
 	 * @param mnc
 	 */
-	public MessageListener(HandlerFactory handlerFactory, Connector mnc, int clientId) {
+	public MessageListener(HandlerFactory handlerFactory, int clientId) {
 		this.handlerFactory = handlerFactory;
-		this.mnc = mnc; 
 		this.clientId = clientId;
+	}
+	
+	public void setParent(Connector mnc) {
+		this.mnc = mnc;
 	}
 
     public void onMessage(Object message) {
