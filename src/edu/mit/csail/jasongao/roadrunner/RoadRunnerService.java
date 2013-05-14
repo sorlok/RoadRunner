@@ -1133,10 +1133,14 @@ public class RoadRunnerService extends Service implements LocationListener {
 			}
 
 			// take last octet of IPv4 address as my id
-			//InetAddress addr = aat.getLocalAddress();
-			//byte[] addrses = addr.getAddress();
-			//mId = (addrses[3] & 0xff);
-			mId = rand.nextInt(0xFF);
+			// If none, just make a Random ID and hope there are no collisions.
+			InetAddress addr = aat.getLocalAddress();
+			if (addr!=null) {
+				byte[] addrses = addr.getAddress();
+				mId = (addrses[3] & 0xff);
+			} else {
+				mId = rand.nextInt(0xFF);
+			}
 			log("mId=" + mId);
 
 			/*

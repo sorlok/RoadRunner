@@ -30,7 +30,7 @@ public class AdhocPacketThread extends Thread {
 	private DatagramSocket sendSocket;
 
 	private InetAddress remoteIPAddress;
-	//private InetAddress localIPAddress;
+	private InetAddress localIPAddress;
 
 	/** Send an UDP packet to the broadcast address */
 	public void sendData(byte[] sendData) throws IOException {
@@ -73,18 +73,19 @@ public class AdhocPacketThread extends Thread {
 	//	log("determined local IPv4 address: " + localIPAddress.getHostAddress());
 
 		// Figure out my local IP address
-		/*localIPAddress = null;
+		//NOTE: On some versions of Android (x86, ICS, but it varies), the "getByName()"
+		//      function fails. In this case, you can comment out the localIpAddress and
+		//      do things manually.... but sockets will fail regardless. Not sure if it's 
+		//      possible/worth fixing.
+		localIPAddress = null;
 		try {
 			NetworkInterface intf = NetworkInterface
 					.getByName(Globals.ADHOC_IFACE_NAME);
-			
-			log_nodisplay("INET_EXIST: " + intf.getInetAddresses().hasMoreElements());
 			
 			// Loop through all the addresses
 			for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr
 					.hasMoreElements();) {
 				InetAddress inetAddress = enumIpAddr.nextElement();
-				log_nodisplay("INET_DEBUG: " + inetAddress.toString());
 				if (!inetAddress.isLoopbackAddress()
 						&& (inetAddress instanceof Inet4Address)) {
 					localIPAddress = (Inet4Address) inetAddress;
@@ -98,11 +99,10 @@ public class AdhocPacketThread extends Thread {
 						+ Globals.ADHOC_IFACE_NAME);
 		} catch (IOException e) {
 			log("can't determine local IPv4 address: " + e.toString());
-			throw new RuntimeException("INET Can't find IPv4 address.");
-			//return;
+			return;
 		}
 		log("determined local IPv4 address: " + localIPAddress.getHostAddress());
-*/
+
 		// Setup remote address
 		try {
 			remoteIPAddress = InetAddress
@@ -170,11 +170,9 @@ public class AdhocPacketThread extends Thread {
 						receiveData.length);
 				recvSocket.receive(dPacket);
 				
-				if (true) { throw new RuntimeException("ACCIDENTAL CODE"); }
-
-/*				if (dPacket.getAddress().equals(localIPAddress))
+				if (dPacket.getAddress().equals(localIPAddress))
 					continue; // ignore our own UDP broadcasts
-*/
+
 				AdhocPacket p = readPacket(dPacket.getData(),
 						dPacket.getLength());
 
@@ -196,9 +194,9 @@ public class AdhocPacketThread extends Thread {
 	} // end run()
 
 	/** Return our stored local IP address. */
-	/*public synchronized InetAddress getLocalAddress() {
+	public synchronized InetAddress getLocalAddress() {
 		return localIPAddress;
-	}*/
+	}
 
 	/**
 	 * Deserialize a UDP packet back into an AdhocPacket object

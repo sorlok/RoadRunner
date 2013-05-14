@@ -421,6 +421,8 @@ public class MainActivity extends Activity implements OnInitListener {
 		
 		//Jumpstart our tests.
 		mClicked.onClick(findViewById(R.id.connect_button));
+		
+		//NOTE: Uncomment this if you want to try connecting to the cloud.
 		//mClicked.onClick(findViewById(R.id.start_stop_button));
 	}
 

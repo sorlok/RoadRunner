@@ -42,6 +42,10 @@ import edu.mit.csail.sethhetu.roadrunner.SimMobServerConnectTask.PostExecuteActi
  *        A) Any number of additional messages may be bundled with this update.
  *     5) Steps 3 and 4 continue for time ticks 2, 3, 4, etc.
  * This behavior can be enabled by setting Globals.SIM_MOBILITY to "true".
+ * 
+ * TODO: At the moment, the Broker will handle all messages via the post-back methods
+ *       of the MinaConnector, meaning that it will NOT operate in lock step.
+ *       Changing this requires modifying the fundamental underlying architecture.
  */
 public class SimMobilityBroker  implements PostExecuteAction {	
 	//We need to maintain an open connection to the Sim Mobility server, since we are in a 
@@ -50,6 +54,8 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	Connector conn;
 	
 	//Open streams for communicating with the server.
+	//TODO: Currently communication is decentralized and asynchronous, thus difficult to 
+	//      debug. We might want to change how we organize things.
 	//private BufferedReader reader;
 	//private BufferedWriter writer;
 	
@@ -85,6 +91,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		}
 		
 		//Save objects locally.
+		//TODO: reader and writer are currently null.
 		//this.reader = reader;
 		//this.writer = writer;
 				
@@ -111,6 +118,9 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		if (uniqueId==null) { throw new RuntimeException("Unique Id cannot be null."); }
 		
 		//Make a fake ID
+		//TODO: We need a better policy for assigning IDs. We can use the Android 
+		//      device ID when we initiate the connection, and then have the server
+		//      assign a shorter, integer-based ID later on.
 		SimMobilityBroker.rand = new Random();
 		int clientID = SimMobilityBroker.rand.nextInt(100000)+100;
 		
@@ -210,6 +220,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	}
 	
 	
+	//TODO: This does nothing while reader/writer are null.
 	private void closeStreams() {
 		/*try {
 			if (this.reader!=null) { this.reader.close(); }

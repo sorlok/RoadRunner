@@ -43,7 +43,7 @@ public class SimMobServerConnectTask extends AsyncTask<Connector, Void, Boolean>
 	}
 	
 	protected Boolean doInBackground(Connector... mnConnect) {
-		if (mnConnect.length!=1) { throw new RuntimeException("Only one socket allowed."); }
+		if (mnConnect.length!=1) { throw new RuntimeException("Only one Connector allowed."); }
 		try {
 			mnConnect[0].listen(new MessageListener(handlerFactory, mnConnect[0], ((MinaConnector)mnConnect[0]).getClientID()));
 	        System.out.println("client " + ((MinaConnector)mnConnect[0]).getClientID() + " connecting...");
