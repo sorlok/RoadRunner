@@ -80,15 +80,15 @@ public class MainActivity extends Activity implements OnInitListener {
 				log_nodisplay((String) msg.obj);
 				break;
 			case UPDATE_DISPLAY: // Update status display TextViews
-				List<String> update = (ArrayList<String>) msg.obj;
+				List<?> update = (List<?>) msg.obj;
 
 				TextView regionTv = (TextView) findViewById(R.id.region_tv);
 				TextView reservationsTv = (TextView) findViewById(R.id.reservations_tv);
 				TextView extrasTv = (TextView) findViewById(R.id.extras_tv);
 
-				regionTv.setText(update.get(0));
-				reservationsTv.setText(update.get(1));
-				extrasTv.setText(update.get(2));
+				regionTv.setText((String)update.get(0));
+				reservationsTv.setText((String)update.get(1));
+				extrasTv.setText((String)update.get(2));
 
 				break;
 			}
