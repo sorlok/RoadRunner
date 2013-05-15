@@ -4,6 +4,7 @@
 
 package edu.mit.smart.sm4and.handler;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import edu.mit.smart.sm4and.Connector;
@@ -18,7 +19,15 @@ import edu.mit.smart.sm4and.message.Message;
  */
 public class WhoAreYouHandler extends AbstractMessageHandler {
 	/** A message from the server requesting that the client identify itself. */
-	public static class WhoAreYouMessage extends Message { }
+	public static class WhoAreYouMessage extends Message {
+		public WhoAreYouMessage() { this.MessageType = Type.WhoAreYou.toString(); }
+	}
+	
+	/** A response to the server identifying oneself. */
+	public static class WhoAmIResponse extends Message {
+		public WhoAmIResponse() { this.MessageType = Type.WhoAmI.toString(); }
+	    private int ID;    
+	}
 	
     private int clientID;
     
@@ -31,14 +40,21 @@ public class WhoAreYouHandler extends AbstractMessageHandler {
     public void handle(Message message, Connector connector) {
         System.out.println("WhoAreYouHandler is handling");
         
-        JsonObject obj = new JsonObject();
+        WhoAmIResponse obj = new WhoAmIResponse();
+        obj.ID = clientID;
+        String msg = new Gson().toJson(obj);
+        
+      // obj2 = new JsonObject();
         
         /*
          * seth please add your emulator's ID here. 
          * Note that it will be received as unsidned int 
          * on the other side
          */
-        obj.addProperty("ID", clientID);
-        connector.send(obj.toString());
+      //  obj2.addProperty("ID", clientID);
+        
+     //   if (true) throw new RuntimeException("TESTING: **" + msg + "**  **" + obj2.toString() + "**");
+        
+        connector.send(msg);
     }
 }

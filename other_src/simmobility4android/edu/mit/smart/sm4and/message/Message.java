@@ -11,22 +11,30 @@ package edu.mit.smart.sm4and.message;
  * 
  * @author Pedro Gandola
  */
-public abstract class Message {
+public class Message {
 	//The actual type of the message.
-	private MessageType msgType;
+	//(Stored as a string because I'm not 100% sure how json handles Enums.).
+	protected String MessageType;
 	
-    public enum MessageType {
+	//Hide from everything except Gson
+	protected Message() {}
+	
+    public enum Type {
+    	//From server.
         WhoAreYou,
         TimeData,
         Ready,
-        LocationData
+        LocationData,
+        
+        //To server
+        WhoAmI,
     }
 
-    public MessageType getMessageType() {
-        return msgType;
+    public Type getMessageType() {
+        return Type.valueOf(MessageType);
     }
 
-    public void setMessageType(MessageType MessageType) {
-        this.msgType = MessageType;
-    }
+    /*public void setMessageType(MessageType msgType) {
+        this.msgType = msgType;
+    }*/
 }

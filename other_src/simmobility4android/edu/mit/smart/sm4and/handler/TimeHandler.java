@@ -7,6 +7,7 @@ package edu.mit.smart.sm4and.handler;
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.AbstractMessageHandler;
 import edu.mit.smart.sm4and.message.Message;
+import edu.mit.smart.sm4and.message.Message.Type;
 
 /**
  * Handle a time-tick update from the server.
@@ -16,6 +17,7 @@ import edu.mit.smart.sm4and.message.Message;
 public class TimeHandler extends AbstractMessageHandler {
 	/** A message from the server indicating that the current time has advanced. */
 	public static class TimeMessage extends Message {
+		public TimeMessage() { this.MessageType = Type.TimeData.toString(); }
 	    private int tick;    
 	}
 	

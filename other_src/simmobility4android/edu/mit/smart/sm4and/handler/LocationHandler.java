@@ -8,6 +8,7 @@ import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.AbstractMessageHandler;
 import edu.mit.smart.sm4and.message.Message;
+import edu.mit.smart.sm4and.message.Message.Type;
 
 /**
  * Handle a location-update message.
@@ -16,6 +17,7 @@ import edu.mit.smart.sm4and.message.Message;
 public class LocationHandler extends AbstractMessageHandler {
 	/** A location update message. Uses projected (x,y) coordinates, not Latitude/Longitude. */
 	public static class LocationMessage extends Message { 
+		public LocationMessage() { this.MessageType = Type.LocationData.toString(); }
 	    private int x;
 	    private int y;
 	}

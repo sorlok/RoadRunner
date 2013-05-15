@@ -37,7 +37,7 @@ public class JsonMessageParser implements MessageParser {
         		}
         	}
         }
-        if (lastBracket!=0) { 
+        if (numLeft!=0 || lastBracket==-1) { 
         	throw new RuntimeException("Bad json-formatted message string; left and right bracket counts don't add up."); 
         }
         return msg.substring(0, lastBracket+1);
@@ -51,7 +51,7 @@ public class JsonMessageParser implements MessageParser {
     	// for the closing brace and cutting everything after that. This *might* disable
     	// muultiple messages on the same stream, but for now that's not a problem.
     	src = FilterJson(src);
-        System.out.println("in JsonHandlerFactory.create-> "+ src);
+        System.out.println("in JsonMessageParser.create-> "+ src);
 
         //Parse the message into one of our Message subclasses.
         Gson gson = new Gson();

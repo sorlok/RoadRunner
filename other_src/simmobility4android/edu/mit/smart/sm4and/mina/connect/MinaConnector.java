@@ -97,10 +97,10 @@ public class MinaConnector implements Connector {
         
         //Check if an actual connection was made, or if some error occurred.
         if (future.isConnected()) {
+        	connected = true;
             session = future.getSession();
             session.getConfig().setUseReadOperation(true);
             session.getCloseFuture().awaitUninterruptibly();
-            connected = true;
         } else {
             logger.log("Connection could not be established:");
             logger.log(future.getException().toString());

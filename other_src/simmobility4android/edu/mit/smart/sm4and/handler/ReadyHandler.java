@@ -7,6 +7,7 @@ package edu.mit.smart.sm4and.handler;
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.AbstractMessageHandler;
 import edu.mit.smart.sm4and.message.Message;
+import edu.mit.smart.sm4and.message.Message.Type;
 
 /**
  * Handle a "ready" message from the server.
@@ -14,7 +15,9 @@ import edu.mit.smart.sm4and.message.Message;
  */
 public class ReadyHandler extends AbstractMessageHandler {
 	/** A message from the server indicating that the client may proceed. */
-	public static class ReadyMessage extends Message {}
+	public static class ReadyMessage extends Message {
+		public ReadyMessage() { this.MessageType = Type.Ready.toString(); }
+	}
 	
     public ReadyHandler(ReadyMessage message, Connector connector) {
     }
