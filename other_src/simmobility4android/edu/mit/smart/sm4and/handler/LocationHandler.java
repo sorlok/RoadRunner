@@ -7,8 +7,8 @@ package edu.mit.smart.sm4and.handler;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.AbstractMessageHandler;
+import edu.mit.smart.sm4and.MessageParser;
 import edu.mit.smart.sm4and.message.Message;
-import edu.mit.smart.sm4and.message.Message.Type;
 
 /**
  * Handle a location-update message.
@@ -29,7 +29,7 @@ public class LocationHandler extends AbstractMessageHandler {
     }
 
     @Override
-    public void handle(Message message, Connector connector) {
+    public void handle(Message message, Connector connector, MessageParser parser) {
         /*
          * TODO: This currently uses X/Y coordinates. We need to reverse project back to lat/lng
          *       (but randomized networks need a fallback, as there is no projection matrix). 

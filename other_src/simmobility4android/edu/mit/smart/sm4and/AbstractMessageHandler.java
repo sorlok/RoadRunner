@@ -24,5 +24,5 @@ public abstract class AbstractMessageHandler {
      * Subclasses should handle Message here, relying on the Connector for response
      *  functionality.
      */
-    public abstract void handle(Message message, Connector connector);
+    public abstract void handle(Message message, Connector connector, MessageParser parser);
 }

@@ -16,4 +16,5 @@ import edu.mit.smart.sm4and.message.Message;
  */
 public interface MessageParser {
 	Message parse(String src);
+	String serialize(Message msg);
 }

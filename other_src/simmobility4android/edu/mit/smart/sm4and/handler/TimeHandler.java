@@ -6,8 +6,8 @@ package edu.mit.smart.sm4and.handler;
 
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.AbstractMessageHandler;
+import edu.mit.smart.sm4and.MessageParser;
 import edu.mit.smart.sm4and.message.Message;
-import edu.mit.smart.sm4and.message.Message.Type;
 
 /**
  * Handle a time-tick update from the server.
@@ -25,7 +25,7 @@ public class TimeHandler extends AbstractMessageHandler {
     }
 
     @Override
-    public void handle(Message message, Connector connector) {
+    public void handle(Message message, Connector connector, MessageParser parser) {
         /*
          * if you need to use the simMobility current time, here is your chance.
          * you have a "TimeMessage message" filled with the data you need

@@ -4,11 +4,9 @@
 
 package edu.mit.smart.sm4and.handler;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.AbstractMessageHandler;
+import edu.mit.smart.sm4and.MessageParser;
 import edu.mit.smart.sm4and.message.Message;
 
 
@@ -37,24 +35,12 @@ public class WhoAreYouHandler extends AbstractMessageHandler {
     }
 
     @Override
-    public void handle(Message message, Connector connector) {
+    public void handle(Message message, Connector connector, MessageParser parser) {
         System.out.println("WhoAreYouHandler is handling");
         
         WhoAmIResponse obj = new WhoAmIResponse();
         obj.ID = clientID;
-        String msg = new Gson().toJson(obj);
         
-      // obj2 = new JsonObject();
-        
-        /*
-         * seth please add your emulator's ID here. 
-         * Note that it will be received as unsidned int 
-         * on the other side
-         */
-      //  obj2.addProperty("ID", clientID);
-        
-     //   if (true) throw new RuntimeException("TESTING: **" + msg + "**  **" + obj2.toString() + "**");
-        
-        connector.send(msg);
+        connector.send(parser.serialize(obj));
     }
 }

@@ -42,6 +42,6 @@ public class MessageListener {
 
     public void onMessage(Message message) {
         AbstractMessageHandler handler = handlerFactory.create(connector, message, clientId);
-        handler.handle(message, connector);
+        handler.handle(message, connector, this.parser);
     }
 }

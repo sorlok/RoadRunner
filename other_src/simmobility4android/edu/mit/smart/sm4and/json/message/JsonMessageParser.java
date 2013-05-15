@@ -83,4 +83,9 @@ public class JsonMessageParser implements MessageParser {
             }
         }
     }
+    
+    @Override
+    public String serialize(Message msg) {
+    	return new Gson().toJson(msg);
+    }
 }

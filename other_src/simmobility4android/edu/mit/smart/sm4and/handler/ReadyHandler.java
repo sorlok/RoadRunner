@@ -6,8 +6,8 @@ package edu.mit.smart.sm4and.handler;
 
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.AbstractMessageHandler;
+import edu.mit.smart.sm4and.MessageParser;
 import edu.mit.smart.sm4and.message.Message;
-import edu.mit.smart.sm4and.message.Message.Type;
 
 /**
  * Handle a "ready" message from the server.
@@ -23,7 +23,7 @@ public class ReadyHandler extends AbstractMessageHandler {
     }
     
     @Override
-    public void handle(Message message, Connector connector) {
+    public void handle(Message message, Connector connector, MessageParser parser) {
         /*Seth, if you want your emulator set any flag to make sure 
          * it is successfully registered with the simMobility server(Broker)
          * here is your chance
