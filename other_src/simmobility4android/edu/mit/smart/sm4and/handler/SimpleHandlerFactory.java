@@ -12,6 +12,7 @@ import edu.mit.smart.sm4and.handler.ReadyHandler.ReadyMessage;
 import edu.mit.smart.sm4and.handler.TimeHandler.TimeMessage;
 import edu.mit.smart.sm4and.handler.WhoAreYouHandler.WhoAreYouMessage;
 import edu.mit.smart.sm4and.message.Message;
+import edu.mit.smart.sm4and.message.Message.Type;
 
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 
@@ -22,27 +23,29 @@ import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
  * @author Vahid
  */
 public class SimpleHandlerFactory implements MessageHandlerFactory {
-	public LocationSpoofer locspoof;
+	private LocationSpoofer locspoof;
+	private int clientID;
 	
-	public SimpleHandlerFactory(LocationSpoofer locspoof) {
+	public SimpleHandlerFactory(LocationSpoofer locspoof, int clientID) {
 		this.locspoof = locspoof;
+		this.clientID = clientID;
 	}
 
     @Override
-    public AbstractMessageHandler create(Connector connector, Message message, int clientID) {
+    public AbstractMessageHandler create(Type msgType) {
     	//Respond to the given message.
-    	switch (message.getMessageType()) {
+    	switch (msgType) {
             case WhoAreYou: {
-                return new WhoAreYouHandler((WhoAreYouMessage)message, connector, clientID);
+                return new WhoAreYouHandler(clientID);
             }
             case TimeData: {
-                return new TimeHandler((TimeMessage)message, connector);
+                return new TimeHandler();
             }
             case Ready: {
-                return new ReadyHandler((ReadyMessage)message, connector);
+                return new ReadyHandler();
             }
             case LocationData: {
-            	return new LocationHandler(locspoof, (LocationMessage)message, connector);
+            	return new LocationHandler(locspoof);
             }
             default: {
                 return null;

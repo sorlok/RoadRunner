@@ -5,6 +5,7 @@
 package edu.mit.smart.sm4and;
 
 import edu.mit.smart.sm4and.message.Message;
+import edu.mit.smart.sm4and.message.Message.Type;
 
 
 /**
@@ -20,5 +21,5 @@ public interface MessageHandlerFactory {
 	 * @param message The message in question.
 	 * @param ID The ID of the current agent.
 	 */
-    AbstractMessageHandler create(Connector connector, Message message, int ID);
+    AbstractMessageHandler create(Type msgType);
 }

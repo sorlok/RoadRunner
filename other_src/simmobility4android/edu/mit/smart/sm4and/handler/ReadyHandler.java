@@ -19,7 +19,7 @@ public class ReadyHandler extends AbstractMessageHandler {
 		public ReadyMessage() { this.MessageType = Type.Ready.toString(); }
 	}
 	
-    public ReadyHandler(ReadyMessage message, Connector connector) {
+    public ReadyHandler() {
     }
     
     @Override

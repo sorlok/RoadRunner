@@ -34,24 +34,24 @@ public class MinaIoHandler implements IoHandler {
     
     @Override
     public void sessionCreated(IoSession is) throws Exception {
-    	logger.info("client "+ parent.getClientID() + " Session Created");
+    	logger.info("(MinaHandler) Session Created");
     	parent.setSession(is);
     }
 
     @Override
     public void sessionOpened(IoSession is) throws Exception {
-    	logger.info("client "+ parent.getClientID() + " Session Opened");
+    	logger.info("(MinaHandler) Session Opened");
     	parent.setSession(is);
     }
 
     @Override
     public void sessionClosed(IoSession is) throws Exception {
-    	logger.info("client "+ parent.getClientID() + " Session Closed");
+    	logger.info("(MinaHandler) Session Closed");
     }
 
     @Override
     public void sessionIdle(IoSession is, IdleStatus is1) throws Exception {
-    	logger.info("client "+ parent.getClientID() + " Session Idle");
+    	logger.info("(MinaHandler) Session Idle");
     }
 
     @Override
@@ -62,12 +62,12 @@ public class MinaIoHandler implements IoHandler {
 
     @Override
     public void messageReceived(IoSession is, Object o) throws Exception {
-    	logger.info("client "+ parent.getClientID() + " received[" + o.toString() + "]");
+    	logger.info("(MinaHandler) received[" + o.toString() + "]");
     	parent.handleMessage(o.toString());
     }
 
     @Override
     public void messageSent(IoSession is, Object o) throws Exception {
-    	logger.info(String.format("client %d Message: %s was sent.", parent.getClientID(), o));
+    	logger.info(String.format("(MinaHandler) Message: %s was sent.", o.toString()));
     }
 }

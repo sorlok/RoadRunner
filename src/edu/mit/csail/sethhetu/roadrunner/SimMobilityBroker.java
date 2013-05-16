@@ -106,7 +106,6 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	 * Create the broker entity and connect to the server.
 	 */
 	public SimMobilityBroker(String uniqueId, Handler myHandler, LoggerI logger, AdHocAnnouncer adhoc, LocationSpoofer locspoof) {
-		this.handlerFactory = new SimpleHandlerFactory(locspoof);
 		this.messageParser = new JsonMessageParser();
 		this.myHandler = myHandler;
 		this.logger = logger;
@@ -121,12 +120,8 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		//      assign a shorter, integer-based ID later on.
 		SimMobilityBroker.rand = new Random();
 		int clientID = SimMobilityBroker.rand.nextInt(100000)+100;
-		
-		//this.smSocket = new Socket();
-		
-		//TODO: These 3 lines need to be simplified.
-		MessageHandlerFactory hf = new SimpleHandlerFactory(locspoof);
-		this.conn = new MinaConnector(clientID, messageParser, hf, locspoof, logger);
+		this.handlerFactory = new SimpleHandlerFactory(locspoof, clientID);
+		this.conn = new MinaConnector(messageParser, handlerFactory, locspoof, logger);
 		
 		this.returnedMessages = new ArrayList<String>();
 		

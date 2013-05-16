@@ -36,12 +36,9 @@ public class MinaConnector implements Connector {
     private IoHandler ioHandler;
     private MessageParser parser;
     private MessageHandlerFactory handlerFactory;
-    private int clientID;
     private final int BUFFER_SIZE = 2048;
     private final java.util.logging.Logger LOG = java.util.logging.Logger.getLogger(getClass().getCanonicalName());
     private LoggerI logger;
-    
-    public int getClientID() { return clientID; }
     
     public void setSession(IoSession sess) {
     	session = sess;
@@ -49,12 +46,10 @@ public class MinaConnector implements Connector {
 
     /**
      * Create a new connector based on Apache Mina
-     * @param clientID_  The unique ID of this client. Used for communication.
      * @param locspoof   A handler for spoofing location-based updates. Used to set software lat/lng.
      * @param logger     A handler for logging.
      */
-    public MinaConnector(int clientID, MessageParser parser, MessageHandlerFactory handlerFactory, LocationSpoofer locspoof, LoggerI logger) {
-        this.clientID = clientID;
+    public MinaConnector(MessageParser parser, MessageHandlerFactory handlerFactory, LocationSpoofer locspoof, LoggerI logger) {
         this.logger = logger;
         this.parser = parser;
         this.handlerFactory = handlerFactory;
@@ -143,10 +138,9 @@ public class MinaConnector implements Connector {
     
     @Override
     public void handleMessage(String data) {
-    	//TODO: This is a remarkably hackish way of doing things; it's not even
-    	//      apparent that the "result" of handlerFactory.create() is used.
+    	//Just pass it off to "handle()"
     	Message message = parser.parse(data);
-        handlerFactory.create(this, message, this.getClientID()).handle(message, this, parser);
+        handlerFactory.create(message.getMessageType()).handle(message, this, parser);
     }
     
 }

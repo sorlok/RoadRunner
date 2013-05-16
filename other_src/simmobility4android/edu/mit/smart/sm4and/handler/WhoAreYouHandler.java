@@ -29,7 +29,7 @@ public class WhoAreYouHandler extends AbstractMessageHandler {
 	
     private int clientID;
     
-    public WhoAreYouHandler(WhoAreYouMessage message, Connector connector, int clientID) {
+    public WhoAreYouHandler( int clientID) {
         this.clientID = clientID;
         System.out.println("creating WhoAreYouHandler");
     }

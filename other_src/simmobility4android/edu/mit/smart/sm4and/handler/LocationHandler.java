@@ -24,7 +24,7 @@ public class LocationHandler extends AbstractMessageHandler {
 	
     private LocationSpoofer locspoof;
     
-    public LocationHandler(LocationSpoofer locspoof, LocationMessage message, Connector connector) {
+    public LocationHandler(LocationSpoofer locspoof) {
         this.locspoof = locspoof;
     }
 

@@ -21,7 +21,7 @@ public class TimeHandler extends AbstractMessageHandler {
 	    private int tick;    
 	}
 	
-    public TimeHandler(TimeMessage message, Connector connector) {
+    public TimeHandler() {
     }
 
     @Override
