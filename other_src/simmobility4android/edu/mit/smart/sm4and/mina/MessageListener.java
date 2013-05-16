@@ -2,7 +2,7 @@
 //Licensed under the terms of the MIT License, as described in the file:
 //   license.txt   (http://opensource.org/licenses/MIT)
 
-package edu.mit.smart.sm4and.listener;
+package edu.mit.smart.sm4and.mina;
 
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.AbstractMessageHandler;

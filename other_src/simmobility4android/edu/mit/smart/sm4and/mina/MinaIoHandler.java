@@ -2,7 +2,7 @@
 //Licensed under the terms of the MIT License, as described in the file:
 //   license.txt   (http://opensource.org/licenses/MIT)
 
-package edu.mit.smart.sm4and.mina.connect;
+package edu.mit.smart.sm4and.mina;
 
 import org.apache.mina.core.service.*;
 import org.apache.mina.core.session.*;
@@ -56,7 +56,8 @@ public class MinaIoHandler implements IoHandler {
 
     @Override
     public void exceptionCaught(IoSession is, Throwable thrwbl) throws Exception {
-    	logger.info("client "+ parent.getClientID() + " Exception" + thrwbl.toString());
+    	//Propagate.
+    	throw new RuntimeException(thrwbl);
     }
 
     @Override

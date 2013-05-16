@@ -12,8 +12,8 @@ import android.os.AsyncTask;
 import edu.mit.csail.jasongao.roadrunner.Globals;
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.MessageHandlerFactory;
-import edu.mit.smart.sm4and.listener.MessageListener;
-import edu.mit.smart.sm4and.mina.connect.MinaConnector;
+import edu.mit.smart.sm4and.mina.MessageListener;
+import edu.mit.smart.sm4and.mina.MinaConnector;
 
 /**
  * Helper class for connecting to the Sim Mobility server.
@@ -47,7 +47,6 @@ public class SimMobServerConnectTask extends AsyncTask<Connector, Void, Boolean>
 		try {
 	        System.out.println("client " + ((MinaConnector)mnConnect[0]).getClientID() + " connecting...");
 	        mnConnect[0].connect(Globals.SM_HOST, Globals.SM_PORT);
-			
 			/*mnConnect[0].connect(new InetSocketAddress(Globals.SM_HOST, Globals.SM_PORT), Globals.SM_TIMEOUT);
 
 			//Retrieve underlying input/output streams.

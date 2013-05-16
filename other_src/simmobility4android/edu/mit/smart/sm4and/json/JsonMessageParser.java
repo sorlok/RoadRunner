@@ -2,7 +2,7 @@
 //Licensed under the terms of the MIT License, as described in the file:
 //   license.txt   (http://opensource.org/licenses/MIT)
 
-package edu.mit.smart.sm4and.json.message;
+package edu.mit.smart.sm4and.json;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;

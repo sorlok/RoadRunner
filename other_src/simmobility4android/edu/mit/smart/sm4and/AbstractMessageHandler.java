@@ -17,9 +17,6 @@ import edu.mit.smart.sm4and.message.Message;
  * @author Pedro Gandola
  */
 public abstract class AbstractMessageHandler {
-    protected AbstractMessageHandler() {
-    }
-
     /**
      * Subclasses should handle Message here, relying on the Connector for response
      *  functionality.

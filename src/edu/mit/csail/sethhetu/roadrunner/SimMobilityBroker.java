@@ -22,9 +22,9 @@ import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.MessageHandlerFactory;
 import edu.mit.smart.sm4and.MessageParser;
 import edu.mit.smart.sm4and.handler.SimpleHandlerFactory;
-import edu.mit.smart.sm4and.json.message.JsonMessageParser;
-import edu.mit.smart.sm4and.listener.MessageListener;
-import edu.mit.smart.sm4and.mina.connect.MinaConnector;
+import edu.mit.smart.sm4and.json.JsonMessageParser;
+import edu.mit.smart.sm4and.mina.MessageListener;
+import edu.mit.smart.sm4and.mina.MinaConnector;
 
 /**
  * The SimMobilityBroker is used by RoadRunner to communicate with Sim Mobility. 
@@ -134,6 +134,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		this.returnedMessages = new ArrayList<String>();
 		
 		//Connect our socket.
+		//NOTE: Currently, this task will *only* end if the session is closed. 
 		SimMobServerConnectTask task = new SimMobServerConnectTask(this, this.handlerFactory);
 		task.execute(this.conn);
 	}

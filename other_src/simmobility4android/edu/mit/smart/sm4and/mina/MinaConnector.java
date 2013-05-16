@@ -2,7 +2,7 @@
 //Licensed under the terms of the MIT License, as described in the file:
 //   license.txt   (http://opensource.org/licenses/MIT)
 
-package edu.mit.smart.sm4and.mina.connect;
+package edu.mit.smart.sm4and.mina;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
@@ -10,7 +10,6 @@ import java.nio.charset.Charset;
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.MessageHandlerFactory;
 import edu.mit.smart.sm4and.MessageParser;
-import edu.mit.smart.sm4and.listener.MessageListener;
 import edu.mit.smart.sm4and.message.Message;
 
 import org.apache.mina.core.future.ConnectFuture;
@@ -98,13 +97,19 @@ public class MinaConnector implements Connector {
         //Check if an actual connection was made, or if some error occurred.
         if (future.isConnected()) {
         	connected = true;
-            session = future.getSession();
-            session.getConfig().setUseReadOperation(true);
-            session.getCloseFuture().awaitUninterruptibly();
         } else {
             logger.log("Connection could not be established:");
             logger.log(future.getException().toString());
+            return;
         }
+        
+        //Set some properties of the session.
+        //NOTE: I am not 100% sure how "setUseReadOperation()" affects data sent *before* it is called.
+        session = future.getSession();
+        session.getConfig().setUseReadOperation(true);
+        
+        //NOTE: This shouldn't be needed; we don't *need* to wait for the session to close here.
+        //session.getCloseFuture().awaitUninterruptibly();
     }
 
     @Override
@@ -121,6 +126,11 @@ public class MinaConnector implements Connector {
             connected = false;
         }
     }
+    
+    public MessageListener getMessageListener() {
+    	return messageListener;
+    }
+    
 
     @Override
     public void send(String data) {        
@@ -135,10 +145,6 @@ public class MinaConnector implements Connector {
         	sb.append("  session=").append(session!=null ? session.isConnected() : "<NULL>");
         	System.out.println(sb.toString());
         }
-    }
-    
-    public MessageListener getMessageListener() {
-    	return messageListener;
     }
     
     @Override

@@ -14,5 +14,11 @@ import edu.mit.smart.sm4and.message.Message;
  * @author Vahid
  */
 public interface MessageHandlerFactory {
+	/**
+	 * Create an AbstractMessageHandler for dealing with a given message.
+	 * @param connector The connector (used for responding to the message).
+	 * @param message The message in question.
+	 * @param ID The ID of the current agent.
+	 */
     AbstractMessageHandler create(Connector connector, Message message, int ID);
 }
