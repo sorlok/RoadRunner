@@ -12,7 +12,6 @@ import android.os.AsyncTask;
 import edu.mit.csail.jasongao.roadrunner.Globals;
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.MessageHandlerFactory;
-import edu.mit.smart.sm4and.mina.MessageListener;
 import edu.mit.smart.sm4and.mina.MinaConnector;
 
 /**

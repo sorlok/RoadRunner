@@ -34,7 +34,6 @@ public class MinaConnector implements Connector {
     private volatile boolean connected;
     private IoSession session;
     private IoHandler ioHandler;
-    private MessageListener messageListener;
     private MessageParser parser;
     private MessageHandlerFactory handlerFactory;
     private int clientID;
@@ -54,13 +53,12 @@ public class MinaConnector implements Connector {
      * @param locspoof   A handler for spoofing location-based updates. Used to set software lat/lng.
      * @param logger     A handler for logging.
      */
-    public MinaConnector(int clientID, MessageParser parser, MessageHandlerFactory handlerFactory, LocationSpoofer locspoof, LoggerI logger, MessageListener listener) {
+    public MinaConnector(int clientID, MessageParser parser, MessageHandlerFactory handlerFactory, LocationSpoofer locspoof, LoggerI logger) {
         this.clientID = clientID;
         this.logger = logger;
         this.parser = parser;
         this.handlerFactory = handlerFactory;
         this.ioHandler = new MinaIoHandler(this, LOG);
-        this.messageListener = listener;
     }
 
     
@@ -127,10 +125,6 @@ public class MinaConnector implements Connector {
         }
     }
     
-    public MessageListener getMessageListener() {
-    	return messageListener;
-    }
-    
 
     @Override
     public void send(String data) {        
@@ -152,8 +146,7 @@ public class MinaConnector implements Connector {
     	//TODO: This is a remarkably hackish way of doing things; it's not even
     	//      apparent that the "result" of handlerFactory.create() is used.
     	Message message = parser.parse(data);
-        handlerFactory.create(this, message, this.getClientID());
-        getMessageListener().onMessage(message);
+        handlerFactory.create(this, message, this.getClientID()).handle(message, this, parser);
     }
     
 }

@@ -23,7 +23,6 @@ import edu.mit.smart.sm4and.MessageHandlerFactory;
 import edu.mit.smart.sm4and.MessageParser;
 import edu.mit.smart.sm4and.handler.SimpleHandlerFactory;
 import edu.mit.smart.sm4and.json.JsonMessageParser;
-import edu.mit.smart.sm4and.mina.MessageListener;
 import edu.mit.smart.sm4and.mina.MinaConnector;
 
 /**
@@ -126,10 +125,8 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		//this.smSocket = new Socket();
 		
 		//TODO: These 3 lines need to be simplified.
-		MessageListener listen = new MessageListener(messageParser, handlerFactory, clientID);
 		MessageHandlerFactory hf = new SimpleHandlerFactory(locspoof);
-		this.conn = new MinaConnector(clientID, messageParser, hf, locspoof, logger, listen);
-		listen.setParent(this.conn);
+		this.conn = new MinaConnector(clientID, messageParser, hf, locspoof, logger);
 		
 		this.returnedMessages = new ArrayList<String>();
 		
