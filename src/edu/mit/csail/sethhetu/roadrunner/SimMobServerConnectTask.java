@@ -7,12 +7,11 @@ package edu.mit.csail.sethhetu.roadrunner;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 
-
 import android.os.AsyncTask;
+
 import edu.mit.csail.jasongao.roadrunner.Globals;
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.MessageHandlerFactory;
-import edu.mit.smart.sm4and.mina.MinaConnector;
 
 /**
  * Helper class for connecting to the Sim Mobility server.
@@ -25,7 +24,7 @@ public class SimMobServerConnectTask extends AsyncTask<Connector, Void, Boolean>
 		public void onPostExecute(Exception thrownException, BufferedReader reader, BufferedWriter writer);
 	}
 	
-    private MessageHandlerFactory handlerFactory;
+    //private MessageHandlerFactory handlerFactory;
 	private BufferedReader reader;
 	private BufferedWriter writer;
 	private Exception errorEx;
@@ -34,11 +33,10 @@ public class SimMobServerConnectTask extends AsyncTask<Connector, Void, Boolean>
 	
 	public SimMobServerConnectTask(PostExecuteAction onComplete, MessageHandlerFactory handlerFactory) {
 		this.onComplete = onComplete;
-		this.handlerFactory = handlerFactory;
+		//this.handlerFactory = handlerFactory;
 	}
 	
 	protected void onPreExecute() {
-		super.onPreExecute();
 	}
 	
 	protected Boolean doInBackground(Connector... mnConnect) {

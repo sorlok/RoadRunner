@@ -4,7 +4,6 @@
 
 package edu.mit.smart.sm4and;
 
-import edu.mit.smart.sm4and.message.Message;
 import edu.mit.smart.sm4and.message.Message.Type;
 
 

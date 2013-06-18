@@ -24,7 +24,7 @@ public class WhoAreYouHandler extends AbstractMessageHandler {
 	/** A response to the server identifying oneself. */
 	public static class WhoAmIResponse extends Message {
 		public WhoAmIResponse() { this.MessageType = Type.WhoAmI.toString(); }
-	    private int ID;    
+	    public int id;
 	}
 	
     private int clientID;
@@ -39,7 +39,7 @@ public class WhoAreYouHandler extends AbstractMessageHandler {
         System.out.println("WhoAreYouHandler is handling");
         
         WhoAmIResponse obj = new WhoAmIResponse();
-        obj.ID = clientID;
+        obj.id = clientID;
         
         connector.send(parser.serialize(obj));
     }

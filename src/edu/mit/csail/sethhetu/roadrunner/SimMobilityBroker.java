@@ -68,7 +68,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	private long lastAnnouncePacket;
 	
 	//Let's make this non-deterministic.
-	private static Random rand;
+	private static Random RandGen;
 	
 	//Returned messages.
 	private ArrayList<String> returnedMessages;
@@ -118,8 +118,8 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		//TODO: We need a better policy for assigning IDs. We can use the Android 
 		//      device ID when we initiate the connection, and then have the server
 		//      assign a shorter, integer-based ID later on.
-		SimMobilityBroker.rand = new Random();
-		int clientID = SimMobilityBroker.rand.nextInt(100000)+100;
+		SimMobilityBroker.RandGen = new Random();
+		int clientID = SimMobilityBroker.RandGen.nextInt(100000)+100;
 		this.handlerFactory = new SimpleHandlerFactory(locspoof, clientID);
 		this.conn = new MinaConnector(messageParser, handlerFactory, locspoof, logger);
 		
@@ -189,10 +189,10 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		Set<String> res = new HashSet<String>();
 		
 		//How many tokens?
-		int numTokens = rand.nextInt(upper-lower)+lower;		
+		int numTokens = RandGen.nextInt(upper-lower)+lower;		
 		for (int i=0; i<numTokens; i++) {
 			//Which letter?
-			res.add(Character.toString(token_range.charAt(rand.nextInt(token_range.length()))));
+			res.add(Character.toString(token_range.charAt(RandGen.nextInt(token_range.length()))));
 		}
 		
 		return res;
@@ -205,7 +205,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	 *  that they aren't viable to each other.
 	 */
 	public boolean linkIsViable() {
-		return rand.nextDouble() <= Globals.SM_VIABILITY_PERCENT;
+		return RandGen.nextDouble() <= Globals.SM_VIABILITY_PERCENT;
 	}
 	
 	
@@ -213,8 +213,8 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	 * Spoof regions too. Returns null for no region (e.g., "FREE")
 	 */
 	public String getRegion() {
-		if (rand.nextDouble() <= Globals.SM_FREE_REGION_PERCENT) { return null; }
-		return Character.toString((Globals.SM_TOKEN_RANGE.charAt(rand.nextInt(Globals.SM_TOKEN_RANGE.length()))));
+		if (RandGen.nextDouble() <= Globals.SM_FREE_REGION_PERCENT) { return null; }
+		return Character.toString((Globals.SM_TOKEN_RANGE.charAt(RandGen.nextInt(Globals.SM_TOKEN_RANGE.length()))));
 	}
 	
 	

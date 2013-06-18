@@ -36,6 +36,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocalBinder;
+import android.graphics.PorterDuff;
 
 public class MainActivity extends Activity implements OnInitListener {
 	final static private String TAG = "MainActivity";
@@ -423,6 +424,10 @@ public class MainActivity extends Activity implements OnInitListener {
 		//Jumpstart our tests.
 		if (Globals.SIM_MOBILITY && Globals.SM_AUTORUN) {
 			mClicked.onClick(findViewById(R.id.connect_button));
+		} else {
+			//Highlight it, so we know what to press. 
+			//((Button)findViewById(R.id.connect_button)).setBackgroundDrawable(background);
+			((Button)findViewById(R.id.connect_button)).getBackground().setColorFilter(0xFFFF6600, PorterDuff.Mode.MULTIPLY);
 		}
 		
 		//NOTE: Uncomment this if you want to try connecting to the cloud.
