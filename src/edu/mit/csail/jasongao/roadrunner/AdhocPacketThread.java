@@ -13,6 +13,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 
+import edu.mit.csail.sethhetu.roadrunner.InterfaceMap;
 import edu.mit.csail.sethhetu.roadrunner.LoggerI;
 
 import android.os.Handler;
@@ -72,36 +73,19 @@ public class AdhocPacketThread extends Thread {
 		this.parentHandler = p_;
 		this.logger = logger;
 		
-	//	log("determined local IPv4 address: " + localIPAddress.getHostAddress());
-
 		// Figure out my local IP address
 		//NOTE: On some versions of Android (x86, ICS, but it varies), the "getByName()"
 		//      function fails. In this case, you can comment out the localIpAddress and
 		//      do things manually.... but sockets will fail regardless. Not sure if it's 
 		//      possible/worth fixing.
-		localIPAddress = null;
-		try {
-			NetworkInterface intf = NetworkInterface.getByName(Globals.ADHOC_IFACE_NAME);
-			if (intf!=null) {
-				// Loop through all the addresses
-				for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
-					InetAddress inetAddress = enumIpAddr.nextElement();
-					if (!inetAddress.isLoopbackAddress()
-							&& (inetAddress instanceof Inet4Address)) {
-						localIPAddress = (Inet4Address) inetAddress;
-						break;
-					}
-				}
-			}
-
-			// Check that we got a hit
-			if (localIPAddress == null)
-				throw new IOException("no addresses bound to "
-						+ Globals.ADHOC_IFACE_NAME);
-		} catch (IOException e) {
-			log("can't determine local IPv4 address: " + e.toString());
-			return;
+		localIPAddress = InterfaceMap.GetInstance().getAddress(Globals.ADHOC_IFACE_NAME);
+		
+		//Check that we got a hit
+		if (localIPAddress==null) {
+			log("can't determine local IPv4 address: " + Globals.ADHOC_IFACE_NAME);
+			return;	
 		}
+
 		log("determined local IPv4 address: " + localIPAddress.getHostAddress());
 
 		// Setup remote address

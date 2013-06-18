@@ -37,6 +37,10 @@ public class Globals {
 	static int ADHOC_SEND_PORT = 4200;
 	static int CLOUD_PORT = 50000; // 50001 for wifi, 50000 for dsrc
 	
+	///Which interfaces we use to identify this phone (in order)
+	///We list ADHOC_IFACE_NAME first, even though it may repeat.
+	public static final String[] SM_IDENTIFYING_INTERFACES = {ADHOC_IFACE_NAME, "eth0", "wlan0"};
+	
 	/** Cloud parameters */
 	static final String CLOUD_HOST = "128.30.87.68";
 	static final int CLOUD_SOCKET_TIMEOUT = 3000;

@@ -9,6 +9,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -24,6 +25,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import edu.mit.csail.sethhetu.roadrunner.InterfaceMap;
 import edu.mit.csail.sethhetu.roadrunner.LoggerI;
 import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker;
 
@@ -1127,8 +1129,16 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			}
 
 			// take last octet of IPv4 address as my id
+			Inet4Address addr = null;
+			if (Globals.SIM_MOBILITY) {
+				//Currently, "eth0" or "wlan0" can identify this phone.
+				addr = InterfaceMap.GetInstance().getAddress(Globals.SM_IDENTIFYING_INTERFACES);
+			} else {
+				//"eth0" only.
+				addr = InterfaceMap.GetInstance().getAddress(Globals.ADHOC_IFACE_NAME);
+			}
+			
 			// If none, just make a Random ID and hope there are no collisions.
-			InetAddress addr = aat.getLocalAddress();
 			if (addr!=null) {
 				byte[] addrses = addr.getAddress();
 				mId = (addrses[3] & 0xff);
