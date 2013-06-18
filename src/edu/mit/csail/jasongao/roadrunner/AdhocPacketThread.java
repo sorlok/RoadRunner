@@ -81,17 +81,16 @@ public class AdhocPacketThread extends Thread {
 		//      possible/worth fixing.
 		localIPAddress = null;
 		try {
-			NetworkInterface intf = NetworkInterface
-					.getByName(Globals.ADHOC_IFACE_NAME);
-			
-			// Loop through all the addresses
-			for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr
-					.hasMoreElements();) {
-				InetAddress inetAddress = enumIpAddr.nextElement();
-				if (!inetAddress.isLoopbackAddress()
-						&& (inetAddress instanceof Inet4Address)) {
-					localIPAddress = (Inet4Address) inetAddress;
-					break;
+			NetworkInterface intf = NetworkInterface.getByName(Globals.ADHOC_IFACE_NAME);
+			if (intf!=null) {
+				// Loop through all the addresses
+				for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+					InetAddress inetAddress = enumIpAddr.nextElement();
+					if (!inetAddress.isLoopbackAddress()
+							&& (inetAddress instanceof Inet4Address)) {
+						localIPAddress = (Inet4Address) inetAddress;
+						break;
+					}
 				}
 			}
 
