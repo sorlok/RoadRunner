@@ -6,6 +6,7 @@ public class Globals {
 	public static final String SM_HOST = "128.31.33.156"; //Note that 127.0.0.1 won't work; Android assigns this to the phone.
 	public static final int SM_PORT = 6745;
 	public static final int SM_TIMEOUT = 0;  //0=infinite
+	public static final boolean SM_AUTORUN = false; //Set to "true" to auto-run the app (good for MegaDroid)
 	
 	/** We offer single-letter tokens, sampled from this range. 
 	 *  NOTE: Tokens are *not* consistent at the moment; vehicles will offer them randomly. */

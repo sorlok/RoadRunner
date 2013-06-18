@@ -348,6 +348,7 @@ public class MainActivity extends Activity implements OnInitListener {
 	 ***********************************************/
 
 	/** Called when the activity is first created. */
+	@SuppressWarnings("unused")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -420,7 +421,9 @@ public class MainActivity extends Activity implements OnInitListener {
 		// mTts.setLanguage(Locale.ENGLISH);
 		
 		//Jumpstart our tests.
-		mClicked.onClick(findViewById(R.id.connect_button));
+		if (Globals.SIM_MOBILITY && Globals.SM_AUTORUN) {
+			mClicked.onClick(findViewById(R.id.connect_button));
+		}
 		
 		//NOTE: Uncomment this if you want to try connecting to the cloud.
 		//mClicked.onClick(findViewById(R.id.start_stop_button));
