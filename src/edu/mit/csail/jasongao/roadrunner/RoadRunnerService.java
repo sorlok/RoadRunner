@@ -1128,7 +1128,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 				ast.start();
 			}
 
-			// take last octet of IPv4 address as my id
+			//Get my Inet address and use it to generate a unique ID
 			Inet4Address addr = null;
 			if (Globals.SIM_MOBILITY) {
 				//Currently, "eth0" or "wlan0" can identify this phone.
@@ -1138,13 +1138,21 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 				addr = InterfaceMap.GetInstance().getAddress(Globals.ADHOC_IFACE_NAME);
 			}
 			
-			// If none, just make a Random ID and hope there are no collisions.
-			if (addr!=null) {
-				byte[] addrses = addr.getAddress();
-				mId = (addrses[3] & 0xff);
+			//Sim Mobility requires longer IDs (so we use the entire IP address). 
+			if (Globals.SIM_MOBILITY) {
+				mId = SimMobilityBroker.GenerateIdFromInet(addr);
 			} else {
-				mId = rand.nextInt(0xFF);
+				//take last octet of IPv4 address as my id
+				if (addr!=null) {
+					byte[] addrses = addr.getAddress();
+					mId = (addrses[3] & 0xff);
+				} else {
+					//If none, just make a Random ID and hope there are no collisions.
+					mId = rand.nextInt(0xFF);
+				}
 			}
+			
+			//Inform the user of their ID.
 			log("mId=" + mId);
 
 			/*

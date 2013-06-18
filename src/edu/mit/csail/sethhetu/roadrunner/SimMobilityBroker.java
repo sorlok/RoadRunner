@@ -6,6 +6,7 @@ package edu.mit.csail.sethhetu.roadrunner;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.net.Inet4Address;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
@@ -68,7 +69,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	private long lastAnnouncePacket;
 	
 	//Let's make this non-deterministic.
-	private static Random RandGen;
+	private static Random RandGen = new Random();
 	
 	//Returned messages.
 	private ArrayList<String> returnedMessages;
@@ -78,6 +79,29 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	
 	private MessageParser messageParser;
 	private MessageHandlerFactory handlerFactory;
+	
+	private static final long ToU(byte b) {
+		return ((int)b)&0xFF;
+	}
+	
+	public static final long GenerateIdFromInet(Inet4Address addr) {
+		//If we've got a null address, just fake it.
+		byte[] elements = null;
+		if (addr!=null) {
+			elements = addr.getAddress();
+		} else {
+			elements = new byte[4];
+			SimMobilityBroker.RandGen.nextBytes(elements);
+		}
+		
+		//Try to make something semi-recognizable:
+		long res = ToU(elements[0])*1000000000
+				 + ToU(elements[1])*1000000
+				 + ToU(elements[2])*1000
+				 + ToU(elements[3]);
+		return res;
+	}
+	
 
 	@Override
 	public void onPostExecute(Exception thrownException, BufferedReader reader, BufferedWriter writer) {
@@ -118,7 +142,6 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		//TODO: We need a better policy for assigning IDs. We can use the Android 
 		//      device ID when we initiate the connection, and then have the server
 		//      assign a shorter, integer-based ID later on.
-		SimMobilityBroker.RandGen = new Random();
 		int clientID = SimMobilityBroker.RandGen.nextInt(100000)+100;
 		this.handlerFactory = new SimpleHandlerFactory(locspoof, clientID);
 		this.conn = new MinaConnector(messageParser, handlerFactory, locspoof, logger);
