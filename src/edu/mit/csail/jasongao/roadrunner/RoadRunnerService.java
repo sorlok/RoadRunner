@@ -1053,7 +1053,11 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		wl.acquire();
 
 		lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1f, this);
+		
+		//Sim Mobility *only* uses spoofed location updates.
+		if (!Globals.SIM_MOBILITY) {
+			lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1f, this);
+		}
 
 		tm = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
 	}
@@ -1238,14 +1242,19 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			l.setLatitude(lat);
 			l.setLongitude(lng);
 			l.setTime(System.currentTimeMillis());
-			onLocationChanged(l);
+			locationChanged(l, true);
 		}
 	}
 	
-
-	/** Location - location changed */
-	@Override
-	public void onLocationChanged(Location loc) {
+	//Location changed (with a "spoofed" flag)
+	private void locationChanged(Location loc, boolean spoofed) {
+		//Special case: Sim Mobility is bound ONLY by the spoofed messages. 
+		// (These shouldn't arrive anyway, but we check again just to be safe.)
+		if (Globals.SIM_MOBILITY && !spoofed) { 
+			return; 
+		}
+		
+		
 		// log GPS traces
 		log_nodisplay(String.format("loc=%s", loc.toString()));
 
@@ -1271,6 +1280,13 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			regionTransition(oldRegion, newRegion);
 		}
 		updateDisplay();
+	}
+	
+
+	/** Location - location changed */
+	@Override
+	public void onLocationChanged(Location loc) {
+		locationChanged(loc, false);
 	}
 
 	public void offerReservationIfInUse(String oldRegion) {
