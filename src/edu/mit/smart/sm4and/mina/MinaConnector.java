@@ -6,6 +6,7 @@ package edu.mit.smart.sm4and.mina;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.MessageHandlerFactory;
@@ -84,6 +85,7 @@ public class MinaConnector implements Connector {
         connector.setHandler(ioHandler);
         
         //Connect to the server and wait forever until it makes contact.
+        logger.log("Attempting to connect to MINA server on " + host + ":" + port);
         ConnectFuture future = connector.connect(new InetSocketAddress(host, port));
         future.awaitUninterruptibly();
         
@@ -138,9 +140,11 @@ public class MinaConnector implements Connector {
     
     @Override
     public void handleMessage(String data) {
-    	//Just pass it off to "handle()"
-    	Message message = parser.parse(data);
-        handlerFactory.create(message.getMessageType()).handle(message, this, parser);
+    	//Just pass off each message to "handle()"
+    	ArrayList<Message> messages = parser.parse(data);
+    	for (Message message : messages) {
+    		handlerFactory.create(message.getMessageType()).handle(message, this, parser);
+    	}
     }
     
 }

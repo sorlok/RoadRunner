@@ -16,7 +16,7 @@ import edu.mit.smart.sm4and.message.Message;
 public class ReadyHandler extends AbstractMessageHandler {
 	/** A message from the server indicating that the client may proceed. */
 	public static class ReadyMessage extends Message {
-		public ReadyMessage() { this.MessageType = Type.Ready.toString(); }
+		public ReadyMessage() { this.MESSAGE_TYPE = Type.Ready; }
 	}
 	
     public ReadyHandler() {

@@ -4,6 +4,14 @@
 
 package edu.mit.smart.sm4and.message;
 
+import edu.mit.smart.sm4and.handler.LocationHandler.LocationMessage;
+import edu.mit.smart.sm4and.handler.MulticastHandler.MulticastMessage;
+import edu.mit.smart.sm4and.handler.ReadyHandler.ReadyMessage;
+import edu.mit.smart.sm4and.handler.ReadyToReceiveHandler.ReadyToReceiveMessage;
+import edu.mit.smart.sm4and.handler.TimeHandler.TimeMessage;
+import edu.mit.smart.sm4and.handler.UnicastHandler.UnicastMessage;
+import edu.mit.smart.sm4and.handler.WhoAreYouHandler.WhoAreYouMessage;
+
 /**
  * Parent class for all Messages.
  * 
@@ -14,7 +22,12 @@ package edu.mit.smart.sm4and.message;
 public class Message {
 	//The actual type of the message.
 	//(Stored as a string because I'm not 100% sure how json handles Enums.).
-	protected String MessageType;
+	//protected String MessageType;
+	
+	//Set by Gson:
+	protected Type MESSAGE_TYPE;
+    public String SENDER;       //Sender ID
+    public String SENDER_TYPE;  //Almost always "SIMMOBILITY"
 	
 	//Hide from everything except Gson
 	protected Message() {}
@@ -26,12 +39,39 @@ public class Message {
         Ready,
         LocationData,
         
+        //Not sure.
+        MultiCast,
+        UniCast,
+        ReadyToReceive,
+        
         //To server
-        WhoAmI,
+        WhoAmI,  //TODO: Keep?
+    }
+    
+    //Convert a "MultiCast" into "MultiCastMessage.class"
+    public static Class<? extends Message> GetClassFromType(Type msgType) {
+    	switch (msgType) {
+    		case WhoAreYou:
+    			return WhoAreYouMessage.class;
+    		case TimeData:
+    			return TimeMessage.class;
+    		case Ready:
+    			return ReadyMessage.class;
+    		case LocationData:
+    			return LocationMessage.class;
+    		case MultiCast:
+    			return MulticastMessage.class;
+    		case UniCast:
+    			return UnicastMessage.class;
+    		case ReadyToReceive:
+    			return ReadyToReceiveMessage.class;
+    		default:
+    			throw new RuntimeException("Unknown message type: " + msgType.toString());
+    	}
     }
 
     public Type getMessageType() {
-        return Type.valueOf(MessageType);
+        return MESSAGE_TYPE;
     }
 
     /*public void setMessageType(MessageType msgType) {

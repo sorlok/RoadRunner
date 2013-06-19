@@ -4,6 +4,8 @@
 
 package edu.mit.smart.sm4and;
 
+import java.util.ArrayList;
+
 import edu.mit.smart.sm4and.message.Message;
 
 
@@ -19,11 +21,11 @@ import edu.mit.smart.sm4and.message.Message;
  */
 public interface MessageParser {
 	/**
-	 * Turns a String into a Message, which is independent of encoding.
+	 * Turns a String into an array of Messages, which is independent of encoding.
 	 * @param src The input String.
 	 * @return The Message it corresponds to.
 	 */
-	Message parse(String src);
+	ArrayList<Message> parse(String src);
 	
 	/**
 	 * Serializes a message into a String format familiar to the server.

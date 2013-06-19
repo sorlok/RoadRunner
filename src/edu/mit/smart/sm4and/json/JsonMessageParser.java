@@ -4,11 +4,16 @@
 
 package edu.mit.smart.sm4and.json;
 
+import java.util.ArrayList;
+
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import edu.mit.smart.sm4and.MessageParser;
+import edu.mit.smart.sm4and.handler.WhoAreYouHandler;
 import edu.mit.smart.sm4and.handler.WhoAreYouHandler.WhoAreYouMessage;
 import edu.mit.smart.sm4and.handler.LocationHandler.LocationMessage;
 import edu.mit.smart.sm4and.handler.TimeHandler.TimeMessage;
@@ -44,7 +49,7 @@ public class JsonMessageParser implements MessageParser {
 	}
 	
     @Override
-    public Message parse(String src) {
+    public ArrayList<Message> parse(String src) {
     	//For some reason, a few Apache Mina implementations include lots of garbage between
     	// the trailing right-brace and the newline. This is obnoxious for a number of reasons,
     	// but primarily in that it breaks Gson parsing. We solve this by manually scanning
@@ -53,35 +58,40 @@ public class JsonMessageParser implements MessageParser {
     	src = FilterJson(src);
         System.out.println("in JsonMessageParser.create-> "+ src);
 
-        //Parse the message into one of our Message subclasses.
-        Gson gson = new Gson();
-        Message rawObject = gson.fromJson(src, Message.class);
-        switch (rawObject.getMessageType()) {
-            case WhoAreYou: {
-                return new WhoAreYouMessage();
-            }
-                
-            case TimeData: {
-                JsonParser parser = new JsonParser();
-                JsonObject jo = (JsonObject) parser.parse(src);
-                JsonObject jo1 = jo.getAsJsonObject("TimeData");
-                return gson.fromJson(jo1.toString(), TimeMessage.class);
-            }
-                
-            case Ready:
-                return new ReadyMessage();
-                
-            case LocationData:{
-                JsonParser parser = new JsonParser();
-                JsonObject jo = (JsonObject) parser.parse(src);
-                JsonObject jo1 = jo.getAsJsonObject("LocationData");
-                return gson.fromJson(jo1.toString(), LocationMessage.class);
-            }
-                
-            default: {
-                return null;
-            }
+        //Parse the message into a generic Json object.
+        JsonParser parser = new JsonParser();
+        JsonObject root = (JsonObject)parser.parse(src);
+        
+        //Ensure we have a few mandatory properties.
+        JsonObject head = root.getAsJsonObject("PACKET_HEADER");
+        JsonArray data = root.getAsJsonArray("DATA");
+        if (head==null) { throw new RuntimeException("Packet arrived with no header."); }
+        if (data==null) { throw new RuntimeException("Packet arrived with no data."); }
+        
+        //Dispatch parsing.
+        return parseCustomMessageFormat(head, data);
+    }
+    
+    private ArrayList<Message> parseCustomMessageFormat(JsonObject head, JsonArray data) {
+    	//Ensure our message count lines up.
+    	int count = head.get("NOF_MESSAGES").getAsInt();
+    	if (data.size() != count) { throw new RuntimeException("Header/body size mismatch."); }
+    	
+    	//Iterate through each DATA element and add an appropriate Message type to the result list.
+    	Gson gson = new Gson();
+    	ArrayList<Message> res = new ArrayList<Message>();
+        for (JsonElement msg : data) {
+        	//First, parse it as a generic "message" object.
+        	Message rawObject = gson.fromJson(msg, Message.class);
+        	
+        	//Depending on the type, re-parse it as a sub-class.
+        	Class<? extends Message> msgClass = Message.GetClassFromType(rawObject.getMessageType());
+        	Message specificObject = gson.fromJson(msg, msgClass);
+        	res.add(specificObject);
         }
+        
+        //Done
+        return res;
     }
     
     @Override
