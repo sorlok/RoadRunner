@@ -16,7 +16,7 @@ import edu.mit.smart.sm4and.message.Message;
 public class ReadyToReceiveHandler extends AbstractMessageHandler {
 	/** A message from the server indicating that the server is now ready for this time tick. */
 	public static class ReadyToReceiveMessage extends Message {
-		public ReadyToReceiveMessage() { this.MESSAGE_TYPE = Type.ReadyToReceive; }
+		public ReadyToReceiveMessage() { this.MESSAGE_TYPE = Type.READY_TO_RECEIVE; }
 	}
 	
     public ReadyToReceiveHandler() {

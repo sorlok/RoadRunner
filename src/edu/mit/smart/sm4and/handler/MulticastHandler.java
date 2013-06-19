@@ -17,7 +17,7 @@ import edu.mit.smart.sm4and.message.Message;
 public class MulticastHandler extends AbstractMessageHandler {
 	/** A multicast message. Contains an opaque block of Base64-encoded data. */
 	public static class MulticastMessage extends Message { 
-		public MulticastMessage() { this.MESSAGE_TYPE = Type.MultiCast; }
+		public MulticastMessage() { this.MESSAGE_TYPE = Type.MULTICAST; }
 		private String MULTICAST_DATA;
 	}
 	    

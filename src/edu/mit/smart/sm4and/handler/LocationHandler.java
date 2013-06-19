@@ -17,7 +17,7 @@ import edu.mit.smart.sm4and.message.Message;
 public class LocationHandler extends AbstractMessageHandler {
 	/** A location update message. Uses projected (x,y) coordinates, not Latitude/Longitude. */
 	public static class LocationMessage extends Message { 
-		public LocationMessage() { this.MESSAGE_TYPE = Type.LocationData; }
+		public LocationMessage() { this.MESSAGE_TYPE = Type.LOCATION_DATA; }
 	    private int x;
 	    private int y;
 	}

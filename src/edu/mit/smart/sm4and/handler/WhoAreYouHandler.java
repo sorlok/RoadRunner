@@ -18,12 +18,12 @@ import edu.mit.smart.sm4and.message.Message;
 public class WhoAreYouHandler extends AbstractMessageHandler {
 	/** A message from the server requesting that the client identify itself. */
 	public static class WhoAreYouMessage extends Message {
-		public WhoAreYouMessage() { this.MESSAGE_TYPE = Type.WhoAreYou; }
+		public WhoAreYouMessage() { this.MESSAGE_TYPE = Type.WHOAREYOU; }
 	}
 	
 	/** A response to the server identifying oneself. */
 	public static class WhoAmIResponse extends Message {
-		public WhoAmIResponse() { this.MESSAGE_TYPE = Type.WhoAmI; }
+		public WhoAmIResponse() { this.MESSAGE_TYPE = Type.WHOAMI; }
 	    public int id;
 	}
 	

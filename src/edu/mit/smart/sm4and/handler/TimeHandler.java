@@ -17,7 +17,7 @@ import edu.mit.smart.sm4and.message.Message;
 public class TimeHandler extends AbstractMessageHandler {
 	/** A message from the server indicating that the current time has advanced. */
 	public static class TimeMessage extends Message {
-		public TimeMessage() { this.MESSAGE_TYPE = Type.TimeData; }
+		public TimeMessage() { this.MESSAGE_TYPE = Type.TIME_DATA; }
 		private int tick;    
 	}
 	

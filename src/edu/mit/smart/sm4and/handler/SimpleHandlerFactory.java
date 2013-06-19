@@ -29,21 +29,22 @@ public class SimpleHandlerFactory implements MessageHandlerFactory {
     public AbstractMessageHandler create(Type msgType) {
     	//Respond to the given message.
     	switch (msgType) {
-            case WhoAreYou: {
+            case WHOAREYOU:
                 return new WhoAreYouHandler(clientID);
-            }
-            case TimeData: {
+            case TIME_DATA: 
                 return new TimeHandler();
-            }
-            case Ready: {
+            case READY: 
                 return new ReadyHandler();
-            }
-            case LocationData: {
+            case LOCATION_DATA: 
             	return new LocationHandler(locspoof);
-            }
-            default: {
-                return null;
-            }
+            case MULTICAST: 
+            	return new MulticastHandler();
+            case UNICAST:
+            	return new UnicastHandler();
+            case READY_TO_RECEIVE:
+            	return new ReadyToReceiveHandler();
+            default:
+                throw new RuntimeException("Unknown message type: " + msgType.toString());
         }
     }
 }

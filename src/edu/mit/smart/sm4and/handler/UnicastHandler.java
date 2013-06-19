@@ -17,7 +17,7 @@ import edu.mit.smart.sm4and.message.Message;
 public class UnicastHandler extends AbstractMessageHandler {
 	/** A unicast message. Contains an opaque block of Base64-encoded data. */
 	public static class UnicastMessage extends Message { 
-		public UnicastMessage() { this.MESSAGE_TYPE = Type.UniCast; }
+		public UnicastMessage() { this.MESSAGE_TYPE = Type.UNICAST; }
 		private String UNICAST_DATA;
 	}
 	    

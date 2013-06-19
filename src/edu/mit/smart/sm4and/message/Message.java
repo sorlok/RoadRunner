@@ -34,36 +34,43 @@ public class Message {
 	
     public enum Type {
     	//From server.
-        WhoAreYou,
-        TimeData,
-        Ready,
-        LocationData,
+        WHOAREYOU,
+        TIME_DATA,
+        READY,
+        LOCATION_DATA,
         
         //Not sure.
-        MultiCast,
-        UniCast,
-        ReadyToReceive,
+        MULTICAST,
+        UNICAST,
+        READY_TO_RECEIVE,
         
         //To server
-        WhoAmI,  //TODO: Keep?
+        WHOAMI,  //TODO: Keep?
     }
     
     //Convert a "MultiCast" into "MultiCastMessage.class"
     public static Class<? extends Message> GetClassFromType(Type msgType) {
+    	//Sanity check; the switch will explode otherwise.
+    	if (msgType==null) {
+    		System.err.println("Can't switch on a null Message type.");
+    		return null;
+    	}
+    	
+    	//Dispatch.
     	switch (msgType) {
-    		case WhoAreYou:
+    		case WHOAREYOU:
     			return WhoAreYouMessage.class;
-    		case TimeData:
+    		case TIME_DATA:
     			return TimeMessage.class;
-    		case Ready:
+    		case READY:
     			return ReadyMessage.class;
-    		case LocationData:
+    		case LOCATION_DATA:
     			return LocationMessage.class;
-    		case MultiCast:
+    		case MULTICAST:
     			return MulticastMessage.class;
-    		case UniCast:
+    		case UNICAST:
     			return UnicastMessage.class;
-    		case ReadyToReceive:
+    		case READY_TO_RECEIVE:
     			return ReadyToReceiveMessage.class;
     		default:
     			throw new RuntimeException("Unknown message type: " + msgType.toString());

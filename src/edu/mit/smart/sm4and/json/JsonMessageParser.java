@@ -57,33 +57,34 @@ public class JsonMessageParser implements MessageParser {
     	// muultiple messages on the same stream, but for now that's not a problem.
     	src = FilterJson(src);
         System.out.println("in JsonMessageParser.create-> "+ src);
-
+        
         //Parse the message into a generic Json object.
         JsonParser parser = new JsonParser();
         JsonObject root = (JsonObject)parser.parse(src);
-        
+                
         //Ensure we have a few mandatory properties.
         JsonObject head = root.getAsJsonObject("PACKET_HEADER");
         JsonArray data = root.getAsJsonArray("DATA");
         if (head==null) { throw new RuntimeException("Packet arrived with no header."); }
         if (data==null) { throw new RuntimeException("Packet arrived with no data."); }
-        
+                
         //Dispatch parsing.
-        return parseCustomMessageFormat(head, data);
+        ArrayList<Message> res = parseCustomMessageFormat(head, data);
+        return res;
     }
     
     private ArrayList<Message> parseCustomMessageFormat(JsonObject head, JsonArray data) {
     	//Ensure our message count lines up.
     	int count = head.get("NOF_MESSAGES").getAsInt();
     	if (data.size() != count) { throw new RuntimeException("Header/body size mismatch."); }
-    	
+
     	//Iterate through each DATA element and add an appropriate Message type to the result list.
     	Gson gson = new Gson();
     	ArrayList<Message> res = new ArrayList<Message>();
         for (JsonElement msg : data) {
         	//First, parse it as a generic "message" object.
         	Message rawObject = gson.fromJson(msg, Message.class);
-        	
+
         	//Depending on the type, re-parse it as a sub-class.
         	Class<? extends Message> msgClass = Message.GetClassFromType(rawObject.getMessageType());
         	Message specificObject = gson.fromJson(msg, msgClass);
