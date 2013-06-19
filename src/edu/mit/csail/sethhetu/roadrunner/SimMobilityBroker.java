@@ -22,7 +22,8 @@ import edu.mit.csail.sethhetu.roadrunner.SimMobServerConnectTask.PostExecuteActi
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.MessageHandlerFactory;
 import edu.mit.smart.sm4and.MessageParser;
-import edu.mit.smart.sm4and.handler.SimpleHandlerFactory;
+import edu.mit.smart.sm4and.handler.AndroidHandlerFactory;
+import edu.mit.smart.sm4and.handler.SimpleAndroidHandler;
 import edu.mit.smart.sm4and.json.JsonMessageParser;
 import edu.mit.smart.sm4and.mina.MinaConnector;
 
@@ -143,8 +144,8 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		//      device ID when we initiate the connection, and then have the server
 		//      assign a shorter, integer-based ID later on.
 		int clientID = SimMobilityBroker.RandGen.nextInt(100000)+100;
-		this.handlerFactory = new SimpleHandlerFactory(locspoof, clientID);
-		this.conn = new MinaConnector(messageParser, handlerFactory, locspoof, logger);
+		this.handlerFactory = new AndroidHandlerFactory(clientID, locspoof);
+		this.conn = new MinaConnector(myHandler, messageParser, handlerFactory, locspoof, logger);
 		
 		this.returnedMessages = new ArrayList<String>();
 		

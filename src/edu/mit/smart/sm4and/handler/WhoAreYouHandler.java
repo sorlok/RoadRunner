@@ -24,7 +24,9 @@ public class WhoAreYouHandler extends AbstractMessageHandler {
 	/** A response to the server identifying oneself. */
 	public static class WhoAmIResponse extends Message {
 		public WhoAmIResponse() { this.MESSAGE_TYPE = Type.WHOAMI; }
-	    public int id;
+	    public String ID;
+	    public String TYPE;
+	    public String[] REQUIRED_SERVICES;
 	}
 	
     private int clientID;
@@ -38,9 +40,16 @@ public class WhoAreYouHandler extends AbstractMessageHandler {
     public void handle(Message message, Connector connector, MessageParser parser) {
         System.out.println("WhoAreYouHandler is handling");
         
+        //Prepare a response.
         WhoAmIResponse obj = new WhoAmIResponse();
-        obj.id = clientID;
+        obj.SENDER = String.valueOf(clientID);
+        obj.ID = String.valueOf(clientID);
+        obj.TYPE = "ANDROID_EMULATOR";
+        obj.SENDER_TYPE = "ANDROID_EMULATOR";
+        obj.REQUIRED_SERVICES = new String[]{"SIMMOB_SRV_TIME","SIMMOB_SRV_LOCATION"};
         
-        connector.send(parser.serialize(obj));
+        //The "WhoAmIResponse" is unique in that it *always* triggers a send.
+        connector.addMessage(obj);
+        connector.sendAll(parser.serialize(connector.getAndClearMessages()));
     }
 }

@@ -96,7 +96,31 @@ public class JsonMessageParser implements MessageParser {
     }
     
     @Override
-    public String serialize(Message msg) {
-    	return new Gson().toJson(msg);
+    public String serialize(ArrayList<Message> messages) {
+    	//Do it manually:
+    	JsonObject packet = new JsonObject();
+    	serializeHeader(packet, messages.size());
+    	serializeData(packet, messages);
+    	return packet.toString();
     }
+    
+    private void serializeHeader(JsonObject res, int numMessages) {
+        JsonObject header = new JsonObject();
+        header.addProperty("NOF_MESSAGES", String.valueOf(numMessages));
+        res.add("PACKET_HEADER", header);
+    }
+    
+    private void serializeData(JsonObject res, ArrayList<Message> messages) {
+    	Gson gson = new Gson();
+    	JsonArray data = new JsonArray();
+    	for (Message msg : messages) {
+    		data.add(gson.toJsonTree(msg));
+    	}
+        res.add("DATA", data);
+    }
+    
+    
+    
+    
+    
 }

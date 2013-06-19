@@ -6,37 +6,35 @@ package edu.mit.smart.sm4and.handler;
 
 import edu.mit.smart.sm4and.AbstractMessageHandler;
 import edu.mit.smart.sm4and.MessageHandlerFactory;
+import edu.mit.smart.sm4and.message.Message;
 import edu.mit.smart.sm4and.message.Message.Type;
 
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 
 /**
- * Returns to messages by simply returning their default Handlers.
- * 
- * @author Pedro Gandola
- * @author Vahid
+ * Provides Android-specific handlers for our various messages.
  */
-public class SimpleHandlerFactory implements MessageHandlerFactory {
-	private LocationSpoofer locspoof;
-	private int clientID;
+public class AndroidHandlerFactory implements MessageHandlerFactory {
+	private int clientId;
+	private LocationSpoofer locSpoof;
 	
-	public SimpleHandlerFactory(LocationSpoofer locspoof, int clientID) {
-		this.locspoof = locspoof;
-		this.clientID = clientID;
+	public AndroidHandlerFactory(int clientId, LocationSpoofer locSpoof) {
+		this.clientId = clientId;
+		this.locSpoof = locSpoof;
 	}
-
-    @Override
-    public AbstractMessageHandler create(Type msgType) {
+	
+	@Override
+	public AbstractMessageHandler create(Type msgType) {
     	//Respond to the given message.
     	switch (msgType) {
             case WHOAREYOU:
-                return new WhoAreYouHandler(clientID);
+                return new WhoAreYouHandler(clientId);
             case TIME_DATA: 
                 return new TimeHandler();
             case READY: 
                 return new ReadyHandler();
             case LOCATION_DATA: 
-            	return new LocationHandler(locspoof);
+            	return new LocationHandler(locSpoof);
             case MULTICAST: 
             	return new MulticastHandler();
             case UNICAST:
@@ -46,5 +44,5 @@ public class SimpleHandlerFactory implements MessageHandlerFactory {
             default:
                 throw new RuntimeException("Unknown message type: " + msgType.toString());
         }
-    }
+	}
 }

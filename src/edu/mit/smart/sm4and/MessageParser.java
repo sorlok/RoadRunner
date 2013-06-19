@@ -32,5 +32,5 @@ public interface MessageParser {
 	 * @param msg The message to serialize.
 	 * @return A string representation of that message.
 	 */
-	String serialize(Message msg);
+	String serialize(ArrayList<Message> messages);
 }

@@ -8,9 +8,11 @@ import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 
+import edu.mit.smart.sm4and.AbstractMessageHandler;
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.MessageHandlerFactory;
 import edu.mit.smart.sm4and.MessageParser;
+import edu.mit.smart.sm4and.handler.SimpleAndroidHandler;
 import edu.mit.smart.sm4and.message.Message;
 
 import org.apache.mina.core.future.ConnectFuture;
@@ -21,6 +23,8 @@ import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.codec.textline.TextLineCodecFactory;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
+import android.os.Handler;
+
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 import edu.mit.csail.sethhetu.roadrunner.LoggerI;
 
@@ -30,7 +34,8 @@ import edu.mit.csail.sethhetu.roadrunner.LoggerI;
  * @author Pedro Gandola
  * @author Vahid
  */
-public class MinaConnector implements Connector {
+public class MinaConnector extends Connector {
+	private Handler myHandler;
     private IoConnector connector;
     private volatile boolean connected;
     private IoSession session;
@@ -50,7 +55,8 @@ public class MinaConnector implements Connector {
      * @param locspoof   A handler for spoofing location-based updates. Used to set software lat/lng.
      * @param logger     A handler for logging.
      */
-    public MinaConnector(MessageParser parser, MessageHandlerFactory handlerFactory, LocationSpoofer locspoof, LoggerI logger) {
+    public MinaConnector(Handler myHandler, MessageParser parser, MessageHandlerFactory handlerFactory, LocationSpoofer locspoof, LoggerI logger) {
+    	this.myHandler = myHandler;
         this.logger = logger;
         this.parser = parser;
         this.handlerFactory = handlerFactory;
@@ -124,7 +130,7 @@ public class MinaConnector implements Connector {
     
 
     @Override
-    public void send(String data) {        
+    public void sendAll(String data) {        
         if (connected && (data!=null) && (session!=null) && session.isConnected()) {
             String str = String.format("%8h%s", data.length(), data);
             System.out.println("Outgoing data: ***" + str + "***");
@@ -143,7 +149,13 @@ public class MinaConnector implements Connector {
     	//Just pass off each message to "handle()"
     	ArrayList<Message> messages = parser.parse(data);
     	for (Message message : messages) {
-    		handlerFactory.create(message.getMessageType()).handle(message, this, parser);
+    		//Get an appropriate response handler.
+    		AbstractMessageHandler handler = handlerFactory.create(message.getMessageType());
+    		
+    		//We want to process this on the main thread, as we may want to interact with the user.
+    		//Thus, we post it to the message queue.
+    		SimpleAndroidHandler sam = new SimpleAndroidHandler(handler, message, this, parser);
+    		myHandler.post(sam);
     	}
     }
     
