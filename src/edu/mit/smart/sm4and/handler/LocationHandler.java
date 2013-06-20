@@ -36,7 +36,7 @@ public class LocationHandler extends AbstractMessageHandler {
          */  
         LocationMessage locMsg = (LocationMessage)message;
         System.out.println("Current location is "+ locMsg.x + ":" + locMsg.y);
-        locspoof.setLocation(locMsg.x, locMsg.y);
+        locspoof.setLocation(locMsg.y, locMsg.x);
     }
     
 }

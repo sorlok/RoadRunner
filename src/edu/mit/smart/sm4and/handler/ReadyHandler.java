@@ -24,10 +24,6 @@ public class ReadyHandler extends AbstractMessageHandler {
     
     @Override
     public void handle(Message message, Connector connector, MessageParser parser) {
-        /*Seth, if you want your emulator set any flag to make sure 
-         * it is successfully registered with the simMobility server(Broker)
-         * here is your chance
-         */
         System.out.println("Server Knows you. You can send and receive now.");
     }
     

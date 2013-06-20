@@ -12,6 +12,8 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
+import com.google.gson.JsonObject;
+
 
 import android.os.Handler;
 import android.util.Base64;
@@ -23,6 +25,7 @@ import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.MessageHandlerFactory;
 import edu.mit.smart.sm4and.MessageParser;
 import edu.mit.smart.sm4and.handler.AndroidHandlerFactory;
+import edu.mit.smart.sm4and.handler.MulticastHandler.MulticastMessage;
 import edu.mit.smart.sm4and.handler.SimpleAndroidHandler;
 import edu.mit.smart.sm4and.json.JsonMessageParser;
 import edu.mit.smart.sm4and.mina.MinaConnector;
@@ -73,7 +76,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	private static Random RandGen = new Random();
 	
 	//Returned messages.
-	private ArrayList<String> returnedMessages;
+	//private ArrayList<String> returnedMessages;
 	
 	//Same as the one in RoadRunnerService
 	private String uniqueId;
@@ -126,6 +129,20 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		//new SimMobTickRequest(myHandler, new ServerTickDoneRunnable()).execute(reader);
 	}
 	
+	public class TimeAdvancer {
+		public void advance(int elapsedMs) {
+			currTimeMs += elapsedMs;
+			
+			//Time for an announce packet?
+			if (currTimeMs-lastAnnouncePacket >= Globals.ADHOC_ANNOUNCE_PERIOD) {
+				lastAnnouncePacket += Globals.ADHOC_ANNOUNCE_PERIOD;
+				
+				//Send announce packet!
+				adhoc.announce(false);
+			}
+		}
+	}
+	
 	
 	/**
 	 * Create the broker entity and connect to the server.
@@ -143,11 +160,11 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		//TODO: We need a better policy for assigning IDs. We can use the Android 
 		//      device ID when we initiate the connection, and then have the server
 		//      assign a shorter, integer-based ID later on.
-		int clientID = SimMobilityBroker.RandGen.nextInt(100000)+100;
-		this.handlerFactory = new AndroidHandlerFactory(clientID, locspoof);
+		//int clientID = SimMobilityBroker.RandGen.nextInt(100000)+100;
+		this.handlerFactory = new AndroidHandlerFactory(uniqueId, locspoof, new TimeAdvancer());
 		this.conn = new MinaConnector(myHandler, messageParser, handlerFactory, locspoof, logger);
 		
-		this.returnedMessages = new ArrayList<String>();
+		//this.returnedMessages = new ArrayList<String>();
 		
 		//Connect our socket.
 		//NOTE: Currently, this task will *only* end if the session is closed. 
@@ -264,21 +281,19 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		if (myId==null || packet==null) { throw new RuntimeException("Can't broadcast without data or an id."); }
 		
 		//Prepare the packet.
-		StringBuilder sb = new StringBuilder();
-		sb.append("ANDROID_BROADCAST:");
-		sb.append(myId+",");
-		sb.append("[");
-		sb.append(bytes2string(packet));
-		sb.append("]");
+		MulticastMessage obj = new MulticastMessage();
+		obj.SENDER = String.valueOf(uniqueId);
+		obj.SENDER_TYPE = "ANDROID_EMULATOR";
+		obj.MULTICAST_DATA = bytes2string(packet);
 		
 		//Save it for later.
-		bufferMessage(sb.toString());
+		conn.addMessage(obj);
 	}
 	
 	
-	private synchronized void bufferMessage(String msg) {
+	/*private synchronized void bufferMessage(String msg) {
 		returnedMessages.add(msg);
-	}
+	}*/
 	
 	
 	//Called when the server states that a time tick has completed.
@@ -379,7 +394,10 @@ public class SimMobilityBroker  implements PostExecuteAction {
 			//      Android app (e.g., "every 2 seconds" the old way). We would ideally 
 			//      remove these, but they are effectively harmless (and *shouldn't* really
 			//      happen in practice).
-			StringBuilder sb = new StringBuilder();
+			
+			throw new RuntimeException("NO LONGER SUPPORTED.");
+			
+			/*StringBuilder sb = new StringBuilder();
 			synchronized (this) {
 				//Combine all messages.
 				String sep = "";
@@ -398,7 +416,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 			
 			//Send all messages.
 			BufferedWriter writer = null; //TEMP
-			new SimMobTickResponse(sb.toString()).execute(writer);
+			new SimMobTickResponse(sb.toString()).execute(writer);*/
 		}
 	};
 	

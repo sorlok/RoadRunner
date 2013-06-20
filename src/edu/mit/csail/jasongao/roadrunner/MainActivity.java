@@ -481,7 +481,7 @@ public class MainActivity extends Activity implements OnInitListener {
 					Toast.LENGTH_LONG).show();
 			
 			//One more thing..
-			mService.setUniqueId(Secure.getString(getContentResolver(), Secure.ANDROID_ID));
+			//mService.setUniqueId(Secure.getString(getContentResolver(), Secure.ANDROID_ID));
 
 			// Start the service
 			CheckBox adhocCheckBox = (CheckBox) findViewById(R.id.adhoc_checkbox);

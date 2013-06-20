@@ -29,9 +29,9 @@ public class WhoAreYouHandler extends AbstractMessageHandler {
 	    public String[] REQUIRED_SERVICES;
 	}
 	
-    private int clientID;
+    private String clientID;
     
-    public WhoAreYouHandler( int clientID) {
+    public WhoAreYouHandler(String clientID) {
         this.clientID = clientID;
         System.out.println("creating WhoAreYouHandler");
     }
@@ -42,7 +42,7 @@ public class WhoAreYouHandler extends AbstractMessageHandler {
         
         //Prepare a response.
         WhoAmIResponse obj = new WhoAmIResponse();
-        obj.SENDER = String.valueOf(clientID);
+        obj.SENDER = clientID;
         obj.ID = String.valueOf(clientID);
         obj.TYPE = "ANDROID_EMULATOR";
         obj.SENDER_TYPE = "ANDROID_EMULATOR";

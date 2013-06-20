@@ -49,10 +49,10 @@ import android.telephony.TelephonyManager;
 public class RoadRunnerService extends Service implements LocationListener, LoggerI {
 	public static final String TAG = "RoadRunnerService";
 	
-	private String uniqueId;
+	/*private String uniqueId;
 	public void setUniqueId(String uniqueId) {
 		this.uniqueId = uniqueId;
-	}
+	}*/
 	
 	//Used for communicating with Sim Mobility.
 	SimMobilityBroker simmob = null;
@@ -95,6 +95,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	private Location mLoc;
 	private String mRegion = "FREE";
 	private long mId = -1000;
+	private String mIdStr;
 	private Random rand = new Random();
 
 	private long udpStartTime = 0;
@@ -1002,7 +1003,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 					
 					//Dispatch through Sim Mobility, or through the AdHoc's broadcast port.
 					if (Globals.SIM_MOBILITY) {
-						simmob.sendBroadcastPacket(uniqueId, data);
+						simmob.sendBroadcastPacket(mIdStr, data);
 					} else if (aat != null) {
 						aat.sendData(data);
 					}
@@ -1107,7 +1108,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		
 		//Connect to the Sim Mobility server.
 		if (Globals.SIM_MOBILITY) {
-			simmob = new SimMobilityBroker(uniqueId, myHandler, this, new AdHocAnnouncer(), new LocationSpoofer());
+			simmob = new SimMobilityBroker(mIdStr, myHandler, this, new AdHocAnnouncer(), new LocationSpoofer());
 			log("Sim Mobility server connected.");
 		}
 
@@ -1157,6 +1158,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			}
 			
 			//Inform the user of their ID.
+			mIdStr = String.valueOf(mId);
 			log("mId=" + mId);
 
 			/*

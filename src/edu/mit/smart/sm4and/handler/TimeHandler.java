@@ -4,6 +4,9 @@
 
 package edu.mit.smart.sm4and.handler;
 
+import edu.mit.csail.jasongao.roadrunner.Globals;
+import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker;
+import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker.TimeAdvancer;
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.AbstractMessageHandler;
 import edu.mit.smart.sm4and.MessageParser;
@@ -21,15 +24,18 @@ public class TimeHandler extends AbstractMessageHandler {
 		private int tick;    
 	}
 	
-    public TimeHandler() {
+	private TimeAdvancer timeTicker;
+	
+    public TimeHandler(TimeAdvancer timeTicker) {
+    	this.timeTicker = timeTicker;
     }
 
     @Override
-    public void handle(Message message, Connector connector, MessageParser parser) {
-        /*
-         * if you need to use the simMobility current time, here is your chance.
-         * you have a "TimeMessage message" filled with the data you need
-         */  
+    public void handle(Message message, Connector connector, MessageParser parser) {  
         System.out.println("current tick is " + ((TimeMessage)message).tick);
+        
+        //TODO: The server should really send the elapsed time in ms. We guess it for nwo.
+        int elapsed = 100; //ms
+        timeTicker.advance(elapsed);
     }
 }

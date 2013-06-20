@@ -38,14 +38,15 @@ public class Message {
         TIME_DATA,
         READY,
         LOCATION_DATA,
-        
-        //Not sure.
-        MULTICAST,
-        UNICAST,
         READY_TO_RECEIVE,
         
+        //Not sure; might be both.
+        MULTICAST,
+        UNICAST,
+        
         //To server
-        WHOAMI,  //TODO: Keep?
+        WHOAMI,
+        CLIENT_MESSAGES_DONE,
     }
     
     //Convert a "MultiCast" into "MultiCastMessage.class"

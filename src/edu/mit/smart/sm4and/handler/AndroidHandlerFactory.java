@@ -4,23 +4,29 @@
 
 package edu.mit.smart.sm4and.handler;
 
+import com.google.gson.internal.bind.TimeTypeAdapter;
+
 import edu.mit.smart.sm4and.AbstractMessageHandler;
 import edu.mit.smart.sm4and.MessageHandlerFactory;
 import edu.mit.smart.sm4and.message.Message;
 import edu.mit.smart.sm4and.message.Message.Type;
 
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
+import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker;
+import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker.TimeAdvancer;
 
 /**
  * Provides Android-specific handlers for our various messages.
  */
 public class AndroidHandlerFactory implements MessageHandlerFactory {
-	private int clientId;
+	private String clientId;
 	private LocationSpoofer locSpoof;
+	private TimeAdvancer timeTicker;
 	
-	public AndroidHandlerFactory(int clientId, LocationSpoofer locSpoof) {
+	public AndroidHandlerFactory(String clientId, LocationSpoofer locSpoof, TimeAdvancer timeTicker) {
 		this.clientId = clientId;
 		this.locSpoof = locSpoof;
+		this.timeTicker = timeTicker;
 	}
 	
 	@Override
@@ -30,7 +36,7 @@ public class AndroidHandlerFactory implements MessageHandlerFactory {
             case WHOAREYOU:
                 return new WhoAreYouHandler(clientId);
             case TIME_DATA: 
-                return new TimeHandler();
+                return new TimeHandler(timeTicker);
             case READY: 
                 return new ReadyHandler();
             case LOCATION_DATA: 
@@ -40,7 +46,7 @@ public class AndroidHandlerFactory implements MessageHandlerFactory {
             case UNICAST:
             	return new UnicastHandler();
             case READY_TO_RECEIVE:
-            	return new ReadyToReceiveHandler();
+            	return new ReadyToReceiveHandler(clientId);
             default:
                 throw new RuntimeException("Unknown message type: " + msgType.toString());
         }
