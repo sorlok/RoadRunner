@@ -22,6 +22,7 @@ public class TimeHandler extends AbstractMessageHandler {
 	public static class TimeMessage extends Message {
 		public TimeMessage() { this.MESSAGE_TYPE = Type.TIME_DATA; }
 		private int tick;    
+		private int elapsed_ms;
 	}
 	
 	private TimeAdvancer timeTicker;
@@ -32,10 +33,10 @@ public class TimeHandler extends AbstractMessageHandler {
 
     @Override
     public void handle(Message message, Connector connector, MessageParser parser) {  
-        System.out.println("current tick is " + ((TimeMessage)message).tick);
+    	TimeMessage timeMsg= (TimeMessage)message;
+        System.out.println("current tick is " + timeMsg.tick + " +" + timeMsg.elapsed_ms + "ms");
         
-        //TODO: The server should really send the elapsed time in ms. We guess it for nwo.
-        int elapsed = 100; //ms
-        timeTicker.advance(elapsed);
+        //Ensure that some amount of time has elapsed.
+        timeTicker.advance(timeMsg.elapsed_ms);
     }
 }

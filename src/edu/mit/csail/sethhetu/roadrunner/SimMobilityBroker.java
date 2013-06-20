@@ -131,6 +131,10 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	
 	public class TimeAdvancer {
 		public void advance(int elapsedMs) {
+	        if (elapsedMs<=0) {
+	        	throw new RuntimeException("Error: elapsed time cannot be negative.");
+	        }
+	        
 			currTimeMs += elapsedMs;
 			
 			//Time for an announce packet?
