@@ -143,6 +143,23 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		}
 	}
 	
+	public class MultiCastReceiver {
+		public void receive(String id, String base64Data) {
+			//Ignore messages sent to yourself.
+			if (id.equals(uniqueId)) {
+				logger.log("Ignoring packet sent to self.");
+				return;
+			}
+			
+			//Extract the packet.
+			byte[] packet = string2bytes(base64Data);
+			AdhocPacket p = AdhocPacketThread.ReadPacket(logger, packet, packet.length);
+			
+			//Send it to Road Runner's message loop as a ADHOC_PACKET_RECV.
+			myHandler.obtainMessage(RoadRunnerService.ADHOC_PACKET_RECV, p).sendToTarget();
+		}
+	}
+	
 	
 	/**
 	 * Create the broker entity and connect to the server.
@@ -161,7 +178,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		//      device ID when we initiate the connection, and then have the server
 		//      assign a shorter, integer-based ID later on.
 		//int clientID = SimMobilityBroker.RandGen.nextInt(100000)+100;
-		this.handlerFactory = new AndroidHandlerFactory(uniqueId, locspoof, new TimeAdvancer());
+		this.handlerFactory = new AndroidHandlerFactory(uniqueId, locspoof, new TimeAdvancer(), new MultiCastReceiver());
 		this.conn = new MinaConnector(myHandler, messageParser, handlerFactory, locspoof, logger);
 		
 		//this.returnedMessages = new ArrayList<String>();
@@ -340,9 +357,13 @@ public class SimMobilityBroker  implements PostExecuteAction {
 					//Propagate.
 					locspoof.setLocation(lat, lng);
 				} else if (type.equals("SM_ADHOC_BROADCAST")) {
+					
+					throw new RuntimeException("Disabled");
+					
+					
 					//body="ag_id,[packet]"
 					//The result of an ad-hoc announce message.
-					String[] parts = body.split(",", 2);
+					/*String[] parts = body.split(",", 2);
 					if (parts.length!=2) { throw new RuntimeException("Bad broadcast message body: " + body); }
 					
 					//Get the ID of the agent sending this message, along with the packet.
@@ -367,7 +388,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 					myHandler.obtainMessage(
 							RoadRunnerService.ADHOC_PACKET_RECV, p).sendToTarget();
 					
-					
+					*/
 					//TODO
 				} else {
 					throw new RuntimeException("Unknown message type: \"" + type + "\""); 

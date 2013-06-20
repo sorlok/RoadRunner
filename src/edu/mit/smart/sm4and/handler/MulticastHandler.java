@@ -5,6 +5,7 @@
 package edu.mit.smart.sm4and.handler;
 
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
+import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker.MultiCastReceiver;
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.AbstractMessageHandler;
 import edu.mit.smart.sm4and.MessageParser;
@@ -20,14 +21,22 @@ public class MulticastHandler extends AbstractMessageHandler {
 		public MulticastMessage() { this.MESSAGE_TYPE = Type.MULTICAST; }
 		public String MULTICAST_DATA;
 	}
+	
+	private MultiCastReceiver mcProcess;
 	    
-    public MulticastHandler() {
+    public MulticastHandler(MultiCastReceiver mcProcess) {
+    	this.mcProcess = mcProcess;
     }
 
     @Override
     public void handle(Message message, Connector connector, MessageParser parser) { 
     	MulticastMessage mcMsg = (MulticastMessage)message;
-        System.out.println("Multicast message received of length: " + mcMsg.MULTICAST_DATA.length());
+        System.out.println("Multicast message from agent " + mcMsg.SENDER + " received of length: " + mcMsg.MULTICAST_DATA.length());
+        
+        //Hand back to the Broker
+        mcProcess.receive(mcMsg.SENDER, mcMsg.MULTICAST_DATA);
+        
+        
     }
     
 }

@@ -13,6 +13,7 @@ import edu.mit.smart.sm4and.message.Message.Type;
 
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker;
+import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker.MultiCastReceiver;
 import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker.TimeAdvancer;
 
 /**
@@ -22,11 +23,13 @@ public class AndroidHandlerFactory implements MessageHandlerFactory {
 	private String clientId;
 	private LocationSpoofer locSpoof;
 	private TimeAdvancer timeTicker;
+	private MultiCastReceiver mcProcess;
 	
-	public AndroidHandlerFactory(String clientId, LocationSpoofer locSpoof, TimeAdvancer timeTicker) {
+	public AndroidHandlerFactory(String clientId, LocationSpoofer locSpoof, TimeAdvancer timeTicker, MultiCastReceiver mcProcess) {
 		this.clientId = clientId;
 		this.locSpoof = locSpoof;
 		this.timeTicker = timeTicker;
+		this.mcProcess = mcProcess;
 	}
 	
 	@Override
@@ -42,7 +45,7 @@ public class AndroidHandlerFactory implements MessageHandlerFactory {
             case LOCATION_DATA: 
             	return new LocationHandler(locSpoof);
             case MULTICAST: 
-            	return new MulticastHandler();
+            	return new MulticastHandler(mcProcess);
             case UNICAST:
             	return new UnicastHandler();
             case READY_TO_RECEIVE:

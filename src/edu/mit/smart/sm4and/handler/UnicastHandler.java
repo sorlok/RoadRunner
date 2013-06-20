@@ -28,6 +28,9 @@ public class UnicastHandler extends AbstractMessageHandler {
     public void handle(Message message, Connector connector, MessageParser parser) { 
     	UnicastMessage ucMsg = (UnicastMessage)message;
         System.out.println("Unicast message received of length: " + ucMsg.UNICAST_DATA.length());
+        
+        //TODO: Unicast messages are specific to-agent messages. Currently, they are not implemented,
+        //      but will be needed for key exchanges.
     }
     
 }

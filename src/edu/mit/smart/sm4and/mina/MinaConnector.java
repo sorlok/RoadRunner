@@ -132,7 +132,7 @@ public class MinaConnector extends Connector {
     @Override
     public void sendAll(String data) {        
         if (connected && (data!=null) && (session!=null) && session.isConnected()) {
-            String str = String.format("%8h%s", data.length(), data);
+        	String str = String.format("%8h%s", data.toString().length()+1, data.toString());
             System.out.println("Outgoing data: ***" + str + "***");
             session.write(str);
         } else {

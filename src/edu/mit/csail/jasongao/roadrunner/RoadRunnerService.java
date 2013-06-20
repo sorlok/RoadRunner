@@ -1077,6 +1077,38 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 
 		stop();
 	}
+	
+	
+	private void retrieveUniqueId() {
+		//Get my Inet address and use it to generate a unique ID
+		Inet4Address addr = null;
+		if (Globals.SIM_MOBILITY) {
+			//Currently, "eth0" or "wlan0" can identify this phone.
+			addr = InterfaceMap.GetInstance().getAddress(Globals.SM_IDENTIFYING_INTERFACES);
+		} else {
+			//"eth0" only.
+			addr = InterfaceMap.GetInstance().getAddress(Globals.ADHOC_IFACE_NAME);
+		}
+		
+		//Sim Mobility requires longer IDs (so we use the entire IP address). 
+		if (Globals.SIM_MOBILITY) {
+			mId = SimMobilityBroker.GenerateIdFromInet(addr);
+		} else {
+			//take last octet of IPv4 address as my id
+			if (addr!=null) {
+				byte[] addrses = addr.getAddress();
+				mId = (addrses[3] & 0xff);
+			} else {
+				//If none, just make a Random ID and hope there are no collisions.
+				mId = rand.nextInt(0xFF);
+			}
+		}
+		
+		//Inform the user of their ID.
+		mIdStr = String.valueOf(mId);
+		log("mId=" + mId);
+	}
+	
 
 	public synchronized void start(TextToSpeech mTts_, boolean adhocEnabled_,
 			boolean onDemand_, boolean directionCcw_) {
@@ -1108,6 +1140,9 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		
 		//Connect to the Sim Mobility server.
 		if (Globals.SIM_MOBILITY) {
+			//We need this now.
+			retrieveUniqueId(); 
+			
 			simmob = new SimMobilityBroker(mIdStr, myHandler, this, new AdHocAnnouncer(), new LocationSpoofer());
 			log("Sim Mobility server connected.");
 		}
@@ -1132,34 +1167,10 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 				ast = new AdhocServerThread(mainHandler, this);
 				ast.start();
 			}
-
-			//Get my Inet address and use it to generate a unique ID
-			Inet4Address addr = null;
-			if (Globals.SIM_MOBILITY) {
-				//Currently, "eth0" or "wlan0" can identify this phone.
-				addr = InterfaceMap.GetInstance().getAddress(Globals.SM_IDENTIFYING_INTERFACES);
-			} else {
-				//"eth0" only.
-				addr = InterfaceMap.GetInstance().getAddress(Globals.ADHOC_IFACE_NAME);
-			}
 			
-			//Sim Mobility requires longer IDs (so we use the entire IP address). 
-			if (Globals.SIM_MOBILITY) {
-				mId = SimMobilityBroker.GenerateIdFromInet(addr);
-			} else {
-				//take last octet of IPv4 address as my id
-				if (addr!=null) {
-					byte[] addrses = addr.getAddress();
-					mId = (addrses[3] & 0xff);
-				} else {
-					//If none, just make a Random ID and hope there are no collisions.
-					mId = rand.nextInt(0xFF);
-				}
-			}
-			
-			//Inform the user of their ID.
-			mIdStr = String.valueOf(mId);
-			log("mId=" + mId);
+			//This is actually done earlier if SimMobility is enabled, 
+			//but doing it twice is harmless.
+			retrieveUniqueId();
 
 			/*
 			 * byte[] bytes = aat.getLocalAddress().getAddress(); long value =
