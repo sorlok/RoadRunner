@@ -32,16 +32,12 @@ public class Region {
 		boolean oddTransitions = false;
 
 		for (int i = 0, j = polySides - 1; i < polySides; j = i++) {
-			if ((vertices.get(i).getLatitude() < y && vertices.get(j)
-					.getLatitude() >= y)
-					|| (vertices.get(j).getLatitude() < y && vertices.get(i)
-							.getLatitude() >= y)) {
-				if (vertices.get(i).getLongitude()
-						+ (y - vertices.get(i).getLatitude())
-						/ (vertices.get(j).getLatitude() - vertices.get(i)
-								.getLatitude())
-						* (vertices.get(j).getLongitude() - vertices.get(i)
-								.getLongitude()) < x) {
+			if (   (vertices.get(i).getLatitude() < y && vertices.get(j).getLatitude() >= y)
+				|| (vertices.get(j).getLatitude() < y && vertices.get(i).getLatitude() >= y)) {
+				if (vertices.get(i).getLongitude() + 
+						(y - vertices.get(i).getLatitude()) / (vertices.get(j).getLatitude() 
+						- vertices.get(i).getLatitude())
+						* (vertices.get(j).getLongitude() - vertices.get(i).getLongitude()) < x) {
 					oddTransitions = !oddTransitions;
 				}
 			}

@@ -22,10 +22,10 @@ public abstract class TestRegions  {
 
 		// Region 1
 		r = new Region("Stata-1");
-		r.addVertex(42.36218276352746, -71.08994364738464);
-		r.addVertex(42.36207970542849, -71.08879566192627);
-		r.addVertex(42.36181809564884, -71.08882784843445);
-		r.addVertex(42.36184980598321, -71.08983635902405);
+		r.addVertex(42.36218276352746,-71.08994364738464);
+		r.addVertex(42.36207970542849,-71.08879566192627);
+		r.addVertex(42.36181809564884,-71.08882784843445);
+		r.addVertex(42.36184980598321,-71.08983635902405);
 		rs.add(r);
 
 		// Region 2
@@ -99,6 +99,156 @@ public abstract class TestRegions  {
 		l.setLongitude(-71.09134912490845);
 		logger.log(String.format("Test point Stata-1 is in region %s",
 				RoadRunnerService.GetRegion(regionSet, l)));
+	}
+	
+	
+	/** Regions for Randomized road network. */
+	/** Generated: 2013-08-15 15:39 */
+	public static List<Region> MakeRandomNetworkRegions(LoggerI logger) {
+	  List<Region> rs = new ArrayList<Region>();
+	  Region r;
+	  
+	  r = new Region("Region_1");
+	  r.addVertex(0.005564, 0.016406);
+	  r.addVertex(0.006955, 0.014266);
+	  r.addVertex(0.005564, 0.012126);
+	  r.addVertex(0.004173, 0.014266);
+	  rs.add(r);
+	  
+	  r = new Region("Region_2");
+	  r.addVertex(0.001855, 0.010700);
+	  r.addVertex(0.003246, 0.008560);
+	  r.addVertex(0.001855, 0.006420);
+	  r.addVertex(0.000464, 0.008560);
+	  rs.add(r);
+	  
+	  r = new Region("Region_3");
+	  r.addVertex(0.020401, 0.027819);
+	  r.addVertex(0.021792, 0.025679);
+	  r.addVertex(0.020401, 0.023539);
+	  r.addVertex(0.019010, 0.025679);
+	  rs.add(r);
+	  
+	  r = new Region("Region_4");
+	  r.addVertex(0.009273, 0.039232);
+	  r.addVertex(0.010664, 0.037092);
+	  r.addVertex(0.009273, 0.034952);
+	  r.addVertex(0.007882, 0.037092);
+	  rs.add(r);
+	  
+	  r = new Region("Region_5");
+	  r.addVertex(0.027820, 0.022113);
+	  r.addVertex(0.029211, 0.019973);
+	  r.addVertex(0.027820, 0.017833);
+	  r.addVertex(0.026429, 0.019973);
+	  rs.add(r);
+	  
+	  r = new Region("Region_6");
+	  r.addVertex(0.012983, 0.022113);
+	  r.addVertex(0.014374, 0.019973);
+	  r.addVertex(0.012983, 0.017833);
+	  r.addVertex(0.011592, 0.019973);
+	  rs.add(r);
+	  
+	  r = new Region("Region_7");
+	  r.addVertex(0.024111, 0.039232);
+	  r.addVertex(0.025502, 0.037092);
+	  r.addVertex(0.024111, 0.034952);
+	  r.addVertex(0.022720, 0.037092);
+	  rs.add(r);
+	  
+	  r = new Region("Region_8");
+	  r.addVertex(0.020401, 0.039232);
+	  r.addVertex(0.021792, 0.037092);
+	  r.addVertex(0.020401, 0.034952);
+	  r.addVertex(0.019010, 0.037092);
+	  rs.add(r);
+	  
+	  r = new Region("Region_9");
+	  r.addVertex(0.027820, 0.056352);
+	  r.addVertex(0.029211, 0.054212);
+	  r.addVertex(0.027820, 0.052072);
+	  r.addVertex(0.026429, 0.054212);
+	  rs.add(r);
+	  
+	  r = new Region("Region_10");
+	  r.addVertex(0.024111, 0.010700);
+	  r.addVertex(0.025502, 0.008560);
+	  r.addVertex(0.024111, 0.006420);
+	  r.addVertex(0.022720, 0.008560);
+	  rs.add(r);
+	  
+	  r = new Region("Region_11");
+	  r.addVertex(0.024111, 0.004993);
+	  r.addVertex(0.025502, 0.002853);
+	  r.addVertex(0.024111, 0.000713);
+	  r.addVertex(0.022720, 0.002853);
+	  rs.add(r);
+	  
+	  r = new Region("Region_12");
+	  r.addVertex(0.031529, 0.016406);
+	  r.addVertex(0.032920, 0.014266);
+	  r.addVertex(0.031529, 0.012126);
+	  r.addVertex(0.030138, 0.014266);
+	  rs.add(r);
+	  
+	  r = new Region("Region_13");
+	  r.addVertex(0.005564, 0.033526);
+	  r.addVertex(0.006955, 0.031386);
+	  r.addVertex(0.005564, 0.029246);
+	  r.addVertex(0.004173, 0.031386);
+	  rs.add(r);
+	  
+	  r = new Region("Region_14");
+	  r.addVertex(0.031529, 0.050645);
+	  r.addVertex(0.032920, 0.048505);
+	  r.addVertex(0.031529, 0.046365);
+	  r.addVertex(0.030138, 0.048505);
+	  rs.add(r);
+	  
+	  r = new Region("Region_15");
+	  r.addVertex(0.005564, 0.039232);
+	  r.addVertex(0.006955, 0.037092);
+	  r.addVertex(0.005564, 0.034952);
+	  r.addVertex(0.004173, 0.037092);
+	  rs.add(r);
+	  
+	  r = new Region("Region_16");
+	  r.addVertex(0.016692, 0.022113);
+	  r.addVertex(0.018083, 0.019973);
+	  r.addVertex(0.016692, 0.017833);
+	  r.addVertex(0.015301, 0.019973);
+	  rs.add(r);
+	  
+	  r = new Region("Region_17");
+	  r.addVertex(0.005564, 0.004993);
+	  r.addVertex(0.006955, 0.002853);
+	  r.addVertex(0.005564, 0.000713);
+	  r.addVertex(0.004173, 0.002853);
+	  rs.add(r);
+	  
+	  r = new Region("Region_18");
+	  r.addVertex(0.035239, 0.044939);
+	  r.addVertex(0.036630, 0.042799);
+	  r.addVertex(0.035239, 0.040659);
+	  r.addVertex(0.033848, 0.042799);
+	  rs.add(r);
+	  
+	  r = new Region("Region_19");
+	  r.addVertex(0.020401, 0.016406);
+	  r.addVertex(0.021792, 0.014266);
+	  r.addVertex(0.020401, 0.012126);
+	  r.addVertex(0.019010, 0.014266);
+	  rs.add(r);
+	  
+	  r = new Region("Region_20");
+	  r.addVertex(0.031529, 0.027819);
+	  r.addVertex(0.032920, 0.025679);
+	  r.addVertex(0.031529, 0.023539);
+	  r.addVertex(0.030138, 0.025679);
+	  rs.add(r);
+	  
+	  return rs;
 	}
 	
 

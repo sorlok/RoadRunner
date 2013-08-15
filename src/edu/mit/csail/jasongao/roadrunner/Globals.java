@@ -3,7 +3,7 @@ package edu.mit.csail.jasongao.roadrunner;
 public class Globals {
 	/** Enable communication via Sim Mobility, including time-step synchronization. */
 	public static final boolean SIM_MOBILITY = true;
-	public static final String SM_HOST = "192.168.1.101"; //Note that 127.0.0.1 won't work; Android assigns this to the phone.
+	public static final String SM_HOST = "128.31.35.94"; //Note that 127.0.0.1 won't work; Android assigns this to the phone.
 	public static final int SM_PORT = 6745;
 	public static final int SM_TIMEOUT = 0;  //0=infinite
 	public static final boolean SM_AUTORUN = false; //Set to "true" to auto-run the app (good for MegaDroid)
