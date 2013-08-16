@@ -18,8 +18,8 @@ public class LocationHandler extends AbstractMessageHandler {
 	/** A location update message. Uses projected (x,y) coordinates, not Latitude/Longitude. */
 	public static class LocationMessage extends Message { 
 		public LocationMessage() { this.MESSAGE_TYPE = Type.LOCATION_DATA; }
-	    private int x;
-	    private int y;
+	    private double lat;
+	    private double lng;
 	}
 	
     private LocationSpoofer locspoof;
@@ -35,8 +35,8 @@ public class LocationHandler extends AbstractMessageHandler {
          *       (but randomized networks need a fallback, as there is no projection matrix). 
          */  
         LocationMessage locMsg = (LocationMessage)message;
-        System.out.println("Current location is "+ locMsg.x + ":" + locMsg.y);
-        locspoof.setLocation(locMsg.y, locMsg.x);
+        System.out.println("Current location is lat:"+ locMsg.lat + ", lng:" + locMsg.lng);
+        locspoof.setLocation(locMsg.lat, locMsg.lng);
     }
     
 }
