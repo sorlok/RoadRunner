@@ -146,6 +146,10 @@ public class MinaConnector extends Connector {
     
     @Override
     public void handleMessage(String data) {
+    	//Trim the first 8 bytes.
+    	//String trim = data.substring(0,8);
+    	data = data.substring(8);
+    	
     	//Just pass off each message to "handle()"
     	ArrayList<Message> messages = parser.parse(data);
     	for (Message message : messages) {
