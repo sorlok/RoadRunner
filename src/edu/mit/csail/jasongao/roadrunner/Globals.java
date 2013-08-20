@@ -3,10 +3,10 @@ package edu.mit.csail.jasongao.roadrunner;
 public class Globals {
 	/** Enable communication via Sim Mobility, including time-step synchronization. */
 	public static final boolean SIM_MOBILITY = true;
-	public static final String SM_HOST = "10.0.0.3";
+	public static final String SM_HOST = "128.30.87.196";
 	//public static final String SM_HOST = "192.160.228.190";
 	//public static final String SM_HOST = "192.168.42.165";
-	public static final int SM_PORT = 6745;
+	public static final int SM_PORT = 2013;
 	public static final int SM_TIMEOUT = 0;  //0=infinite
 	
 	/** We offer single-letter tokens, sampled from this range. 
