@@ -12,6 +12,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import edu.mit.csail.jasongao.roadrunner.Globals;
 import edu.mit.smart.sm4and.MessageParser;
 import edu.mit.smart.sm4and.handler.WhoAreYouHandler;
 import edu.mit.smart.sm4and.handler.WhoAreYouHandler.WhoAreYouMessage;
@@ -56,7 +57,9 @@ public class JsonMessageParser implements MessageParser {
     	// for the closing brace and cutting everything after that. This *might* disable
     	// muultiple messages on the same stream, but for now that's not a problem.
     	src = FilterJson(src);
-        System.out.println("in JsonMessageParser.create-> "+ src);
+    	if (Globals.SM_VERBOSE_TRACE) {
+    		System.out.println("in JsonMessageParser.create-> "+ src);
+    	}
         
         //Parse the message into a generic Json object.
         JsonParser parser = new JsonParser();

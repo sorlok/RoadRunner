@@ -3,10 +3,11 @@ package edu.mit.csail.jasongao.roadrunner;
 public class Globals {
 	/** Enable communication via Sim Mobility, including time-step synchronization. */
 	public static final boolean SIM_MOBILITY = true;
-	public static final String SM_HOST = "128.30.87.196"; //Note that 127.0.0.1 won't work; Android assigns this to the phone.
+	public static final String SM_HOST = "192.168.0.106"; //Note that 127.0.0.1 won't work; Android assigns this to the phone.
 	public static final int SM_PORT = 6745;
 	public static final int SM_TIMEOUT = 0;  //0=infinite
 	public static final boolean SM_AUTORUN = false; //Set to "true" to auto-run the app (good for MegaDroid)
+	public static final boolean SM_VERBOSE_TRACE = false; //Set to "true" to get a trace of all messages sent and received.
 	
 	/** We offer single-letter tokens, sampled from this range. 
 	 *  NOTE: Tokens are *not* consistent at the moment; vehicles will offer them randomly. */

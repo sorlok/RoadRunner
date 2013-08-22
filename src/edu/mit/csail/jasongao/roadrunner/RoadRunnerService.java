@@ -1260,6 +1260,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	}
 	
 	//Location changed (with a "spoofed" flag)
+	@SuppressWarnings("unused")
 	private void locationChanged(Location loc, boolean spoofed) {
 		//Special case: Sim Mobility is bound ONLY by the spoofed messages. 
 		// (These shouldn't arrive anyway, but we check again just to be safe.)
@@ -1269,8 +1270,10 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		
 		
 		// log GPS traces
-		log_nodisplay(String.format("loc=%s", loc.toString()));
-
+		if (Globals.SM_VERBOSE_TRACE || !Globals.SIM_MOBILITY) {
+			log_nodisplay(String.format("loc=%s", loc.toString()));
+		}
+		
 		// sync internal clock to GPS on first fix
 		/*
 		 * if (!MainActivity.clockSynced) { MainActivity.clockOffset =

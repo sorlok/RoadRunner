@@ -25,6 +25,7 @@ import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
 import android.os.Handler;
 
+import edu.mit.csail.jasongao.roadrunner.Globals;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 import edu.mit.csail.sethhetu.roadrunner.LoggerI;
 
@@ -133,8 +134,10 @@ public class MinaConnector extends Connector {
     public void sendAll(String data) {        
         if (connected && (data!=null) && (session!=null) && session.isConnected()) {
         	String str = String.format("%8h%s", data.toString().length()+1, data.toString());
-            System.out.println("Outgoing data: ***" + str + "***");
-            session.write(str);
+        	if (Globals.SM_VERBOSE_TRACE) {
+        		System.out.println("Outgoing data: ***" + str + "***");
+        	}
+        	session.write(str);
         } else {
         	StringBuilder sb = new StringBuilder("Can't send data to server:");
         	sb.append("  connected=").append(connected);

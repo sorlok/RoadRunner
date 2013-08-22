@@ -7,6 +7,8 @@ package edu.mit.smart.sm4and.mina;
 import org.apache.mina.core.service.*;
 import org.apache.mina.core.session.*;
 
+import edu.mit.csail.jasongao.roadrunner.Globals;
+
 import java.util.logging.Logger;
 
 /**
@@ -62,12 +64,16 @@ public class MinaIoHandler implements IoHandler {
 
     @Override
     public void messageReceived(IoSession is, Object o) throws Exception {
-    	logger.info("(MinaHandler) received[" + o.toString() + "]");
+    	if (Globals.SM_VERBOSE_TRACE) {
+    		logger.info("(MinaHandler) received[" + o.toString() + "]");
+    	}
     	parent.handleMessage(o.toString());
     }
 
     @Override
     public void messageSent(IoSession is, Object o) throws Exception {
-    	logger.info(String.format("(MinaHandler) Message: %s was sent.", o.toString()));
+    	if (Globals.SM_VERBOSE_TRACE) {
+    		logger.info(String.format("(MinaHandler) Message: %s was sent.", o.toString()));
+    	}
     }
 }
