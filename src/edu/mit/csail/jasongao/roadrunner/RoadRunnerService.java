@@ -1125,7 +1125,9 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 
 		// Set up regions
 		if (Globals.SIM_MOBILITY) {
-			this.regions = TestRegions.MakeSimMobilityRegions();
+			//"Null" means "randomize regions".
+			this.regions = null;
+			//this.regions = TestRegions.MakeSimMobilityRegions();
 		} else {
 			this.regions = TestRegions.MakeExperimentARegions();
 			TestRegions.TestExperimentARegions(this.regions, this);
@@ -1210,13 +1212,20 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	 *       if you want the application to be aware of Sim Mobility server integration.
 	 */
 	private String getRegion(List<Region> rs, Location loc) {
-		if (Globals.SIM_MOBILITY && simmob!=null) {
-			String newRegionId = simmob.getRegion();
-			if (newRegionId!=null) { return newRegionId; }
-		} else {
-			return GetRegion(rs, loc);
+		//Randomized regions only work in a very specific case.
+		boolean randReg = Globals.SIM_MOBILITY && (simmob!=null) && (rs==null);
+		if (randReg) {
+			if (Globals.SM_ALLOW_RANDOM_REGIONS) {
+				String newRegionId = simmob.spoofRandomRegion();
+				if (newRegionId!=null) {
+					return newRegionId; //The Region was successfully spoofed.
+				}
+			}
+			return Globals.FREE_REGION_TAG; //Fall-back when attempting to spoof Regions.
 		}
-		return Globals.FREE_REGION_TAG;
+		
+		//If we *have* a Region dataset, use it.
+		return GetRegion(rs, loc);
 	}
 
 	public synchronized void stop() {

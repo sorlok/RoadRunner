@@ -274,7 +274,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	/**
 	 * Spoof regions too. Returns null for no region (e.g., "FREE")
 	 */
-	public String getRegion() {
+	public String spoofRandomRegion() {
 		if (RandGen.nextDouble() <= Globals.SM_FREE_REGION_PERCENT) { return null; }
 		return Character.toString((Globals.SM_TOKEN_RANGE.charAt(RandGen.nextInt(Globals.SM_TOKEN_RANGE.length()))));
 	}

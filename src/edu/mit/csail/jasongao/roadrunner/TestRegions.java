@@ -68,10 +68,10 @@ public abstract class TestRegions  {
 	
 	
 	/** Regions for our Sim Mobility network */
-	public static List<Region> MakeSimMobilityRegions() {
+	/*public static List<Region> MakeSimMobilityRegions() {
 		//TODO: Actually add regions.
 		return new ArrayList<Region>();
-	}
+	}*/
 	
 
 	/** Test regions in Stata courtyard */
@@ -104,7 +104,7 @@ public abstract class TestRegions  {
 	
 	/** Regions for Randomized road network. */
 	/** Generated: 2013-08-15 15:39 */
-	public static List<Region> MakeRandomNetworkRegions(LoggerI logger) {
+	/*public static List<Region> MakeRandomNetworkRegions(LoggerI logger) {
 	  List<Region> rs = new ArrayList<Region>();
 	  Region r;
 	  
@@ -249,7 +249,7 @@ public abstract class TestRegions  {
 	  rs.add(r);
 	  
 	  return rs;
-	}
+	}*/
 	
 
 	/** Regions in experiment A */
