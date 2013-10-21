@@ -4,7 +4,6 @@
 
 package edu.mit.smart.sm4and.handler;
 
-import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker.MultiCastReceiver;
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.AbstractMessageHandler;

@@ -6,12 +6,8 @@ package edu.mit.smart.sm4and.handler;
 
 import edu.mit.smart.sm4and.AbstractMessageHandler;
 import edu.mit.smart.sm4and.Connector;
-import edu.mit.smart.sm4and.MessageHandlerFactory;
 import edu.mit.smart.sm4and.MessageParser;
 import edu.mit.smart.sm4and.message.Message;
-import edu.mit.smart.sm4and.message.Message.Type;
-
-import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 
 /**
  * Wraps an AbstractMessageHandler, calling its "handle" statement in a run block. 

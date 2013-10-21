@@ -4,15 +4,11 @@
 
 package edu.mit.smart.sm4and.handler;
 
-import com.google.gson.internal.bind.TimeTypeAdapter;
-
 import edu.mit.smart.sm4and.AbstractMessageHandler;
 import edu.mit.smart.sm4and.MessageHandlerFactory;
-import edu.mit.smart.sm4and.message.Message;
 import edu.mit.smart.sm4and.message.Message.Type;
 
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
-import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker;
 import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker.MultiCastReceiver;
 import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker.TimeAdvancer;
 

@@ -7,13 +7,9 @@ package edu.mit.csail.sethhetu.roadrunner;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.net.Inet4Address;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
-
-import com.google.gson.JsonObject;
-
 
 import android.os.Handler;
 import android.util.Base64;
@@ -26,7 +22,6 @@ import edu.mit.smart.sm4and.MessageHandlerFactory;
 import edu.mit.smart.sm4and.MessageParser;
 import edu.mit.smart.sm4and.handler.AndroidHandlerFactory;
 import edu.mit.smart.sm4and.handler.MulticastHandler.MulticastMessage;
-import edu.mit.smart.sm4and.handler.SimpleAndroidHandler;
 import edu.mit.smart.sm4and.json.JsonMessageParser;
 import edu.mit.smart.sm4and.mina.MinaConnector;
 
@@ -174,19 +169,14 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		this.logger = logger;
 		this.adhoc = adhoc;
 		this.locspoof = locspoof;
+		
+		//Check that we have a unique ID.
 		this.uniqueId = uniqueId;
 		if (uniqueId==null) { throw new RuntimeException("Unique Id cannot be null."); }
 		
-		//Make a fake ID
-		//TODO: We need a better policy for assigning IDs. We can use the Android 
-		//      device ID when we initiate the connection, and then have the server
-		//      assign a shorter, integer-based ID later on.
-		//int clientID = SimMobilityBroker.RandGen.nextInt(100000)+100;
 		this.handlerFactory = new AndroidHandlerFactory(uniqueId, locspoof, new TimeAdvancer(), new MultiCastReceiver());
 		this.conn = new MinaConnector(myHandler, messageParser, handlerFactory, locspoof, logger);
-		
-		//this.returnedMessages = new ArrayList<String>();
-		
+				
 		//Connect our socket.
 		//NOTE: Currently, this task will *only* end if the session is closed. 
 		SimMobServerConnectTask task = new SimMobServerConnectTask(this, this.handlerFactory);

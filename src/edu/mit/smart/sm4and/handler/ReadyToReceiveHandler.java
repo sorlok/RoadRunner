@@ -7,7 +7,6 @@ package edu.mit.smart.sm4and.handler;
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.AbstractMessageHandler;
 import edu.mit.smart.sm4and.MessageParser;
-import edu.mit.smart.sm4and.handler.WhoAreYouHandler.WhoAmIResponse;
 import edu.mit.smart.sm4and.message.Message;
 
 /**

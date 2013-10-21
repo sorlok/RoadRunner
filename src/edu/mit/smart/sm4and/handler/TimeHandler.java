@@ -4,8 +4,6 @@
 
 package edu.mit.smart.sm4and.handler;
 
-import edu.mit.csail.jasongao.roadrunner.Globals;
-import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker;
 import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker.TimeAdvancer;
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.AbstractMessageHandler;
