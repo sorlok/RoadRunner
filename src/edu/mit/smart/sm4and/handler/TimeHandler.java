@@ -35,6 +35,6 @@ public class TimeHandler extends AbstractMessageHandler {
         System.out.println("current tick is " + timeMsg.tick + " +" + timeMsg.elapsed_ms + "ms");
         
         //Ensure that some amount of time has elapsed.
-        timeTicker.advance(timeMsg.elapsed_ms);
+        timeTicker.advance(timeMsg.tick, timeMsg.elapsed_ms);
     }
 }

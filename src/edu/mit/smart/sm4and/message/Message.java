@@ -39,6 +39,7 @@ public class Message {
         READY,
         LOCATION_DATA,
         READY_TO_RECEIVE,
+        REGIONS_SENT,
         
         //Not sure; might be both.
         MULTICAST,
@@ -47,6 +48,7 @@ public class Message {
         //To server
         WHOAMI,
         CLIENT_MESSAGES_DONE,
+        SEND_REGIONS,
     }
     
     //Convert a "MultiCast" into "MultiCastMessage.class"

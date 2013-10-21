@@ -7,7 +7,9 @@ package edu.mit.csail.sethhetu.roadrunner;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.net.Inet4Address;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
@@ -16,12 +18,14 @@ import android.util.Base64;
 import edu.mit.csail.jasongao.roadrunner.*;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.AdHocAnnouncer;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
+import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.SimMobRegionRequester;
 import edu.mit.csail.sethhetu.roadrunner.SimMobServerConnectTask.PostExecuteAction;
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.MessageHandlerFactory;
 import edu.mit.smart.sm4and.MessageParser;
 import edu.mit.smart.sm4and.handler.AndroidHandlerFactory;
 import edu.mit.smart.sm4and.handler.MulticastHandler.MulticastMessage;
+import edu.mit.smart.sm4and.handler.SendRegionHandler.SendRegionRequest;
 import edu.mit.smart.sm4and.json.JsonMessageParser;
 import edu.mit.smart.sm4and.mina.MinaConnector;
 
@@ -60,6 +64,10 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	private LoggerI logger;
 	private AdHocAnnouncer adhoc;
 	private LocationSpoofer locspoof;
+	private SimMobRegionRequester region_requester;
+	
+	//The list of Regions that Sim Mobility has sent to us. Will be used in place of RoadRunnerService's list if appropriate.
+	private List<Region> simmobRegions;
 	
 	//What's the time according to Sim Mobility?
 	private long currTimeMs;
@@ -78,6 +86,10 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	
 	private MessageParser messageParser;
 	private MessageHandlerFactory handlerFactory;
+	
+	public List<Region> getRegionSet() {
+		return simmobRegions;
+	}
 	
 	private static final long ToU(byte b) {
 		return ((int)b)&0xFF;
@@ -125,12 +137,20 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	}
 	
 	public class TimeAdvancer {
-		public void advance(int elapsedMs) {
-	        if (elapsedMs<=0) {
+		public void advance(int tick, int elapsed_ms) {
+	        if (elapsed_ms<=0) {
 	        	throw new RuntimeException("Error: elapsed time cannot be negative.");
 	        }
 	        
-			currTimeMs += elapsedMs;
+	        //Advance
+			currTimeMs += elapsed_ms;
+			
+			//First time tick?
+			if (tick==0) {
+				if (Globals.SM_REAL_REGIONS) {
+					region_requester.request();
+				}
+			}
 			
 			//Time for an announce packet?
 			if (currTimeMs-lastAnnouncePacket >= Globals.ADHOC_ANNOUNCE_PERIOD) {
@@ -139,6 +159,17 @@ public class SimMobilityBroker  implements PostExecuteAction {
 				//Send announce packet!
 				adhoc.announce(false);
 			}
+		}
+	}
+	
+	public class RegionSetter {
+		public void setRegions(Region[] regions) {
+	        if (regions==null) {
+	        	return; //Don't set.
+	        }
+	        
+	        //Change the current region set
+	        simmobRegions = Arrays.asList(regions);
 		}
 	}
 	
@@ -163,12 +194,13 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	/**
 	 * Create the broker entity and connect to the server.
 	 */
-	public SimMobilityBroker(String uniqueId, Handler myHandler, LoggerI logger, AdHocAnnouncer adhoc, LocationSpoofer locspoof) {
+	public SimMobilityBroker(String uniqueId, Handler myHandler, LoggerI logger, AdHocAnnouncer adhoc, LocationSpoofer locspoof, SimMobRegionRequester region_requester) {
 		this.messageParser = new JsonMessageParser();
 		this.myHandler = myHandler;
 		this.logger = logger;
 		this.adhoc = adhoc;
 		this.locspoof = locspoof;
+		this.region_requester = region_requester;
 		
 		//Check that we have a unique ID.
 		this.uniqueId = uniqueId;
@@ -299,6 +331,18 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		
 		//Save it for later.
 		conn.addMessage(obj);
+	}
+	
+	public void sendRegionRequest(String myId) {
+		if (myId==null) { throw new RuntimeException("Can't send region request without an id."); }
+		
+		//Send a message. 
+        SendRegionRequest obj = new SendRegionRequest();
+		obj.SENDER = String.valueOf(uniqueId);
+		obj.SENDER_TYPE = "ANDROID_EMULATOR";
+        
+        //Save it for later.
+        conn.addMessage(obj);
 	}
 	
 	

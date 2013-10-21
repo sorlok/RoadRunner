@@ -28,6 +28,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import edu.mit.csail.sethhetu.roadrunner.InterfaceMap;
 import edu.mit.csail.sethhetu.roadrunner.LoggerI;
 import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker;
+import edu.mit.smart.sm4and.handler.SendRegionHandler.SendRegionRequest;
+import edu.mit.smart.sm4and.handler.WhoAreYouHandler.WhoAmIResponse;
 
 import android.app.Service;
 import android.content.Context;
@@ -813,6 +815,18 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		}
 	}
 	
+	public class SimMobRegionRequester {
+		public void request() {
+			requestRegionsFromSimMobility();
+		}
+	}
+	
+	
+	private void requestRegionsFromSimMobility() {
+		log("Requesting Regions (and other information) from Sim Mobility.");
+		simmob.sendRegionRequest(mIdStr);
+	}
+	
 
 	private void adhocAnnounce(boolean triggerAnnounce_) {
 		if (!this.adhocEnabled) {
@@ -1145,7 +1159,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			//We need this now.
 			retrieveUniqueId();
 			
-			simmob = new SimMobilityBroker(mIdStr, myHandler, this, new AdHocAnnouncer(), new LocationSpoofer());
+			simmob = new SimMobilityBroker(mIdStr, myHandler, this, new AdHocAnnouncer(), new LocationSpoofer(), new SimMobRegionRequester());
 			log("Sim Mobility server connected.");
 		}
 
@@ -1212,6 +1226,14 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	 *       if you want the application to be aware of Sim Mobility server integration.
 	 */
 	private String getRegion(List<Region> rs, Location loc) {
+		//Override: Use the SimMobility-supplied's Region set if appropriate.
+		if (Globals.SIM_MOBILITY && (simmob!=null)) {
+			List<Region> newRegionSet = simmob.getRegionSet();
+			if (newRegionSet!=null) {
+				rs = newRegionSet;
+			}
+		}
+		
 		//Randomized regions only work in a very specific case.
 		boolean randReg = Globals.SIM_MOBILITY && (simmob!=null) && (rs==null);
 		if (randReg) {

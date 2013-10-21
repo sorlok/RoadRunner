@@ -9,6 +9,7 @@ public class Globals {
 	public static final boolean SM_AUTORUN = true; //Set to "true" to auto-run the app (good for MegaDroid)
 	public static final boolean SM_VERBOSE_TRACE = false; //Set to "true" to get a trace of all messages sent and received.
 	public static final boolean SM_ALLOW_RANDOM_REGIONS = true; //As a fallback mode, a "null" set of Region just leads to randomization.
+	public static final boolean SM_REAL_REGIONS = true; //If "true", we will ask Sim Mobility for the actual Regions. Set to false if you just want to spoof Regions.
 	
 	/** We offer single-letter tokens, sampled from this range. 
 	 *  NOTE: Tokens are *not* consistent at the moment; vehicles will offer them randomly. */
