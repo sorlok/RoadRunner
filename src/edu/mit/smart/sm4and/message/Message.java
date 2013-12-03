@@ -48,7 +48,7 @@ public class Message {
         //To server
         WHOAMI,
         CLIENT_MESSAGES_DONE,
-        SEND_REGIONS,
+        //SEND_REGIONS,
     }
     
     //Convert a "MultiCast" into "MultiCastMessage.class"

@@ -18,9 +18,9 @@ import edu.mit.smart.sm4and.message.Message;
  */
 public class SendRegionHandler extends AbstractMessageHandler {
 	/** A message from the client requesting that the server send it the list of Regions. */
-	public static class SendRegionRequest extends Message {
+	/*public static class SendRegionRequest extends Message {
 		public SendRegionRequest() { this.MESSAGE_TYPE = Type.SEND_REGIONS; }
-	}
+	}*/
 	
 	/** A response from the server with an attached list of Regions. */
 	public static class SendRegionResponse extends Message {

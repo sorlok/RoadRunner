@@ -46,7 +46,7 @@ public class WhoAreYouHandler extends AbstractMessageHandler {
         obj.ID = String.valueOf(clientID);
         obj.TYPE = "ANDROID_EMULATOR";
         obj.SENDER_TYPE = "ANDROID_EMULATOR";
-        obj.REQUIRED_SERVICES = new String[]{"SIMMOB_SRV_TIME","SIMMOB_SRV_LOCATION"};
+        obj.REQUIRED_SERVICES = new String[]{"SIMMOB_SRV_TIME","SIMMOB_SRV_LOCATION","SIMMOB_SRV_REGIONS_AND_PATH"};
         
         //The "WhoAmIResponse" is unique in that it *always* triggers a send.
         connector.addMessage(obj);

@@ -28,7 +28,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import edu.mit.csail.sethhetu.roadrunner.InterfaceMap;
 import edu.mit.csail.sethhetu.roadrunner.LoggerI;
 import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker;
-import edu.mit.smart.sm4and.handler.SendRegionHandler.SendRegionRequest;
 import edu.mit.smart.sm4and.handler.WhoAreYouHandler.WhoAmIResponse;
 
 import android.app.Service;
@@ -815,7 +814,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		}
 	}
 	
-	public class SimMobRegionRequester {
+	/*public class SimMobRegionRequester {
 		public void request() {
 			requestRegionsFromSimMobility();
 		}
@@ -825,7 +824,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	private void requestRegionsFromSimMobility() {
 		log("Requesting Regions (and other information) from Sim Mobility.");
 		simmob.sendRegionRequest(mIdStr);
-	}
+	}*/
 	
 
 	private void adhocAnnounce(boolean triggerAnnounce_) {
@@ -1159,7 +1158,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			//We need this now.
 			retrieveUniqueId();
 			
-			simmob = new SimMobilityBroker(mIdStr, myHandler, this, new AdHocAnnouncer(), new LocationSpoofer(), new SimMobRegionRequester());
+			simmob = new SimMobilityBroker(mIdStr, myHandler, this, new AdHocAnnouncer(), new LocationSpoofer());
 			log("Sim Mobility server connected.");
 		}
 
