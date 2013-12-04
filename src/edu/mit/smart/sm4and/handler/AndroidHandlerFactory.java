@@ -9,6 +9,7 @@ import edu.mit.smart.sm4and.MessageHandlerFactory;
 import edu.mit.smart.sm4and.message.Message.Type;
 
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
+import edu.mit.csail.sethhetu.roadrunner.LoggingRuntimeException;
 import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker.MultiCastReceiver;
 import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker.TimeAdvancer;
 
@@ -47,7 +48,7 @@ public class AndroidHandlerFactory implements MessageHandlerFactory {
             case READY_TO_RECEIVE:
             	return new ReadyToReceiveHandler(clientId);
             default:
-                throw new RuntimeException("Unknown message type: " + msgType.toString());
+            	throw new LoggingRuntimeException("Unknown message type: " + msgType.toString() + "  >>NOT HANDLED.");
         }
 	}
 }

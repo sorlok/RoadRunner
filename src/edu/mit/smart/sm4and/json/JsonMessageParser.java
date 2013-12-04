@@ -85,7 +85,7 @@ public class JsonMessageParser implements MessageParser {
 
         	//Depending on the type, re-parse it as a sub-class.
         	Class<? extends Message> msgClass = Message.GetClassFromType(rawObject.getMessageType());
-        	Message specificObject = gson.fromJson(msg, msgClass);
+        	Message specificObject = gson.fromJson(msg, msgClass); //This line is failing for the new message type.
         	res.add(specificObject);
         }
         

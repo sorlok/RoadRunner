@@ -4,10 +4,13 @@
 
 package edu.mit.smart.sm4and.message;
 
+import edu.mit.csail.sethhetu.roadrunner.LoggingRuntimeException;
+import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker.RegionSetter;
 import edu.mit.smart.sm4and.handler.LocationHandler.LocationMessage;
 import edu.mit.smart.sm4and.handler.MulticastHandler.MulticastMessage;
 import edu.mit.smart.sm4and.handler.ReadyHandler.ReadyMessage;
 import edu.mit.smart.sm4and.handler.ReadyToReceiveHandler.ReadyToReceiveMessage;
+import edu.mit.smart.sm4and.handler.SendRegionHandler;
 import edu.mit.smart.sm4and.handler.TimeHandler.TimeMessage;
 import edu.mit.smart.sm4and.handler.UnicastHandler.UnicastMessage;
 import edu.mit.smart.sm4and.handler.WhoAreYouHandler.WhoAreYouMessage;
@@ -39,7 +42,7 @@ public class Message {
         READY,
         LOCATION_DATA,
         READY_TO_RECEIVE,
-        REGIONS_SENT,
+        REGIONS_AND_PATH_DATA,
         
         //Not sure; might be both.
         MULTICAST,
@@ -55,10 +58,9 @@ public class Message {
     public static Class<? extends Message> GetClassFromType(Type msgType) {
     	//Sanity check; the switch will explode otherwise.
     	if (msgType==null) {
-    		System.err.println("Can't switch on a null Message type.");
-    		return null;
+    		throw new LoggingRuntimeException("Message.GetClassFromType() - Can't switch on a null Message type.");
     	}
-    	
+    	    	
     	//Dispatch.
     	switch (msgType) {
     		case WHOAREYOU:
@@ -75,8 +77,10 @@ public class Message {
     			return UnicastMessage.class;
     		case READY_TO_RECEIVE:
     			return ReadyToReceiveMessage.class;
+    		case REGIONS_AND_PATH_DATA:
+    			return SendRegionHandler.SendRegionResponse.class;
     		default:
-    			throw new RuntimeException("Unknown message type: " + msgType.toString());
+    			throw new LoggingRuntimeException("Message.GetClassFromType() - Unknown message type: " + msgType.toString());
     	}
     }
 

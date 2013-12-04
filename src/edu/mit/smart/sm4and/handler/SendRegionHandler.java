@@ -24,8 +24,9 @@ public class SendRegionHandler extends AbstractMessageHandler {
 	
 	/** A response from the server with an attached list of Regions. */
 	public static class SendRegionResponse extends Message {
-		public SendRegionResponse() { this.MESSAGE_TYPE = Type.REGIONS_SENT; }
-	    public Region[] REGIONS;
+		public SendRegionResponse() { this.MESSAGE_TYPE = Type.REGIONS_AND_PATH_DATA; }
+	    public Region[] all_regions;
+	    public Region[] region_path;
 	}
 	
 	private RegionSetter regionSetter;
@@ -40,9 +41,10 @@ public class SendRegionHandler extends AbstractMessageHandler {
         System.out.println("SendRegionHandler is handling");
         
         SendRegionResponse regionMsg= (SendRegionResponse)message;
-        System.out.println("Regions sent:  " + regionMsg.REGIONS.length);
+        System.out.println("Regions sent:  " + regionMsg.all_regions.length);
+        System.out.println("Path sent:  " + regionMsg.region_path.length);
         
         //Respond
-        regionSetter.setRegions(regionMsg.REGIONS);
+        regionSetter.setRegions(regionMsg.all_regions);
     }
 }
