@@ -14,6 +14,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -63,7 +64,20 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	LocationManager lm;
 	TelephonyManager tm;
 	TextToSpeech mTts = null;
-
+	
+	//List of free Regions (no token needed). Note that Sim Mobility currently doesn't use these (except "FREE")
+	private static final Set<String> FreeRegions = new HashSet<String>();
+	static {
+		FreeRegions.add("FREE");
+		FreeRegions.add("Mass-1");
+		FreeRegions.add("Mass-2");
+		FreeRegions.add("Mass-3");
+		FreeRegions.add("Main-1");
+		FreeRegions.add("Main-2");
+		FreeRegions.add("Main-3");
+		FreeRegions.add("Main-4");
+	}
+			
 	public void say(String msg) {
 		if (mTts != null) {
 			mTts.speak(msg, TextToSpeech.QUEUE_ADD, null);
@@ -1366,6 +1380,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 				|| this.reservationsInUse.containsKey(newRegion);
 	}
 
+	
 	public void regionTransition(String oldRegion, String newRegion) {
 		this.mRegion = newRegion;
 		
@@ -1382,18 +1397,8 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		// Offer old reservation
 		offerReservationIfInUse(oldRegion);
 
-		Set<String> freeRegions = new HashSet<String>();
-		freeRegions.add("FREE");
-		freeRegions.add("Mass-1");
-		freeRegions.add("Mass-2");
-		freeRegions.add("Mass-3");
-		freeRegions.add("Main-1");
-		freeRegions.add("Main-2");
-		freeRegions.add("Main-3");
-		freeRegions.add("Main-4");
-
 		// Check for reservation
-		if (freeRegions.contains(newRegion)) {
+		if (FreeRegions.contains(newRegion)) {
 			log(String.format("Moved from %s to %s, no reservation needed.",
 					oldRegion, newRegion));
 		} else if (this.reservationsInUse.containsKey(newRegion)) {
@@ -1429,54 +1434,12 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			this.reservationsInUse.put(newRegion, penaltyRes);
 		}
 
-		/** Navigation speech logic */
-		if (Globals.NAV_SPEECH) {
-			if (!directionCcw) { // CW Main-Vassar-Mass
-				if ("Main-1".equals(newRegion) && canDriveOn("Windsor-1")) {
-					log("Divert onto Windsor-1.");
-					say("Turn right onto Windsor, then continue to Mass Avenue.");
-				}
-				if ("Main-2".equals(newRegion) && canDriveOn("Albany-2")) {
-					log("Divert onto Albany-2.");
-					say("Turn right onto Albany, then continue to Mass Avenue.");
-				}
-				if ("Main-4".equals(newRegion)) {
-					log("Default onto Vassar-1.");
-					say("Turn right onto Vassar, then continue to Mass Avenue.");
-				}
-			} else { // CCW Mass-Vassar-Main
-				if ("Mass-1".equals(newRegion) && canDriveOn("Windsor-1")) {
-					log("Divert onto Windsor-1.");
-					say("Turn left onto Windsor, then continue to Main Street.");
-				}
-				if ("Mass-2".equals(newRegion) && canDriveOn("Albany-1")) {
-					log("Divert onto Albany-1.");
-					say("Turn left onto Albany, then continue to Main Street.");
-				}
-				if ("Mass-3".equals(newRegion)) {
-					log("Default onto Vassar-1.");
-					say("Turn left onto Vassar, then continue to Main Street.");
-				}
-			}
-		}
+		//Navigation speech logic (not for Sim Mobility).
+		informUserViaNavSpeech(newRegion);
+		
 
-		/** Request making logic */
-		if (Globals.SUPER_DENSE_REQUESTS) {
-			if ("FREE".equals(newRegion)) {
-				log("Cleared old pending GETs in FREE.");
-				getsPending.clear();
-				// Add request to pending queue
-				ResRequest r1 = new ResRequest(mId, ResRequest.RES_GET,
-						"Stata-1");
-				log(String.format("Adding new pending request for %s.",
-						r1.regionId));
-				// send directly to cloud
-				new ResRequestTask().execute(r1, Globals.CLOUD_HOST);
-			} else if ("Stata-1".equals(newRegion)) {
-				log("Cleared old pending GETs in Stata-1.");
-				getsPending.clear();
-			}
-		}
+		//Request making logic related to SuperDenseRequests
+		handleSuperDenseRequests(newRegion);
 
 		// ON-DEMAND ADHOC and CLOUD-ONLY reservation logic
 		if (Globals.NAV_REQUESTS) {
@@ -1598,6 +1561,62 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			}
 		}
 	}
+	
+	
+	///Use nav-speech (and log) functionality to tell the user where to go.
+	///Only if NavSpeech is enabled, and SimMobility is not.
+	private void informUserViaNavSpeech(String newRegion) {
+		if (!Globals.NAV_SPEECH) { return; }
+		if (Globals.SIM_MOBILITY) { return; }
+
+		if (!directionCcw) { // CW Main-Vassar-Mass
+			if ("Main-1".equals(newRegion) && canDriveOn("Windsor-1")) {
+				log("Divert onto Windsor-1.");
+				say("Turn right onto Windsor, then continue to Mass Avenue.");
+			}
+			if ("Main-2".equals(newRegion) && canDriveOn("Albany-2")) {
+				log("Divert onto Albany-2.");
+				say("Turn right onto Albany, then continue to Mass Avenue.");
+			}
+			if ("Main-4".equals(newRegion)) {
+				log("Default onto Vassar-1.");
+				say("Turn right onto Vassar, then continue to Mass Avenue.");
+			}
+		} else { // CCW Mass-Vassar-Main
+			if ("Mass-1".equals(newRegion) && canDriveOn("Windsor-1")) {
+				log("Divert onto Windsor-1.");
+				say("Turn left onto Windsor, then continue to Main Street.");
+			}
+			if ("Mass-2".equals(newRegion) && canDriveOn("Albany-1")) {
+				log("Divert onto Albany-1.");
+				say("Turn left onto Albany, then continue to Main Street.");
+			}
+			if ("Mass-3".equals(newRegion)) {
+				log("Default onto Vassar-1.");
+				say("Turn left onto Vassar, then continue to Main Street.");
+			}
+		}
+	}
+	
+	private void handleSuperDenseRequests(String newRegion) {
+		if (!Globals.SUPER_DENSE_REQUESTS) { return; }
+		
+		if ("FREE".equals(newRegion)) {
+			log("Cleared old pending GETs in FREE.");
+			getsPending.clear();
+			// Add request to pending queue
+			ResRequest r1 = new ResRequest(mId, ResRequest.RES_GET,
+					"Stata-1");
+			log(String.format("Adding new pending request for %s.",
+					r1.regionId));
+			// send directly to cloud
+			new ResRequestTask().execute(r1, Globals.CLOUD_HOST);
+		} else if ("Stata-1".equals(newRegion)) {
+			log("Cleared old pending GETs in Stata-1.");
+			getsPending.clear();
+		}
+	}
+
 
 	/** Location - provider disabled */
 	@Override
