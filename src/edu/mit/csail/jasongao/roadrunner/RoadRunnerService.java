@@ -1236,7 +1236,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		//Randomized regions only work in a very specific case.
 		boolean randReg = Globals.SIM_MOBILITY && (simmob!=null) && (rs==null);
 		if (randReg) {
-			if (Globals.SM_ALLOW_RANDOM_REGIONS) {
+			if (Globals.SM_ALLOW_RANDOM_REGIONS && firstSecondPassed()) {
 				String newRegionId = simmob.spoofRandomRegion();
 				if (newRegionId!=null) {
 					return newRegionId; //The Region was successfully spoofed.
@@ -1247,6 +1247,16 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		
 		//If we *have* a Region dataset, use it.
 		return GetRegion(rs, loc);
+	}
+	
+	
+	///Have we passed the first second of execution time?
+	///This is used as a very coarse-grained test to avoid spurious regions while Region negotiation is still taking place.
+	private boolean firstSecondPassed() {
+		if (simmob!=null) {
+			return simmob.getCurrTimeMs() > 1000;
+		}
+		return false; //Arbitrary; should never be called.
 	}
 
 	public synchronized void stop() {

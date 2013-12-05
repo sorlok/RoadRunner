@@ -136,6 +136,10 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		//new SimMobTickRequest(myHandler, new ServerTickDoneRunnable()).execute(reader);
 	}
 	
+	public long getCurrTimeMs() {
+		return currTimeMs;
+	}
+	
 	public class TimeAdvancer {
 		public void advance(int tick, int elapsed_ms) {
 	        if (elapsed_ms<=0) {
