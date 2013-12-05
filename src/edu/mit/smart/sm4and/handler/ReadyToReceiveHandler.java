@@ -31,9 +31,7 @@ public class ReadyToReceiveHandler extends AbstractMessageHandler {
     }
     
     @Override
-    public void handle(Message message, Connector connector, MessageParser parser) {
-        System.out.println("Sending back to server...");
-        
+    public void handle(Message message, Connector connector, MessageParser parser) {        
         ClientDoneResponse obj = new ClientDoneResponse();
         obj.SENDER = clientID;
         obj.SENDER_TYPE = "ANDROID_EMULATOR";

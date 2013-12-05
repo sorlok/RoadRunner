@@ -4,7 +4,7 @@
 
 package edu.mit.smart.sm4and.handler;
 
-import edu.mit.csail.jasongao.roadrunner.Region;
+import edu.mit.csail.sethhetu.roadrunner.SimpleRegion;
 import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker.RegionSetter;
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.AbstractMessageHandler;
@@ -25,8 +25,8 @@ public class SendRegionHandler extends AbstractMessageHandler {
 	/** A response from the server with an attached list of Regions. */
 	public static class SendRegionResponse extends Message {
 		public SendRegionResponse() { this.MESSAGE_TYPE = Type.REGIONS_AND_PATH_DATA; }
-	    public Region[] all_regions;
-	    public Region[] region_path;
+	    public SimpleRegion[] all_regions;
+	    public String[] region_path;
 	}
 	
 	private RegionSetter regionSetter;
@@ -40,11 +40,19 @@ public class SendRegionHandler extends AbstractMessageHandler {
     public void handle(Message message, Connector connector, MessageParser parser) {
         System.out.println("SendRegionHandler is handling");
         
-        SendRegionResponse regionMsg= (SendRegionResponse)message;
-        System.out.println("Regions sent:  " + regionMsg.all_regions.length);
-        System.out.println("Path sent:  " + regionMsg.region_path.length);
+        SendRegionResponse regionMsg = (SendRegionResponse)message;
+        
+        //Parts of this may be null
+        if (regionMsg.all_regions!=null) {
+        	System.out.println("Regions sent:  " + regionMsg.all_regions.length);
+        }
+        if (regionMsg.region_path!=null) {
+        	System.out.println("Path sent:  " + regionMsg.region_path.length);
+        }
         
         //Respond
-        regionSetter.setRegions(regionMsg.all_regions);
+        if (regionMsg.all_regions!=null) {
+        	regionSetter.setRegions(regionMsg.all_regions);
+        }
     }
 }

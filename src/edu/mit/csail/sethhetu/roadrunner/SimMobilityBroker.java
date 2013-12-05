@@ -7,6 +7,7 @@ package edu.mit.csail.sethhetu.roadrunner;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.net.Inet4Address;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -19,6 +20,7 @@ import edu.mit.csail.jasongao.roadrunner.*;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.AdHocAnnouncer;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 import edu.mit.csail.sethhetu.roadrunner.SimMobServerConnectTask.PostExecuteAction;
+import edu.mit.csail.sethhetu.roadrunner.SimpleRegion.SimpleLocation;
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.MessageHandlerFactory;
 import edu.mit.smart.sm4and.MessageParser;
@@ -117,7 +119,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		//Was there an error?
 		if (thrownException!=null) {
 			SimMobilityBroker.this.closeStreams();
-			throw new RuntimeException(thrownException);
+			throw new LoggingRuntimeException(thrownException);
 		}
 		
 		//Save objects locally.
@@ -137,7 +139,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	public class TimeAdvancer {
 		public void advance(int tick, int elapsed_ms) {
 	        if (elapsed_ms<=0) {
-	        	throw new RuntimeException("Error: elapsed time cannot be negative.");
+	        	throw new LoggingRuntimeException("Error: elapsed time cannot be negative.");
 	        }
 	        
 	        //Advance
@@ -161,13 +163,20 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	}
 	
 	public class RegionSetter {
-		public void setRegions(Region[] regions) {
+		public void setRegions(SimpleRegion[] regions) {
 	        if (regions==null) {
 	        	return; //Don't set.
 	        }
 	        
 	        //Change the current region set
-	        simmobRegions = Arrays.asList(regions);
+	        simmobRegions = new ArrayList<Region>();
+	        for (SimpleRegion sr : regions) {
+	        	Region rg = new Region(sr.id);
+	        	for (SimpleLocation sloc : sr.vertices) {
+	        		rg.addVertex(sloc.latitude, sloc.longitude);
+	        	}
+	        	simmobRegions.add(rg);
+	        }
 		}
 	}
 	
@@ -202,9 +211,9 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		
 		//Check that we have a unique ID.
 		this.uniqueId = uniqueId;
-		if (uniqueId==null) { throw new RuntimeException("Unique Id cannot be null."); }
+		if (uniqueId==null) { throw new LoggingRuntimeException("Unique Id cannot be null."); }
 		
-		this.handlerFactory = new AndroidHandlerFactory(uniqueId, locspoof, new TimeAdvancer(), new MultiCastReceiver());
+		this.handlerFactory = new AndroidHandlerFactory(uniqueId, locspoof, new TimeAdvancer(), new MultiCastReceiver(), new RegionSetter());
 		this.conn = new MinaConnector(myHandler, messageParser, handlerFactory, locspoof, logger);
 				
 		//Connect our socket.
@@ -252,7 +261,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 				else if (next=='1') { unescaped.append(";"); }
 				else if (next=='2') { unescaped.append(":"); }
 				else if (next=='3') { unescaped.append("\n"); }
-				else { throw new RuntimeException("Bad escape sequence."); }
+				else { throw new LoggingRuntimeException("Bad escape sequence."); }
 			} else {
 				unescaped.append(c);
 			}
@@ -319,7 +328,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		//   (it just passes it along), and "ID" is the ID of the emulator in question, so we
 		//   can ignore packets to ourselves.
 		//We use brackets around DATA to help ensure that we're not deserializing random junk.
-		if (myId==null || packet==null) { throw new RuntimeException("Can't broadcast without data or an id."); }
+		if (myId==null || packet==null) { throw new LoggingRuntimeException("Can't broadcast without data or an id."); }
 		
 		//Prepare the packet.
 		MulticastMessage obj = new MulticastMessage();
@@ -332,7 +341,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	}
 	
 	/*public void sendRegionRequest(String myId) {
-		if (myId==null) { throw new RuntimeException("Can't send region request without an id."); }
+		if (myId==null) { throw new LoggingRuntimeException("Can't send region request without an id."); }
 		
 		//Send a message. 
         SendRegionRequest obj = new SendRegionRequest();
@@ -361,7 +370,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		}
 		
 		public void run() {
-			if (line==null) { throw new RuntimeException("ServerTick line ignored!"); }
+			if (line==null) { throw new LoggingRuntimeException("ServerTick line ignored!"); }
 			
 			//Handle ticks last
 			int curr_tick_len = 0;
@@ -375,7 +384,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 				
 				//Messages are usually defined as "TYPE:BODY", where body is type-defined. 
 				String[] temp = msg.split(":");
-				if (temp.length!=2) { throw new RuntimeException("Unexpected message: \"" + msg + "\""); }
+				if (temp.length!=2) { throw new LoggingRuntimeException("Unexpected message: \"" + msg + "\""); }
 				
 				//Dispatch on the type. Switches are for losers!
 				String type = temp[0];
@@ -386,7 +395,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 				} else if (type.equals("LOC_UPDATE")) {
 					//body="lat,lng", in N/E latitude/longitude coordinates
 					String[] latlng = body.split(",");
-					if (latlng.length!=2) { throw new RuntimeException("lat/lng pair missing"); }
+					if (latlng.length!=2) { throw new LoggingRuntimeException("lat/lng pair missing"); }
 					double lat = Double.parseDouble(latlng[0]);
 					double lng = Double.parseDouble(latlng[1]);
 					
@@ -394,19 +403,19 @@ public class SimMobilityBroker  implements PostExecuteAction {
 					locspoof.setLocation(lat, lng);
 				} else if (type.equals("SM_ADHOC_BROADCAST")) {
 					
-					throw new RuntimeException("Disabled");
+					throw new LoggingRuntimeException("Disabled");
 					
 					
 					//body="ag_id,[packet]"
 					//The result of an ad-hoc announce message.
 					/*String[] parts = body.split(",", 2);
-					if (parts.length!=2) { throw new RuntimeException("Bad broadcast message body: " + body); }
+					if (parts.length!=2) { throw new LoggingRuntimeException("Bad broadcast message body: " + body); }
 					
 					//Get the ID of the agent sending this message, along with the packet.
 					String agId = parts[0];
 					String packet = parts[1];
 					if (packet.charAt(0)!='[' || packet.charAt(packet.length()-1)!=']') {
-						throw new RuntimeException("Incorrect broadcast packet string: " + packet);
+						throw new LoggingRuntimeException("Incorrect broadcast packet string: " + packet);
 					}
 					
 					//Ignore packets sent to yourself.
@@ -427,13 +436,13 @@ public class SimMobilityBroker  implements PostExecuteAction {
 					*/
 					//TODO
 				} else {
-					throw new RuntimeException("Unknown message type: \"" + type + "\""); 
+					throw new LoggingRuntimeException("Unknown message type: \"" + type + "\""); 
 				}
 			}
 			
 			//Move the tick forward.
 			if (curr_tick_len==0) {
-				throw new RuntimeException("Server sent messages, but no tick update!");
+				throw new LoggingRuntimeException("Server sent messages, but no tick update!");
 			} else {
 				currTimeMs += curr_tick_len;
 				
@@ -452,7 +461,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 			//      remove these, but they are effectively harmless (and *shouldn't* really
 			//      happen in practice).
 			
-			throw new RuntimeException("NO LONGER SUPPORTED.");
+			throw new LoggingRuntimeException("NO LONGER SUPPORTED.");
 			
 			/*StringBuilder sb = new StringBuilder();
 			synchronized (this) {
@@ -462,7 +471,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 					//TODO: This is risky; the "packet" in a broadcast may randomly contain a ";". 
 					//      We can reduce/eliminate the risk of this later via escaping or choosing a better
 					//      control code. For now we just close the emulator.
-					if (msg.contains(";")) { throw new RuntimeException("Message contains a separator character: \"" + msg + "\""); }
+					if (msg.contains(";")) { throw new LoggingRuntimeException("Message contains a separator character: \"" + msg + "\""); }
 					sb.append(sep+msg);
 					sep = ";";
 				}

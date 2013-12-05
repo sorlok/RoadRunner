@@ -8,6 +8,7 @@ import org.apache.mina.core.service.*;
 import org.apache.mina.core.session.*;
 
 import edu.mit.csail.jasongao.roadrunner.Globals;
+import edu.mit.csail.sethhetu.roadrunner.LoggingRuntimeException;
 
 import java.util.logging.Logger;
 
@@ -59,7 +60,7 @@ public class MinaIoHandler implements IoHandler {
     @Override
     public void exceptionCaught(IoSession is, Throwable thrwbl) throws Exception {
     	//Propagate.
-    	throw new RuntimeException(thrwbl);
+    	throw new LoggingRuntimeException(thrwbl);
     }
 
     @Override

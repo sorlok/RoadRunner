@@ -22,8 +22,8 @@ public class SimMobTickResponse extends AsyncTask<BufferedWriter, Void, Boolean>
 	}
 	
 	protected Boolean doInBackground(BufferedWriter... writer) {
-		if (writer.length!=1) { throw new RuntimeException("Reader must be 1 line."); }
-		if (this.line==null) { throw new RuntimeException("Line is null."); }
+		if (writer.length!=1) { throw new LoggingRuntimeException("Reader must be 1 line."); }
+		if (this.line==null) { throw new LoggingRuntimeException("Line is null."); }
 		
 		//Make sure our line ends with a newline.
 		if (line.isEmpty() || (line.charAt(line.length()-1)!='\n')) {
@@ -46,6 +46,6 @@ public class SimMobTickResponse extends AsyncTask<BufferedWriter, Void, Boolean>
 	protected void onProgressUpdate(Void unused) {}
 	
 	protected void onPostExecute(Boolean ok) {
-		if (!ok) { throw new RuntimeException("Writeline failed."); }
+		if (!ok) { throw new LoggingRuntimeException("Writeline failed."); }
 	}
 }

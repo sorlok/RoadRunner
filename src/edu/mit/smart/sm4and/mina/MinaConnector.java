@@ -43,7 +43,10 @@ public class MinaConnector extends Connector {
     private IoHandler ioHandler;
     private MessageParser parser;
     private MessageHandlerFactory handlerFactory;
-    private final int BUFFER_SIZE = 2048;
+    
+    //private final int BUFFER_SIZE = 2048;
+    private final int BUFFER_SIZE = 20480;
+    
     private final java.util.logging.Logger LOG = java.util.logging.Logger.getLogger(getClass().getCanonicalName());
     private LoggerI logger;
     
@@ -87,8 +90,15 @@ public class MinaConnector extends Connector {
         //Initialize the connector object.
         connector = new NioSocketConnector();
         connector.getSessionConfig().setUseReadOperation(true);
-        connector.getSessionConfig().setReadBufferSize(BUFFER_SIZE);
-        connector.getFilterChain().addLast("codec", new ProtocolCodecFilter(new TextLineCodecFactory(Charset.forName("UTF-8"))));
+        
+        //NOTE: I'm setting the maximum read/line length here, although it *seems* that the TextLineCodecFactory's 
+        //      maximum length is all that matters. ~Seth
+        connector.getSessionConfig().setMinReadBufferSize(BUFFER_SIZE);
+        TextLineCodecFactory utf8Filter = new TextLineCodecFactory(Charset.forName("UTF-8"));
+        utf8Filter.setDecoderMaxLineLength(BUFFER_SIZE);
+        
+        //Now add the codec factory to the filter chain.
+        connector.getFilterChain().addLast("codec", new ProtocolCodecFilter(utf8Filter));
         connector.setHandler(ioHandler);
         
         //Connect to the server and wait forever until it makes contact.

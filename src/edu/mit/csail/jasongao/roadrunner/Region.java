@@ -5,8 +5,7 @@ import java.util.List;
 
 import android.location.Location;
 
-public class Region {
-	
+public class Region {	
 	public String id;
 	
 	public List<Location> vertices;

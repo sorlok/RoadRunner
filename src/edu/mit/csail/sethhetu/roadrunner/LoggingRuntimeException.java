@@ -23,9 +23,11 @@ public class LoggingRuntimeException extends RuntimeException {
 	public LoggingRuntimeException(Throwable thrwb) {
 		super(thrwb);
 		System.out.println("LoggingRuntimeException constructed from: " + thrwb.getMessage());
+		thrwb.printStackTrace();
 	}
 	public LoggingRuntimeException(String message, Throwable thrwb) {
 		super(message, thrwb);
 		System.out.println(message);
+		thrwb.printStackTrace();
 	}
 }

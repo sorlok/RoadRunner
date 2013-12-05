@@ -11,8 +11,10 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 
 import edu.mit.csail.jasongao.roadrunner.Globals;
+import edu.mit.csail.sethhetu.roadrunner.LoggingRuntimeException;
 import edu.mit.smart.sm4and.MessageParser;
 import edu.mit.smart.sm4and.message.Message;
 
@@ -39,7 +41,7 @@ public class JsonMessageParser implements MessageParser {
         	}
         }
         if (numLeft!=0 || lastBracket==-1) { 
-        	throw new RuntimeException("Bad json-formatted message string; left and right bracket counts don't add up."); 
+        	throw new LoggingRuntimeException("Bad json-formatted message string; left and right bracket counts don't add up."); 
         }
         return msg.substring(0, lastBracket+1);
 	}
@@ -63,8 +65,8 @@ public class JsonMessageParser implements MessageParser {
         //Ensure we have a few mandatory properties.
         JsonObject head = root.getAsJsonObject("PACKET_HEADER");
         JsonArray data = root.getAsJsonArray("DATA");
-        if (head==null) { throw new RuntimeException("Packet arrived with no header."); }
-        if (data==null) { throw new RuntimeException("Packet arrived with no data."); }
+        if (head==null) { throw new LoggingRuntimeException("Packet arrived with no header."); }
+        if (data==null) { throw new LoggingRuntimeException("Packet arrived with no data."); }
                 
         //Dispatch parsing.
         ArrayList<Message> res = parseCustomMessageFormat(head, data);
@@ -74,7 +76,7 @@ public class JsonMessageParser implements MessageParser {
     private ArrayList<Message> parseCustomMessageFormat(JsonObject head, JsonArray data) {
     	//Ensure our message count lines up.
     	int count = head.get("NOF_MESSAGES").getAsInt();
-    	if (data.size() != count) { throw new RuntimeException("Header/body size mismatch."); }
+    	if (data.size() != count) { throw new LoggingRuntimeException("Header/body size mismatch."); }
 
     	//Iterate through each DATA element and add an appropriate Message type to the result list.
     	Gson gson = new Gson();
@@ -85,7 +87,13 @@ public class JsonMessageParser implements MessageParser {
 
         	//Depending on the type, re-parse it as a sub-class.
         	Class<? extends Message> msgClass = Message.GetClassFromType(rawObject.getMessageType());
-        	Message specificObject = gson.fromJson(msg, msgClass); //This line is failing for the new message type.
+        	Message specificObject = null;
+        	try {
+        		specificObject = gson.fromJson(msg, msgClass); //This line is failing for the new message type.
+        	} catch (JsonSyntaxException ex) {
+        		ex.printStackTrace();
+        		throw new LoggingRuntimeException(ex);
+        	}
         	res.add(specificObject);
         }
         

@@ -11,6 +11,7 @@ import edu.mit.smart.sm4and.message.Message.Type;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 import edu.mit.csail.sethhetu.roadrunner.LoggingRuntimeException;
 import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker.MultiCastReceiver;
+import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker.RegionSetter;
 import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker.TimeAdvancer;
 
 /**
@@ -21,12 +22,14 @@ public class AndroidHandlerFactory implements MessageHandlerFactory {
 	private LocationSpoofer locSpoof;
 	private TimeAdvancer timeTicker;
 	private MultiCastReceiver mcProcess;
+	private RegionSetter regSet;
 	
-	public AndroidHandlerFactory(String clientId, LocationSpoofer locSpoof, TimeAdvancer timeTicker, MultiCastReceiver mcProcess) {
+	public AndroidHandlerFactory(String clientId, LocationSpoofer locSpoof, TimeAdvancer timeTicker, MultiCastReceiver mcProcess, RegionSetter regSet) {
 		this.clientId = clientId;
 		this.locSpoof = locSpoof;
 		this.timeTicker = timeTicker;
 		this.mcProcess = mcProcess;
+		this.regSet = regSet;
 	}
 	
 	@Override
@@ -47,6 +50,8 @@ public class AndroidHandlerFactory implements MessageHandlerFactory {
             	return new UnicastHandler();
             case READY_TO_RECEIVE:
             	return new ReadyToReceiveHandler(clientId);
+            case REGIONS_AND_PATH_DATA:
+            	return new SendRegionHandler(regSet);
             default:
             	throw new LoggingRuntimeException("Unknown message type: " + msgType.toString() + "  >>NOT HANDLED.");
         }

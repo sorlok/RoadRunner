@@ -28,8 +28,8 @@ public class SimMobTickRequest extends AsyncTask<BufferedReader, Void, Boolean> 
 	}
 	
 	protected Boolean doInBackground(BufferedReader... reader) {
-		if (reader.length!=1) { throw new RuntimeException("Reader must be 1 line."); }
-		if (this.handler==null || this.onComplete==null) { throw new RuntimeException("Handler/Complete are null."); }
+		if (reader.length!=1) { throw new LoggingRuntimeException("Reader must be 1 line."); }
+		if (this.handler==null || this.onComplete==null) { throw new LoggingRuntimeException("Handler/Complete are null."); }
 				
 		//NOTE: This *shouldn't* get ahead of itself, since the server won't send any new
 		//      data until the Android device responds. We could modify this if required to 
@@ -53,6 +53,6 @@ public class SimMobTickRequest extends AsyncTask<BufferedReader, Void, Boolean> 
 	protected void onProgressUpdate(Void unused) {}
 	
 	protected void onPostExecute(Boolean ok) {
-		if (!ok) { throw new RuntimeException("Readline failed."); }
+		if (!ok) { throw new LoggingRuntimeException("Readline failed."); }
 	}
 }
