@@ -828,18 +828,6 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		}
 	}
 	
-	/*public class SimMobRegionRequester {
-		public void request() {
-			requestRegionsFromSimMobility();
-		}
-	}
-	
-	
-	private void requestRegionsFromSimMobility() {
-		log("Requesting Regions (and other information) from Sim Mobility.");
-		simmob.sendRegionRequest(mIdStr);
-	}*/
-	
 
 	private void adhocAnnounce(boolean triggerAnnounce_) {
 		if (!this.adhocEnabled) {
@@ -851,8 +839,6 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			log("ad-hoc announcement sending...");
 		}
 		
-		// myHandler.removeCallbacks(adhocAnnounceR);
-
 		AdhocPacket p = new AdhocPacket(mId, mLoc);
 
 		// AdhocPacket the state of our data link
@@ -1437,127 +1423,15 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		//Navigation speech logic (not for Sim Mobility).
 		informUserViaNavSpeech(newRegion);
 		
-
 		//Request making logic related to SuperDenseRequests
 		handleSuperDenseRequests(newRegion);
 
-		// ON-DEMAND ADHOC and CLOUD-ONLY reservation logic
+		//Update your list of required and offered tokens, under certain conditions. 
 		if (Globals.NAV_REQUESTS) {
-			if (!this.adhocEnabled || (this.adhocEnabled && this.onDemand)) {
-				if (!directionCcw) { // Main-Vassar-Mass
-					if ("Mass-1".equals(newRegion)) {
-						log("Cleared old pending GETs.");
-						getsPending.clear();
-						makeRequest(new ResRequest(mId, ResRequest.RES_GET,
-								"Windsor-1"));
-					} else if ("Main-1".equals(newRegion)
-							&& !canDriveOn("Windsor-1")) {
-						log("Cleared old pending GETs.");
-						getsPending.clear();
-						makeRequest(new ResRequest(mId, ResRequest.RES_GET,
-								"Albany-1"));
-						makeRequest(new ResRequest(mId, ResRequest.RES_GET,
-								"Albany-2"));
-					} else if ("Main-2".equals(newRegion)
-							&& !canDriveOn("Albany-1")) {
-						log("Cleared old pending GETs.");
-						getsPending.clear();
-						makeRequest(new ResRequest(mId, ResRequest.RES_GET,
-								"Vassar-1"));
-					}
-					// extra logic for clearing old GETs.
-					else if ("Mass-2".equals(newRegion)
-							|| "Mass-3".equals(newRegion)) {
-						log("Cleared old pending GETs.");
-						getsPending.clear();
-					}
-				} else { // Mass-Vassar-Main
-					if ("Main-1".equals(newRegion)) {
-						log("Cleared old pending GETs.");
-						getsPending.clear();
-						makeRequest(new ResRequest(mId, ResRequest.RES_GET,
-								"Windsor-1"));
-					} else if ("Mass-1".equals(newRegion)
-							&& !canDriveOn("Windsor-1")) {
-						log("Cleared old pending GETs.");
-						getsPending.clear();
-						makeRequest(new ResRequest(mId, ResRequest.RES_GET,
-								"Albany-1"));
-						makeRequest(new ResRequest(mId, ResRequest.RES_GET,
-								"Albany-2"));
-					} else if ("Mass-2".equals(newRegion)
-							&& !canDriveOn("Albany-1")) {
-						log("Cleared old pending GETs.");
-						getsPending.clear();
-						makeRequest(new ResRequest(mId, ResRequest.RES_GET,
-								"Vassar-1"));
-					}
-					// extra logic
-					else if ("Main-2".equals(newRegion)
-							|| "Main-3".equals(newRegion)) {
-						log("Cleared old pending GETs.");
-						getsPending.clear();
-					}
-				}
-			}
-			// PRERESERVE reservation logic
-			else {
-				if (!directionCcw) { // Main-Vassar-Mass
-					if ("Main-1".equals(newRegion)) {
-						log("PRERESERVE: Making reservations while in Main-1.");
-						makeRequest(new ResRequest(mId, ResRequest.RES_GET,
-								"Windsor-1"));
-						makeRequest(new ResRequest(mId, ResRequest.RES_GET,
-								"Albany-1"));
-						makeRequest(new ResRequest(mId, ResRequest.RES_GET,
-								"Albany-2"));
-						makeRequest(new ResRequest(mId, ResRequest.RES_GET,
-								"Vassar-1"));
-						say("Please slow down for 1 minute.");
-					}
-				} else { // Mass-Vassar-Main
-					if ("Mass-1".equals(newRegion)) {
-						log("PRERESERVE: Making reservations while in Mass-1.");
-						makeRequest(new ResRequest(mId, ResRequest.RES_GET,
-								"Windsor-1"));
-						makeRequest(new ResRequest(mId, ResRequest.RES_GET,
-								"Albany-1"));
-						makeRequest(new ResRequest(mId, ResRequest.RES_GET,
-								"Albany-2"));
-						makeRequest(new ResRequest(mId, ResRequest.RES_GET,
-								"Vassar-1"));
-						say("Please slow down for 1 minute.");
-					}
-				}
-			}
-
-			/** PUT and/or offer logic */
-			// Offer / PUT unnecessary reservations once we're on a reserved
-			// stretch.
-			if ("Windsor-1".equals(newRegion)) {
-				log("Cleared old pending GETs.");
-				getsPending.clear();
-				log("PUT all except Windsor-1");
-				offerReservationIfInUse("Vassar-1");
-				// offerReservationIfInUse("Windsor-1");
-				offerReservationIfInUse("Albany-1");
-				offerReservationIfInUse("Albany-2");
-			} else if ("Albany-1".equals(newRegion)) {
-				log("Cleared old pending GETs.");
-				getsPending.clear();
-				log("PUT all except Albany-1");
-				offerReservationIfInUse("Vassar-1");
-				offerReservationIfInUse("Windsor-1");
-				// offerReservationIfInUse("Albany-1");
-				// offerReservationIfInUse("Albany-2");
-			} else if ("Vassar-1".equals(newRegion)) {
-				log("Cleared old pending GETs.");
-				getsPending.clear();
-				log("PUT all except Vassar-1");
-				// offerReservationIfInUse("Vassar-1");
-				offerReservationIfInUse("Windsor-1");
-				offerReservationIfInUse("Albany-1");
-				offerReservationIfInUse("Albany-2");
+			if (!Globals.SIM_MOBILITY) {
+				//Many of the non-SimMob versions are hard-coded here.
+				nonSimMobReservationLogic(newRegion);
+				nonSimMobOfferUnused(newRegion);
 			}
 		}
 	}
@@ -1614,6 +1488,128 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		} else if ("Stata-1".equals(newRegion)) {
 			log("Cleared old pending GETs in Stata-1.");
 			getsPending.clear();
+		}
+	}
+	
+	private void nonSimMobReservationLogic(String newRegion) {
+		//ON-DEMAND ADHOC and CLOUD-ONLY reservation logic
+		if (!this.adhocEnabled || (this.adhocEnabled && this.onDemand)) {
+			if (!directionCcw) { // Main-Vassar-Mass
+				if ("Mass-1".equals(newRegion)) {
+					log("Cleared old pending GETs.");
+					getsPending.clear();
+					makeRequest(new ResRequest(mId, ResRequest.RES_GET,
+							"Windsor-1"));
+				} else if ("Main-1".equals(newRegion)
+						&& !canDriveOn("Windsor-1")) {
+					log("Cleared old pending GETs.");
+					getsPending.clear();
+					makeRequest(new ResRequest(mId, ResRequest.RES_GET,
+							"Albany-1"));
+					makeRequest(new ResRequest(mId, ResRequest.RES_GET,
+							"Albany-2"));
+				} else if ("Main-2".equals(newRegion)
+						&& !canDriveOn("Albany-1")) {
+					log("Cleared old pending GETs.");
+					getsPending.clear();
+					makeRequest(new ResRequest(mId, ResRequest.RES_GET,
+							"Vassar-1"));
+				}
+				// extra logic for clearing old GETs.
+				else if ("Mass-2".equals(newRegion)
+						|| "Mass-3".equals(newRegion)) {
+					log("Cleared old pending GETs.");
+					getsPending.clear();
+				}
+			} else { // Mass-Vassar-Main
+				if ("Main-1".equals(newRegion)) {
+					log("Cleared old pending GETs.");
+					getsPending.clear();
+					makeRequest(new ResRequest(mId, ResRequest.RES_GET,
+							"Windsor-1"));
+				} else if ("Mass-1".equals(newRegion)
+						&& !canDriveOn("Windsor-1")) {
+					log("Cleared old pending GETs.");
+					getsPending.clear();
+					makeRequest(new ResRequest(mId, ResRequest.RES_GET,
+							"Albany-1"));
+					makeRequest(new ResRequest(mId, ResRequest.RES_GET,
+							"Albany-2"));
+				} else if ("Mass-2".equals(newRegion)
+						&& !canDriveOn("Albany-1")) {
+					log("Cleared old pending GETs.");
+					getsPending.clear();
+					makeRequest(new ResRequest(mId, ResRequest.RES_GET,
+							"Vassar-1"));
+				}
+				// extra logic
+				else if ("Main-2".equals(newRegion)
+						|| "Main-3".equals(newRegion)) {
+					log("Cleared old pending GETs.");
+					getsPending.clear();
+				}
+			}
+		}
+		// PRERESERVE reservation logic
+		else {
+			if (!directionCcw) { // Main-Vassar-Mass
+				if ("Main-1".equals(newRegion)) {
+					log("PRERESERVE: Making reservations while in Main-1.");
+					makeRequest(new ResRequest(mId, ResRequest.RES_GET,
+							"Windsor-1"));
+					makeRequest(new ResRequest(mId, ResRequest.RES_GET,
+							"Albany-1"));
+					makeRequest(new ResRequest(mId, ResRequest.RES_GET,
+							"Albany-2"));
+					makeRequest(new ResRequest(mId, ResRequest.RES_GET,
+							"Vassar-1"));
+					say("Please slow down for 1 minute.");
+				}
+			} else { // Mass-Vassar-Main
+				if ("Mass-1".equals(newRegion)) {
+					log("PRERESERVE: Making reservations while in Mass-1.");
+					makeRequest(new ResRequest(mId, ResRequest.RES_GET,
+							"Windsor-1"));
+					makeRequest(new ResRequest(mId, ResRequest.RES_GET,
+							"Albany-1"));
+					makeRequest(new ResRequest(mId, ResRequest.RES_GET,
+							"Albany-2"));
+					makeRequest(new ResRequest(mId, ResRequest.RES_GET,
+							"Vassar-1"));
+					say("Please slow down for 1 minute.");
+				}
+			}
+		}
+	}
+	
+	private void nonSimMobOfferUnused(String newRegion) {
+		/** PUT and/or offer logic */
+		// Offer / PUT unnecessary reservations once we're on a reserved
+		// stretch.
+		if ("Windsor-1".equals(newRegion)) {
+			log("Cleared old pending GETs.");
+			getsPending.clear();
+			log("PUT all except Windsor-1");
+			offerReservationIfInUse("Vassar-1");
+			// offerReservationIfInUse("Windsor-1");
+			offerReservationIfInUse("Albany-1");
+			offerReservationIfInUse("Albany-2");
+		} else if ("Albany-1".equals(newRegion)) {
+			log("Cleared old pending GETs.");
+			getsPending.clear();
+			log("PUT all except Albany-1");
+			offerReservationIfInUse("Vassar-1");
+			offerReservationIfInUse("Windsor-1");
+			// offerReservationIfInUse("Albany-1");
+			// offerReservationIfInUse("Albany-2");
+		} else if ("Vassar-1".equals(newRegion)) {
+			log("Cleared old pending GETs.");
+			getsPending.clear();
+			log("PUT all except Vassar-1");
+			// offerReservationIfInUse("Vassar-1");
+			offerReservationIfInUse("Windsor-1");
+			offerReservationIfInUse("Albany-1");
+			offerReservationIfInUse("Albany-2");
 		}
 	}
 
