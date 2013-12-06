@@ -19,6 +19,7 @@ import android.util.Base64;
 import edu.mit.csail.jasongao.roadrunner.*;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.AdHocAnnouncer;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
+import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.PathSetter;
 import edu.mit.csail.sethhetu.roadrunner.SimMobServerConnectTask.PostExecuteAction;
 import edu.mit.csail.sethhetu.roadrunner.SimpleRegion.SimpleLocation;
 import edu.mit.smart.sm4and.Connector;
@@ -184,6 +185,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		}
 	}
 	
+	
 	public class MultiCastReceiver {
 		public void receive(String id, String base64Data) {
 			//Ignore messages sent to yourself.
@@ -205,7 +207,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	/**
 	 * Create the broker entity and connect to the server.
 	 */
-	public SimMobilityBroker(String uniqueId, Handler myHandler, LoggerI logger, AdHocAnnouncer adhoc, LocationSpoofer locspoof) {
+	public SimMobilityBroker(String uniqueId, Handler myHandler, LoggerI logger, AdHocAnnouncer adhoc, LocationSpoofer locspoof, PathSetter pathSet) {
 		this.messageParser = new JsonMessageParser();
 		this.myHandler = myHandler;
 		this.logger = logger;
@@ -217,7 +219,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		this.uniqueId = uniqueId;
 		if (uniqueId==null) { throw new LoggingRuntimeException("Unique Id cannot be null."); }
 		
-		this.handlerFactory = new AndroidHandlerFactory(uniqueId, locspoof, new TimeAdvancer(), new MultiCastReceiver(), new RegionSetter());
+		this.handlerFactory = new AndroidHandlerFactory(uniqueId, locspoof, new TimeAdvancer(), new MultiCastReceiver(), new RegionSetter(), pathSet);
 		this.conn = new MinaConnector(myHandler, messageParser, handlerFactory, locspoof, logger);
 				
 		//Connect our socket.

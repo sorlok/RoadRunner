@@ -28,6 +28,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import edu.mit.csail.sethhetu.roadrunner.InterfaceMap;
 import edu.mit.csail.sethhetu.roadrunner.LoggerI;
+import edu.mit.csail.sethhetu.roadrunner.LoggingRuntimeException;
 import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker;
 import edu.mit.smart.sm4and.handler.WhoAreYouHandler.WhoAmIResponse;
 
@@ -272,8 +273,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 					}
 
 				} else if (other.type == AdhocPacket.ANNOUNCE) {
-					for (Iterator<ResRequest> it = getsPending.iterator(); it
-							.hasNext();) {
+					for (Iterator<ResRequest> it = getsPending.iterator(); it.hasNext();) {
 						ResRequest req = it.next();
 
 						// try to get token from other vehicle?
@@ -919,15 +919,42 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	 * Activity-Service interface
 	 ***********************************************/
 
+	///If "announce" is true, an ad-hoc announce is sent after this request is added.
+	///This is usually desirable, unless you are making multiple requests in a row.
 	public void makeRequest(ResRequest r1) {
+		makeRequest(r1, true);
+	}
+	public void makeRequest(ResRequest r1, boolean announce) {
 		log(String.format("Adding new pending request for %s.", r1.regionId));
 		if (this.adhocEnabled) {
 			getsPending.add(r1); // queue up requests
-			adhocAnnounce(true); // ask nearby vehicles to announce their
-									// offers
+			if (announce) {
+				adhocAnnounce(true); // ask nearby vehicles to announce their offers
+			}
 		} else {
 			// send directly to cloud
 			new ResRequestTask().execute(r1, Globals.CLOUD_HOST);
+		}
+	}
+	
+	
+	public class PathSetter {
+		public void setPath(String[] path) {
+			if (!Globals.SIM_MOBILITY || simmob==null) {
+				return;
+			}
+			
+			//Can't set a Path without actual, defined Regions.
+			if (simmob.getRegionSet()==null) {
+				throw new LoggingRuntimeException("PathSetter.setPath() - Can't set a path without pre-defined Regions.");
+			}
+			
+			//Add each Region to the list of requests.
+			//Announce on the last one only.
+			getsPending.clear();
+			for (int i=0; i<path.length; i++) {
+				makeRequest(new ResRequest(mId, ResRequest.RES_GET, path[i]), i==path.length-1);
+			}
 		}
 	}
 
@@ -1158,7 +1185,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			//We need this now.
 			retrieveUniqueId();
 			
-			simmob = new SimMobilityBroker(mIdStr, myHandler, this, new AdHocAnnouncer(), new LocationSpoofer());
+			simmob = new SimMobilityBroker(mIdStr, myHandler, this, new AdHocAnnouncer(), new LocationSpoofer(), new PathSetter());
 			log("Sim Mobility server connected.");
 		}
 

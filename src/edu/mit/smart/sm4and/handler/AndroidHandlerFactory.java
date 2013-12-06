@@ -9,6 +9,7 @@ import edu.mit.smart.sm4and.MessageHandlerFactory;
 import edu.mit.smart.sm4and.message.Message.Type;
 
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
+import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.PathSetter;
 import edu.mit.csail.sethhetu.roadrunner.LoggingRuntimeException;
 import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker.MultiCastReceiver;
 import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker.RegionSetter;
@@ -23,13 +24,15 @@ public class AndroidHandlerFactory implements MessageHandlerFactory {
 	private TimeAdvancer timeTicker;
 	private MultiCastReceiver mcProcess;
 	private RegionSetter regSet;
+	private PathSetter pathSet;
 	
-	public AndroidHandlerFactory(String clientId, LocationSpoofer locSpoof, TimeAdvancer timeTicker, MultiCastReceiver mcProcess, RegionSetter regSet) {
+	public AndroidHandlerFactory(String clientId, LocationSpoofer locSpoof, TimeAdvancer timeTicker, MultiCastReceiver mcProcess, RegionSetter regSet, PathSetter pathSet) {
 		this.clientId = clientId;
 		this.locSpoof = locSpoof;
 		this.timeTicker = timeTicker;
 		this.mcProcess = mcProcess;
 		this.regSet = regSet;
+		this.pathSet = pathSet;
 	}
 	
 	@Override
@@ -51,7 +54,7 @@ public class AndroidHandlerFactory implements MessageHandlerFactory {
             case READY_TO_RECEIVE:
             	return new ReadyToReceiveHandler(clientId);
             case REGIONS_AND_PATH_DATA:
-            	return new SendRegionHandler(regSet);
+            	return new SendRegionHandler(regSet, pathSet);
             default:
             	throw new LoggingRuntimeException("Unknown message type: " + msgType.toString() + "  >>NOT HANDLED.");
         }

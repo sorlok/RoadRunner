@@ -4,6 +4,7 @@
 
 package edu.mit.smart.sm4and.handler;
 
+import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.PathSetter;
 import edu.mit.csail.sethhetu.roadrunner.SimpleRegion;
 import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker.RegionSetter;
 import edu.mit.smart.sm4and.Connector;
@@ -30,10 +31,12 @@ public class SendRegionHandler extends AbstractMessageHandler {
 	}
 	
 	private RegionSetter regionSetter;
+	private PathSetter pathSetter;
 	    
-    public SendRegionHandler(RegionSetter regionSetter) {
+    public SendRegionHandler(RegionSetter regionSetter, PathSetter pathSetter) {
         System.out.println("creating SendRegionHandler");
         this.regionSetter = regionSetter;
+        this.pathSetter = pathSetter;
     }
 
     @Override
@@ -53,6 +56,9 @@ public class SendRegionHandler extends AbstractMessageHandler {
         //Respond
         if (regionMsg.all_regions!=null) {
         	regionSetter.setRegions(regionMsg.all_regions);
+        }
+        if (regionMsg.region_path!=null) {
+        	pathSetter.setPath(regionMsg.region_path);
         }
     }
 }
