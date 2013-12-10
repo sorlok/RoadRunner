@@ -869,8 +869,8 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	///Linearly convert a Lat/Lng pair to meters. Only works if the difference is small (hence, call normalize_to_meters() first).
 	private void linear_convert_to_meters(double lat, double lng, PointF res) {
 		//Assume we are at the equator.
-		res.x = (float)(lng * 111.321);
-		res.y = (float)(lat * 110.567);
+		res.x = (float)(lng * 111.321 * 1000);
+		res.y = (float)(lat * 110.567 * 1000);
 	}
 	
 	
@@ -912,7 +912,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		}
 		
 		//Are we too close?
-		log("Current distance to next Region (" + nextRes.regionId + ") is: " + minDist);
+		//System.out.println("Current distance to next Region (" + nextRes.regionId + ") is: " + minDist);
 		if (minDist<Globals.SM_REROUTE_DISTANCE) { 
 			throw new LoggingRuntimeException("Need to reroute!"); 
 		} 
