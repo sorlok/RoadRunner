@@ -26,6 +26,19 @@ public class Globals {
 	/** With what (uniform) percentage is a vehicle in a free zone? */
 	public static final double SM_FREE_REGION_PERCENT = 0.5;
 	
+	/** 
+	 * When do we perform checks to see if we should re-route before entering a Region?
+	 * The _BASE value is the minimum, and a random value between 0 and _ADDITIVE is added
+	 * when the actual wait time is calculated.
+	 * We stagger these to avoid slowing down every X  time ticks, which would throw off our measurements.
+	 * Currently set to 1.0 to check every 2.0 (1.9) seconds.
+	 */
+	public static final int SM_REROUTE_CHECK_BASE = 1000;
+	public static final int SM_REROUTE_CHECK_ADDITIVE = 1000;
+	
+	/** At what distance (or less) do we re-route if we are unable to find a token. */
+	public static final double SM_REROUTE_DISTANCE = 250; //meters
+	
 	/** What string constitutes a "free" region. */
 	public static final String FREE_REGION_TAG = "FREE";
 	

@@ -10,6 +10,7 @@ import java.net.Inet4Address;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -20,6 +21,7 @@ import edu.mit.csail.jasongao.roadrunner.*;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.AdHocAnnouncer;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.PathSetter;
+import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.RegionChecker;
 import edu.mit.csail.sethhetu.roadrunner.SimMobServerConnectTask.PostExecuteAction;
 import edu.mit.csail.sethhetu.roadrunner.SimpleRegion.SimpleLocation;
 import edu.mit.smart.sm4and.Connector;
@@ -66,15 +68,19 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	private AdHocAnnouncer adhoc;
 	private LocationSpoofer locspoof;
 	//private SimMobRegionRequester region_requester;
+	private RegionChecker regcheck;
 	
 	//The list of Regions that Sim Mobility has sent to us. Will be used in place of RoadRunnerService's list if appropriate.
-	private List<Region> simmobRegions;
+	private Hashtable<String, Region> simmobRegions;
 	
 	//What's the time according to Sim Mobility?
 	private long currTimeMs;
 	
 	//We send announce packets every 2 seconds (2000 ms)
 	private long lastAnnouncePacket;
+	
+	//We check the current route's token feasibilty every N + rand(0,M) seconds.
+	private long nextRegionRerouteCheck;
 	
 	//Let's make this non-deterministic.
 	private static Random RandGen = new Random();
@@ -88,7 +94,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	private MessageParser messageParser;
 	private MessageHandlerFactory handlerFactory;
 	
-	public List<Region> getRegionSet() {
+	public Hashtable<String, Region> getRegionSet() {
 		return simmobRegions;
 	}
 	
@@ -134,11 +140,16 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		//As always, messages are sent before the final "done" message.
 		this.currTimeMs = 0;
 		this.lastAnnouncePacket = -1 * Globals.ADHOC_ANNOUNCE_PERIOD; //Immediately dispatch an announce packet.
+		this.nextRegionRerouteCheck = calcNextRegionRerouteCheck();  //Schedule like normal (includes a bit of randomness).
 		//new SimMobTickRequest(myHandler, new ServerTickDoneRunnable()).execute(reader);
 	}
 	
 	public long getCurrTimeMs() {
 		return currTimeMs;
+	}
+	
+	private long calcNextRegionRerouteCheck() {
+		return RandGen.nextInt(Globals.SM_REROUTE_CHECK_ADDITIVE) + Globals.SM_REROUTE_CHECK_BASE;
 	}
 	
 	public class TimeAdvancer {
@@ -164,6 +175,17 @@ public class SimMobilityBroker  implements PostExecuteAction {
 				//Send announce packet!
 				adhoc.announce(false);
 			}
+			
+			//Time for a Region rerouting check?
+			nextRegionRerouteCheck -= currTimeMs;
+			if (nextRegionRerouteCheck <= 0) {
+				//Carry over the remainder.
+				long nextCheck = calcNextRegionRerouteCheck();
+				nextRegionRerouteCheck += nextCheck;
+				
+				//Perform a region check.
+				regcheck.checkAndReroute();
+			}
 		}
 	}
 	
@@ -174,13 +196,13 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	        }
 	        
 	        //Change the current region set
-	        simmobRegions = new ArrayList<Region>();
+	        simmobRegions = new Hashtable<String, Region>();
 	        for (SimpleRegion sr : regions) {
 	        	Region rg = new Region(sr.id);
 	        	for (SimpleLocation sloc : sr.vertices) {
 	        		rg.addVertex(sloc.latitude, sloc.longitude);
 	        	}
-	        	simmobRegions.add(rg);
+	        	simmobRegions.put(rg.id, rg);
 	        }
 		}
 	}
@@ -207,13 +229,14 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	/**
 	 * Create the broker entity and connect to the server.
 	 */
-	public SimMobilityBroker(String uniqueId, Handler myHandler, LoggerI logger, AdHocAnnouncer adhoc, LocationSpoofer locspoof, PathSetter pathSet) {
+	public SimMobilityBroker(String uniqueId, Handler myHandler, LoggerI logger, AdHocAnnouncer adhoc, LocationSpoofer locspoof, PathSetter pathSet, RegionChecker regcheck) {
 		this.messageParser = new JsonMessageParser();
 		this.myHandler = myHandler;
 		this.logger = logger;
 		this.adhoc = adhoc;
 		this.locspoof = locspoof;
 		//this.region_requester = region_requester;
+		this.regcheck = regcheck;
 		
 		//Check that we have a unique ID.
 		this.uniqueId = uniqueId;
@@ -313,6 +336,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		if (RandGen.nextDouble() <= Globals.SM_FREE_REGION_PERCENT) { return null; }
 		return Character.toString((Globals.SM_TOKEN_RANGE.charAt(RandGen.nextInt(Globals.SM_TOKEN_RANGE.length()))));
 	}
+	
 	
 	
 	//TODO: This does nothing while reader/writer are null.

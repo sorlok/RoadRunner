@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,8 @@ import edu.mit.smart.sm4and.handler.WhoAreYouHandler.WhoAmIResponse;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Point;
+import android.graphics.PointF;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -106,7 +109,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	 */
 	private long lastDataActivity = 0;
 
-	private List<Region> regions;
+	private Hashtable<String, Region> regions;
 
 	private Location mLoc;
 	private String mRegion = "FREE";
@@ -155,7 +158,9 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		}
 
 		return null;
-	}
+	}	
+	
+	
 
 	/***********************************************
 	 * Handle messages from other components and threads
@@ -816,6 +821,109 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			myHandler.postDelayed(this, Globals.REQUEST_DEADLINE_CHECK_PERIOD);
 		}
 	};
+	
+	
+	/**
+	 * Region checker
+	 */
+	
+	///This code is taken from the OpenJDK.
+	//Returns the distance between this point and the line (extended to infinity), or 0 if the point is on the line.
+	///http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/7-b147/java/awt/geom/Line2D.java
+	private static double pt_line_dist(PointF p1, PointF p2, PointF pt) {
+		//Adjust vectors relative to x1,y1
+		// x2,y2 becomes relative vector from x1,y1 to end of segment
+		p2.x -= p1.x;
+		p2.y -= p1.y;
+		// px,py becomes relative vector from x1,y1 to test point
+		pt.x -= p1.x;
+		pt.y -= p1.y;
+		double dotprod = pt.x * p2.x + pt.y * p2.y;
+		// dotprod is the length of the px,py vector
+		// projected on the x1,y1=>x2,y2 vector times the
+		// length of the x1,y1=>x2,y2 vector
+		double projlenSq = dotprod * dotprod / (p2.x * p2.x + p2.y * p2.y);
+		// Distance to line is now the length of the relative point
+		// vector minus the length of its projection onto the line
+		double lenSq = pt.x * pt.x + pt.y * pt.y - projlenSq;
+		if (lenSq < 0) {
+			lenSq = 0;
+		}
+		return Math.sqrt(lenSq);
+	}
+	
+	
+	///This is a hack; it just normalizes the points to each other then converts them LINEARLY to meters as if
+	/// they were at the equator. It's accurate enough for the kinds of distance checks we're doing (re-routing).
+	///NOTE: Since this hack is only used for distances, we do not invert latitude.
+	private void normalize_to_meters(Location l1, Location l2, Location l3, PointF p1, PointF p2, PointF p3) {
+		double minLat = Math.min(Math.min(l1.getLatitude(), l2.getLatitude()), l3.getLatitude());
+		double minLng = Math.min(Math.min(l1.getLongitude(), l2.getLongitude()), l3.getLongitude());
+		
+		//Now convert.
+		linear_convert_to_meters(l1.getLatitude() - minLat, l1.getLongitude() - minLng, p1);
+		linear_convert_to_meters(l2.getLatitude() - minLat, l2.getLongitude() - minLng, p2);
+		linear_convert_to_meters(l3.getLatitude() - minLat, l3.getLongitude() - minLng, p3);
+	}
+	
+	///Linearly convert a Lat/Lng pair to meters. Only works if the difference is small (hence, call normalize_to_meters() first).
+	private void linear_convert_to_meters(double lat, double lng, PointF res) {
+		//Assume we are at the equator.
+		res.x = (float)(lng * 111.321);
+		res.y = (float)(lat * 110.567);
+	}
+	
+	
+	//Check if we are too close to our next Region and must re-route.
+	private void checkNextRegionAndReroute() {
+		//Only matters if we're waiting on at lest one token.
+		ResRequest nextRes = getsPending.peek();
+		if (nextRes==null || nextRes.regionId==null || mLoc==null) { return; }
+		
+		//This relies on SimMob regions.
+		if (simmob.getRegionSet()==null) {
+			throw new LoggingRuntimeException("RoadRunnerService.checkNextRegionAndReroute() - SimMob regions should be on by now.");
+		}
+		
+		//Retrieve the region.
+		Region region = simmob.getRegionSet().get(nextRes.regionId);
+		if (region==null) {
+			throw new LoggingRuntimeException("RoadRunnerService.checkNextRegionAndReroute() - Unexpected null region for key: " + nextRes.regionId);
+		}
+		
+		//Check how close we are to that Region. To do this, we check the intersection point to each of the Region's segments.
+		//There are more efficient ways to do this, but it hardly matters.
+		double minDist = Globals.SM_REROUTE_DISTANCE * 2.0; //Start way off.
+		Location prevPt = region.vertices.get(region.vertices.size()-1);
+		for (Location currPt : region.vertices) {
+			//"Normalize" these points to get an idea of their rough distances in meters.
+			PointF ourPos = null;
+			PointF currPos = null;
+			PointF prevPos = null;
+			normalize_to_meters(mLoc, currPt, prevPt, ourPos, currPos, prevPos);
+			
+			//Calculate the intersection.
+			double ptLineDist = pt_line_dist(prevPos, currPos, ourPos);
+			minDist = Math.min(minDist, ptLineDist);
+			if (minDist<Globals.SM_REROUTE_DISTANCE) { break; }
+			
+			//Update
+			prevPt = currPt;
+		}
+		
+		//Are we too close?
+		log("Current distance to next Region (" + nextRes.regionId + ") is: " + minDist);
+		if (minDist<Globals.SM_REROUTE_DISTANCE) { 
+			throw new LoggingRuntimeException("Need to reroute!"); 
+		} 
+	}
+	
+	public class RegionChecker {
+		public void checkAndReroute() {
+			checkNextRegionAndReroute();
+		}
+	}
+	
 
 	/***********************************************
 	 * Adhoc announcements
@@ -1185,7 +1293,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			//We need this now.
 			retrieveUniqueId();
 			
-			simmob = new SimMobilityBroker(mIdStr, myHandler, this, new AdHocAnnouncer(), new LocationSpoofer(), new PathSetter());
+			simmob = new SimMobilityBroker(mIdStr, myHandler, this, new AdHocAnnouncer(), new LocationSpoofer(), new PathSetter(), new RegionChecker());
 			log("Sim Mobility server connected.");
 		}
 
@@ -1236,10 +1344,8 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	 *       if you want the application to be aware of Sim Mobility server integration.
 	 */
 	// http://stackoverflow.com/questions/1066589/java-iterate-through-hashmap
-	public static String GetRegion(List<Region> rs, Location loc) {
-		Iterator<Region> it = rs.iterator();
-		while (it.hasNext()) {
-			Region r = (Region) it.next();
+	public static String GetRegion(Hashtable<String, Region> rs, Location loc) {
+		for (Region r : rs.values()) {
 			if (r.contains(loc)) {
 				return r.id;
 			}
@@ -1251,10 +1357,10 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	 * TODO: This may not work exactly as expected; rrs.getRegion() *must* be called
 	 *       if you want the application to be aware of Sim Mobility server integration.
 	 */
-	private String getRegion(List<Region> rs, Location loc) {
+	private String getRegion(Hashtable<String, Region> rs, Location loc) {
 		//Override: Use the SimMobility-supplied's Region set if appropriate.
 		if (Globals.SIM_MOBILITY && (simmob!=null)) {
-			List<Region> newRegionSet = simmob.getRegionSet();
+			Hashtable<String, Region> newRegionSet = simmob.getRegionSet();
 			if (newRegionSet!=null) {
 				rs = newRegionSet;
 			}
