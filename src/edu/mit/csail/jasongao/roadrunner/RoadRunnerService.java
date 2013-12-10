@@ -897,9 +897,9 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		Location prevPt = region.vertices.get(region.vertices.size()-1);
 		for (Location currPt : region.vertices) {
 			//"Normalize" these points to get an idea of their rough distances in meters.
-			PointF ourPos = null;
-			PointF currPos = null;
-			PointF prevPos = null;
+			PointF ourPos = new PointF();
+			PointF currPos = new PointF();
+			PointF prevPos = new PointF();
 			normalize_to_meters(mLoc, currPt, prevPt, ourPos, currPos, prevPos);
 			
 			//Calculate the intersection.
