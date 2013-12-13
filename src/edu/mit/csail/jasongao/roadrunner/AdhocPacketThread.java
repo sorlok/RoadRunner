@@ -5,13 +5,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.Enumeration;
 
 import edu.mit.csail.sethhetu.roadrunner.InterfaceMap;
 import edu.mit.csail.sethhetu.roadrunner.LoggerI;
@@ -19,6 +16,7 @@ import edu.mit.csail.sethhetu.roadrunner.LoggerI;
 import android.os.Handler;
 
 public class AdhocPacketThread extends Thread {
+	@SuppressWarnings("unused")
 	private static final String TAG = "AdhocPacketThread";
 
 	private Handler parentHandler;
@@ -47,12 +45,6 @@ public class AdhocPacketThread extends Thread {
 	private void log(String s) {
 		if (logger != null) {
 			logger.log(s);
-		}
-	}
-
-	private void log_nodisplay(String s) {
-		if (logger != null) {
-			logger.log_nodisplay(s);
 		}
 	}
 

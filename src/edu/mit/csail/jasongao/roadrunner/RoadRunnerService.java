@@ -10,11 +10,9 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.Inet4Address;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -31,12 +29,10 @@ import edu.mit.csail.sethhetu.roadrunner.InterfaceMap;
 import edu.mit.csail.sethhetu.roadrunner.LoggerI;
 import edu.mit.csail.sethhetu.roadrunner.LoggingRuntimeException;
 import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker;
-import edu.mit.smart.sm4and.handler.WhoAreYouHandler.WhoAmIResponse;
 
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Point;
 import android.graphics.PointF;
 import android.location.Location;
 import android.location.LocationListener;
@@ -343,6 +339,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	 *            Location of vehicle 2
 	 * @return true is the link is viable, false if not
 	 */
+	@SuppressWarnings("unused")
 	private boolean linkIsViableDSRCComplex(Location v1, AdhocPacket other) {
 		Location v2 = other.getLocation();
 
@@ -472,6 +469,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	 *            Location of vehicle 2
 	 * @return true is the link is viable, false if not
 	 */
+	@SuppressWarnings("unused")
 	private boolean linkIsViableWiFi(Location v1, AdhocPacket other) {
 		Location v2 = other.getLocation();
 

@@ -10,7 +10,9 @@ import android.util.Log;
 public class AdhocServerThread extends Thread {
 	private static final String TAG = "AdhocServerThread";
 
+	@SuppressWarnings("unused")
 	private Handler parentHandler;
+	
 	private RoadRunnerService rrs;
 
 	private ServerSocket mySocket;

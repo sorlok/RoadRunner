@@ -20,7 +20,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
-import android.provider.Settings.Secure;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.TextToSpeech.OnInitListener;
 import android.util.Log;
@@ -132,8 +131,10 @@ public class MainActivity extends Activity implements OnInitListener {
 	 ***********************************************/
 
 	private boolean experimentsRunning = false;
-	private boolean firstSet = false;
 	private int experimentNumber = 0;
+	
+	@SuppressWarnings("unused")
+	private boolean firstSet = false;
 
 	/*** Nov 30 2012 */
 	private Runnable endExperimentR = new Runnable() {
@@ -526,10 +527,12 @@ public class MainActivity extends Activity implements OnInitListener {
 	 * ResRequest
 	 ***********************************************/
 
+	@SuppressWarnings("unused")
 	public void doRootCmds(List<String> cmds) throws Exception {
 		// Disable under Gingerbread / Saurom, broken...
-		if (true)
+		if (true) {
 			return;
+		}
 
 		Process process = Runtime.getRuntime().exec("su");
 		DataOutputStream os = new DataOutputStream(process.getOutputStream());

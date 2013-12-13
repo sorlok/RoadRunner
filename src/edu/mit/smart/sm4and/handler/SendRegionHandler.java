@@ -10,9 +10,7 @@ import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker.RegionSetter;
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.AbstractMessageHandler;
 import edu.mit.smart.sm4and.MessageParser;
-import edu.mit.smart.sm4and.handler.WhoAreYouHandler.WhoAmIResponse;
 import edu.mit.smart.sm4and.message.Message;
-import edu.mit.smart.sm4and.message.Message.Type;
 
 
 /**

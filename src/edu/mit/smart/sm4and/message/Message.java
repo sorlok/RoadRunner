@@ -5,7 +5,6 @@
 package edu.mit.smart.sm4and.message;
 
 import edu.mit.csail.sethhetu.roadrunner.LoggingRuntimeException;
-import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker.RegionSetter;
 import edu.mit.smart.sm4and.handler.LocationHandler.LocationMessage;
 import edu.mit.smart.sm4and.handler.MulticastHandler.MulticastMessage;
 import edu.mit.smart.sm4and.handler.ReadyHandler.ReadyMessage;
@@ -88,8 +87,4 @@ public class Message {
     public Type getMessageType() {
         return MESSAGE_TYPE;
     }
-
-    /*public void setMessageType(MessageType msgType) {
-        this.msgType = msgType;
-    }*/
 }

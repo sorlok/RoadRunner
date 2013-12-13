@@ -46,10 +46,12 @@ public class ResRequest implements Serializable {
 	}
 
 	/** Checks signature and expiration */
+	@SuppressWarnings("unused")
 	public boolean tokenIsValid() {
 		// TODO EXPT_DEBUG
-		if (true)
+		if (true) {
 			return true;
+		}
 
 		// Check expiration
 		long now = System.currentTimeMillis();

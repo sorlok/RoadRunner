@@ -1,7 +1,5 @@
 package edu.mit.csail.sethhetu.roadrunner;
 
-import java.util.List;
-
 
 /**
  * A simpler version of a Region, used for serialization.
