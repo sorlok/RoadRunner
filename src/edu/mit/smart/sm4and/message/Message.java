@@ -52,6 +52,7 @@ public class Message {
         WHOAMI,
         CLIENT_MESSAGES_DONE,
         //SEND_REGIONS,
+        REMOTE_LOG,
     }
     
     //Convert a "MultiCast" into "MultiCastMessage.class"

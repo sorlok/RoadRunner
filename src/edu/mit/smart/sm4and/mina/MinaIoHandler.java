@@ -73,8 +73,8 @@ public class MinaIoHandler implements IoHandler {
 
     @Override
     public void messageSent(IoSession is, Object o) throws Exception {
-    	if (Globals.SM_VERBOSE_TRACE) {
+    	//if (Globals.SM_VERBOSE_TRACE) {
     		logger.info(String.format("(MinaHandler) Message: %s was sent.", o.toString()));
-    	}
+    	//}
     }
 }

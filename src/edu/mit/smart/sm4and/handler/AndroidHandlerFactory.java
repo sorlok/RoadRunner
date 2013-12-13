@@ -54,7 +54,7 @@ public class AndroidHandlerFactory implements MessageHandlerFactory {
             case READY_TO_RECEIVE:
             	return new ReadyToReceiveHandler(clientId);
             case REGIONS_AND_PATH_DATA:
-            	return new SendRegionHandler(regSet, pathSet);
+            	return new SendRegionHandler(regSet, pathSet, clientId);
             default:
             	throw new LoggingRuntimeException("Unknown message type: " + msgType.toString() + "  >>NOT HANDLED.");
         }

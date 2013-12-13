@@ -10,7 +10,9 @@ import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker.RegionSetter;
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.AbstractMessageHandler;
 import edu.mit.smart.sm4and.MessageParser;
+import edu.mit.smart.sm4and.handler.WhoAreYouHandler.WhoAmIResponse;
 import edu.mit.smart.sm4and.message.Message;
+import edu.mit.smart.sm4and.message.Message.Type;
 
 
 /**
@@ -30,13 +32,21 @@ public class SendRegionHandler extends AbstractMessageHandler {
 	    public String[] region_path;
 	}
 	
+	//Simple remote-Log message. (TODO: put into its own file).
+	public static class RemoteLogMessage extends Message {
+		public RemoteLogMessage() { this.MESSAGE_TYPE = Type.REMOTE_LOG; }
+	    public String log_message;
+	}
+	
 	private RegionSetter regionSetter;
 	private PathSetter pathSetter;
+	private String clientID;
 	    
-    public SendRegionHandler(RegionSetter regionSetter, PathSetter pathSetter) {
+    public SendRegionHandler(RegionSetter regionSetter, PathSetter pathSetter, String clientID) {
         System.out.println("creating SendRegionHandler");
         this.regionSetter = regionSetter;
         this.pathSetter = pathSetter;
+        this.clientID = clientID;
     }
 
     @Override
@@ -46,12 +56,7 @@ public class SendRegionHandler extends AbstractMessageHandler {
         SendRegionResponse regionMsg = (SendRegionResponse)message;
         
         //Parts of this may be null
-        if (regionMsg.all_regions!=null) {
-        	System.out.println("Regions sent:  " + regionMsg.all_regions.length);
-        }
-        if (regionMsg.region_path!=null) {
-        	System.out.println("Path sent:  " + regionMsg.region_path.length);
-        }
+        logAndReflectToServer(connector, regionMsg);
         
         //Respond
         if (regionMsg.all_regions!=null) {
@@ -60,5 +65,30 @@ public class SendRegionHandler extends AbstractMessageHandler {
         if (regionMsg.region_path!=null) {
         	pathSetter.setPath(regionMsg.region_path);
         }
+    }
+    
+    //Log locally (and remotely) that the Region/Path set was received.
+    private void logAndReflectToServer(Connector connector, SendRegionResponse regionMsg) {
+        if (regionMsg.all_regions!=null) {
+        	String msg = "Client received Region set from server [" + regionMsg.all_regions.length + "]";
+        	System.out.println(msg);
+        	reflectToServer(connector, msg);
+        }
+        if (regionMsg.region_path!=null) {
+        	String msg = "Client received a new Path from server [" + regionMsg.region_path.length + "]";
+        	System.out.println(msg);
+        	reflectToServer(connector, msg);
+        }
+    }
+    
+    private void reflectToServer(Connector connector, String msg) {
+        //Prepare a response.
+    	RemoteLogMessage obj = new RemoteLogMessage();
+        obj.log_message = msg;
+        obj.SENDER_TYPE = "ANDROID_EMULATOR";
+        obj.SENDER = clientID;
+        
+        //Append it.
+        connector.addMessage(obj);
     }
 }
