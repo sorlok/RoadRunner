@@ -1470,7 +1470,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		String oldRegion = this.mRegion;
 		String newRegion = getRegion(this.regions, loc);
 		
-		if (Globals.SIM_MOBILITY) {
+		if (Globals.SIM_MOBILITY && (newRegion != oldRegion)) {
 			log("My location updated to: " + loc.getLatitude() + "," + loc.getLongitude() + " ; region: " + newRegion);
 		}
 		
