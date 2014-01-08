@@ -5,6 +5,7 @@
 package edu.mit.smart.sm4and.handler;
 
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.PathSetter;
+import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker;
 import edu.mit.csail.sethhetu.roadrunner.SimpleRegion;
 import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker.RegionSetter;
 import edu.mit.smart.sm4and.Connector;
@@ -22,6 +23,12 @@ public class SendRegionHandler extends AbstractMessageHandler {
 	/*public static class SendRegionRequest extends Message {
 		public SendRegionRequest() { this.MESSAGE_TYPE = Type.SEND_REGIONS; }
 	}*/
+	
+	
+	public static class RerouteRequest extends Message {
+		public RerouteRequest() { this.MESSAGE_TYPE = Type.REROUTE_REQUEST; }
+		public String blacklist_region;
+	}
 	
 	/** A response from the server with an attached list of Regions. */
 	public static class SendRegionResponse extends Message {
@@ -70,23 +77,12 @@ public class SendRegionHandler extends AbstractMessageHandler {
         if (regionMsg.all_regions!=null) {
         	String msg = "Client received Region set from server [" + regionMsg.all_regions.length + "]";
         	System.out.println(msg);
-        	reflectToServer(connector, msg);
+        	SimMobilityBroker.ReflectToServer(connector, clientID, msg);
         }
         if (regionMsg.region_path!=null) {
         	String msg = "Client received a new Path from server [" + regionMsg.region_path.length + "]";
         	System.out.println(msg);
-        	reflectToServer(connector, msg);
+        	SimMobilityBroker.ReflectToServer(connector, clientID, msg);
         }
-    }
-    
-    private void reflectToServer(Connector connector, String msg) {
-        //Prepare a response.
-    	RemoteLogMessage obj = new RemoteLogMessage();
-        obj.log_message = msg;
-        obj.SENDER_TYPE = "ANDROID_EMULATOR";
-        obj.SENDER = clientID;
-        
-        //Append it.
-        connector.addMessage(obj);
     }
 }

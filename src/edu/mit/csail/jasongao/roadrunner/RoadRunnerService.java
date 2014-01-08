@@ -29,6 +29,7 @@ import edu.mit.csail.sethhetu.roadrunner.InterfaceMap;
 import edu.mit.csail.sethhetu.roadrunner.LoggerI;
 import edu.mit.csail.sethhetu.roadrunner.LoggingRuntimeException;
 import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker;
+import edu.mit.smart.sm4and.handler.SendRegionHandler.RemoteLogMessage;
 
 import android.app.Service;
 import android.content.Context;
@@ -112,6 +113,9 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	private long mId = -1000;
 	private String mIdStr;
 	private Random rand = new Random();
+	
+	//The last Region we've requested a reroute around (to avoid spamming the server).
+	private String lastRequestedReroute;
 
 	private long udpStartTime = 0;
 
@@ -889,6 +893,11 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			throw new LoggingRuntimeException("RoadRunnerService.checkNextRegionAndReroute() - Unexpected null region for key: " + nextRes.regionId);
 		}
 		
+		//Don't check if we've already posted a rerouting request for this Region.
+		if (nextRes.regionId == lastRequestedReroute) {
+			return;
+		}
+		
 		//Check how close we are to that Region. To do this, we check the intersection point to each of the Region's segments.
 		//There are more efficient ways to do this, but it hardly matters.
 		double minDist = Globals.SM_REROUTE_DISTANCE * 2.0; //Start way off.
@@ -911,8 +920,10 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		
 		//Are we too close?
 		//System.out.println("Current distance to next Region (" + nextRes.regionId + ") is: " + minDist);
-		if (minDist<Globals.SM_REROUTE_DISTANCE) { 
-			throw new LoggingRuntimeException("Need to reroute!"); 
+		if (minDist<Globals.SM_REROUTE_DISTANCE) {
+			//Request a re-route from the server.
+			simmob.requestReroute(nextRes.regionId);
+			lastRequestedReroute = nextRes.regionId;
 		} 
 	}
 	

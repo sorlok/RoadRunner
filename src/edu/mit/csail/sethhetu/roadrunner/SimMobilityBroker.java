@@ -26,6 +26,8 @@ import edu.mit.smart.sm4and.MessageHandlerFactory;
 import edu.mit.smart.sm4and.MessageParser;
 import edu.mit.smart.sm4and.handler.AndroidHandlerFactory;
 import edu.mit.smart.sm4and.handler.MulticastHandler.MulticastMessage;
+import edu.mit.smart.sm4and.handler.SendRegionHandler.RemoteLogMessage;
+import edu.mit.smart.sm4and.handler.SendRegionHandler.RerouteRequest;
 import edu.mit.smart.sm4and.json.JsonMessageParser;
 import edu.mit.smart.sm4and.mina.MinaConnector;
 
@@ -325,6 +327,19 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		return RandGen.nextDouble() <= Globals.SM_VIABILITY_PERCENT;
 	}
 	
+	public void requestReroute(String blacklistRegion) {
+		RerouteRequest obj = new RerouteRequest();
+		obj.blacklist_region = blacklistRegion;
+        obj.SENDER_TYPE = "ANDROID_EMULATOR";
+        obj.SENDER = uniqueId;
+        
+        //Append it.
+        conn.addMessage(obj);
+
+        //Remote-log all rerouting requests.
+        SimMobilityBroker.ReflectToServer(conn, uniqueId, "Requested re-route from Sim Mobility, blacklisting Region: " + blacklistRegion);
+	}
+	
 	
 	/**
 	 * Spoof regions too. Returns null for no region (e.g., "FREE")
@@ -512,7 +527,20 @@ public class SimMobilityBroker  implements PostExecuteAction {
 			new SimMobTickResponse(sb.toString()).execute(writer);*/
 		}
 	};
+
 	
+	
+	//Helper: Log to server (remote)
+    public static void ReflectToServer(Connector connector, String clientID, String msg) {
+        //Prepare a response.
+    	RemoteLogMessage obj = new RemoteLogMessage();
+        obj.log_message = msg;
+        obj.SENDER_TYPE = "ANDROID_EMULATOR";
+        obj.SENDER = clientID;
+        
+        //Append it.
+        connector.addMessage(obj);
+    }
 	
 	
 	
