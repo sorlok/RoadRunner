@@ -922,6 +922,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		//System.out.println("Current distance to next Region (" + nextRes.regionId + ") is: " + minDist);
 		if (minDist<Globals.SM_REROUTE_DISTANCE) {
 			//Request a re-route from the server.
+			log("No token; requesting that the server re-route...");
 			simmob.requestReroute(nextRes.regionId);
 			lastRequestedReroute = nextRes.regionId;
 		} 
@@ -953,7 +954,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 
 		//Just need to make sure we're not tied to the 2s clock but rather simulation time.
 		if (Globals.SIM_MOBILITY) {
-			log("ad-hoc announcement sending...");
+			//log("ad-hoc announcement sending..."); //Too wordy
 		}
 		
 		AdhocPacket p = new AdhocPacket(mId, mLoc);
