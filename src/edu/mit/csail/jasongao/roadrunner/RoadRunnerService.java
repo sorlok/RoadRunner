@@ -1067,11 +1067,39 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 				throw new LoggingRuntimeException("PathSetter.setPath() - Can't set a path without pre-defined Regions.");
 			}
 			
+			//If this is the first time the path is set, assign some free tokens.
+			double[] probs = Globals.SM_INITIAL_TOKEN_PROBABILITIES;
+			if (getsPending.isEmpty() && probs!=null && probs.length>0) {
+				double prob = probs[(path.length-1)<probs.length ? (path.length-1) : probs.length-1];
+				for (int i=0; i<path.length; i++) {
+					if (rand.nextDouble() <= prob) {
+						log("Got a free token for: " + path[i]);
+						reservationsInUse.put(path[i], new ResRequest(mId, ResRequest.RES_GET, path[i]));
+					}
+				}
+				
+				//Inform the server (for repeatability/debugging).
+				if (simmob!=null && !reservationsInUse.isEmpty()) {
+					StringBuffer msg = new StringBuffer();
+					msg.append("Agent received gratis tokens [");
+					String comma = "";
+					for (String key : reservationsInUse.keySet()) {
+						msg.append(comma).append(key);
+						comma = ",";
+					}
+					msg.append("]");
+					simmob.ReflectToServer(msg.toString());
+				}
+			}
+			
 			//Add each Region to the list of requests.
 			//Announce on the last one only.
 			getsPending.clear();
 			for (int i=0; i<path.length; i++) {
-				makeRequest(new ResRequest(mId, ResRequest.RES_GET, path[i]), i==path.length-1);
+				//Don't add the token if we already have it.
+				if (!reservationsInUse.containsKey(path[i])) {
+					makeRequest(new ResRequest(mId, ResRequest.RES_GET, path[i]), i==path.length-1);
+				}
 			}
 		}
 	}

@@ -542,6 +542,10 @@ public class SimMobilityBroker  implements PostExecuteAction {
         connector.addMessage(obj);
     }
 	
+    //Helper: Same, but a bit easier to use given an object.
+    public void ReflectToServer(String msg) {
+    	SimMobilityBroker.ReflectToServer(conn, uniqueId, msg);
+    }
 	
 	
 	

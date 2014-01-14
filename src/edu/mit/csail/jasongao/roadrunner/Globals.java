@@ -39,6 +39,18 @@ public class Globals {
 	/** At what distance (or less) do we re-route if we are unable to find a token. */
 	public static final double SM_REROUTE_DISTANCE = 250; //meters
 	
+	/** 
+	 * What percentage of our required tokens are initially (randomly) filled?
+	 * Each index represents the odds of getting a token for Region lists of that size. 
+	 * So, if the list is [0.5, 0.2, 0.1], then you have a 50% chance of getting a token if you 
+	 * only need 1, a 20% chance of getting a token if you only need 2, and a 10% chance for 
+	 * any other (3+).
+	 * Note that these tokens are only handed out the FIRST time you get a token set; if you re-route, 
+	 *   you don't get any free tokens.
+	 */
+	//"roughly 50%" chance of getting at least 1 token. After path size 10, starts increasing >65%
+	public static final double[] SM_INITIAL_TOKEN_PROBABILITIES = {0.5, 0.25, 0.2, 0.2, 0.1}; 
+	
 	/** What string constitutes a "free" region. */
 	public static final String FREE_REGION_TAG = "FREE";
 	
