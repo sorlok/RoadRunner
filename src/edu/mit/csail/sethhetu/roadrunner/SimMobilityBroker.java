@@ -55,18 +55,11 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	//private Socket smSocket;
 	Connector conn;
 	
-	//Open streams for communicating with the server.
-	//TODO: Currently communication is decentralized and asynchronous, thus difficult to 
-	//      debug. We might want to change how we organize things.
-	//private BufferedReader reader;
-	//private BufferedWriter writer;
-	
 	//For communicating back to the RoadRunner service.
 	private Handler myHandler;
 	private LoggerI logger;
 	private AdHocAnnouncer adhoc;
 	private LocationSpoofer locspoof;
-	//private SimMobRegionRequester region_requester;
 	private RegionChecker regcheck;
 	
 	//The list of Regions that Sim Mobility has sent to us. Will be used in place of RoadRunnerService's list if appropriate.
@@ -84,10 +77,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	//Let's make this non-deterministic.
 	private static Random RandGen = new Random();
 	
-	//Returned messages.
-	//private ArrayList<String> returnedMessages;
-	
-	//Same as the one in RoadRunnerService
+	//Synced to the "m_id" field in RoadRunner.
 	private String uniqueId;
 	
 	private MessageParser messageParser;
@@ -127,11 +117,6 @@ public class SimMobilityBroker  implements PostExecuteAction {
 			SimMobilityBroker.this.closeStreams();
 			throw new LoggingRuntimeException(thrownException);
 		}
-		
-		//Save objects locally.
-		//TODO: reader and writer are currently null.
-		//this.reader = reader;
-		//this.writer = writer;
 				
 		//Assuming everything went ok, start our simulation loop. It looks like this:
 		//   1) Send out an Async task waiting for the "tick done" message.
@@ -140,7 +125,6 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		this.currTimeMs = 0;
 		this.lastAnnouncePacket = -1 * Globals.ADHOC_ANNOUNCE_PERIOD; //Immediately dispatch an announce packet.
 		this.nextRegionRerouteCheck = calcNextRegionRerouteCheck();  //Schedule like normal (includes a bit of randomness).
-		//new SimMobTickRequest(myHandler, new ServerTickDoneRunnable()).execute(reader);
 	}
 	
 	public long getCurrTimeMs() {
@@ -159,13 +143,6 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	        
 	        //Advance
 			currTimeMs += elapsed_ms;
-			
-			//First time tick?
-			/*if (tick==0) {
-				if (Globals.SM_REAL_REGIONS) {
-					region_requester.request();
-				}
-			}*/
 			
 			//Time for an announce packet?
 			if (currTimeMs-lastAnnouncePacket >= Globals.ADHOC_ANNOUNCE_PERIOD) {
@@ -381,24 +358,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		//Save it for later.
 		conn.addMessage(obj);
 	}
-	
-	/*public void sendRegionRequest(String myId) {
-		if (myId==null) { throw new LoggingRuntimeException("Can't send region request without an id."); }
-		
-		//Send a message. 
-        SendRegionRequest obj = new SendRegionRequest();
-		obj.SENDER = String.valueOf(uniqueId);
-		obj.SENDER_TYPE = "ANDROID_EMULATOR";
-        
-        //Save it for later.
-        conn.addMessage(obj);
-	}*/
-	
-	
-	/*private synchronized void bufferMessage(String msg) {
-		returnedMessages.add(msg);
-	}*/
-	
+
 	
 	//Called when the server states that a time tick has completed.
 	public class ServerTickDoneRunnable implements Runnable {
@@ -443,40 +403,8 @@ public class SimMobilityBroker  implements PostExecuteAction {
 					
 					//Propagate.
 					locspoof.setLocation(lat, lng);
-				} else if (type.equals("SM_ADHOC_BROADCAST")) {
-					
+				} else if (type.equals("SM_ADHOC_BROADCAST")) {					
 					throw new LoggingRuntimeException("Disabled");
-					
-					
-					//body="ag_id,[packet]"
-					//The result of an ad-hoc announce message.
-					/*String[] parts = body.split(",", 2);
-					if (parts.length!=2) { throw new LoggingRuntimeException("Bad broadcast message body: " + body); }
-					
-					//Get the ID of the agent sending this message, along with the packet.
-					String agId = parts[0];
-					String packet = parts[1];
-					if (packet.charAt(0)!='[' || packet.charAt(packet.length()-1)!=']') {
-						throw new LoggingRuntimeException("Incorrect broadcast packet string: " + packet);
-					}
-					
-					//Ignore packets sent to yourself.
-					if (agId==uniqueId) {
-						logger.log("Ignoring packet sent to self.");
-						continue;
-					}
-					
-					//Extract the packet.
-					packet = packet.substring(1, packet.length()-1);
-					byte[] packetB = string2bytes(packet);
-					AdhocPacket p = AdhocPacketThread.ReadPacket(logger, packetB, packetB.length);
-					
-					
-					myHandler.obtainMessage(
-							RoadRunnerService.ADHOC_PACKET_RECV, p).sendToTarget();
-					
-					*/
-					//TODO
 				} else {
 					throw new LoggingRuntimeException("Unknown message type: \"" + type + "\""); 
 				}
@@ -501,30 +429,8 @@ public class SimMobilityBroker  implements PostExecuteAction {
 			//      a time tick that has already passed, but only if they result from the 
 			//      Android app (e.g., "every 2 seconds" the old way). We would ideally 
 			//      remove these, but they are effectively harmless (and *shouldn't* really
-			//      happen in practice).
-			
+			//      happen in practice).			
 			throw new LoggingRuntimeException("NO LONGER SUPPORTED.");
-			
-			/*StringBuilder sb = new StringBuilder();
-			synchronized (this) {
-				//Combine all messages.
-				String sep = "";
-				for (String msg : returnedMessages) {
-					//TODO: This is risky; the "packet" in a broadcast may randomly contain a ";". 
-					//      We can reduce/eliminate the risk of this later via escaping or choosing a better
-					//      control code. For now we just close the emulator.
-					if (msg.contains(";")) { throw new LoggingRuntimeException("Message contains a separator character: \"" + msg + "\""); }
-					sb.append(sep+msg);
-					sep = ";";
-				}
-				
-				//Empty the list.
-				returnedMessages.clear();
-			}
-			
-			//Send all messages.
-			BufferedWriter writer = null; //TEMP
-			new SimMobTickResponse(sb.toString()).execute(writer);*/
 		}
 	};
 
@@ -546,10 +452,5 @@ public class SimMobilityBroker  implements PostExecuteAction {
     public void ReflectToServer(String msg) {
     	SimMobilityBroker.ReflectToServer(conn, uniqueId, msg);
     }
-	
-	
-	
-	
-	
 
 }
