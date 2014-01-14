@@ -29,7 +29,6 @@ import edu.mit.csail.sethhetu.roadrunner.InterfaceMap;
 import edu.mit.csail.sethhetu.roadrunner.LoggerI;
 import edu.mit.csail.sethhetu.roadrunner.LoggingRuntimeException;
 import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker;
-import edu.mit.smart.sm4and.handler.SendRegionHandler.RemoteLogMessage;
 
 import android.app.Service;
 import android.content.Context;
@@ -51,11 +50,6 @@ import android.telephony.TelephonyManager;
 
 public class RoadRunnerService extends Service implements LocationListener, LoggerI {
 	public static final String TAG = "RoadRunnerService";
-	
-	/*private String uniqueId;
-	public void setUniqueId(String uniqueId) {
-		this.uniqueId = uniqueId;
-	}*/
 	
 	//Used for communicating with Sim Mobility.
 	SimMobilityBroker simmob = null;
