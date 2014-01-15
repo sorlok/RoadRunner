@@ -57,6 +57,8 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		return instance;
 	}
 	
+	//Have we started yet?
+	private boolean activated = false;
 	
 	//We need to maintain an open connection to the Sim Mobility server, since we are in a 
 	//  tight time loop.
@@ -95,6 +97,10 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	 * Initialize the Broker. Can be called multiple times, until "Connect" is called.
 	 */
 	public void initialize(String uniqueId, Handler myHandler, LoggerI logger, AdHocAnnouncer adhoc, LocationSpoofer locspoof, PathSetter pathSet, RegionChecker regcheck) {
+		if (this.activated) {
+			throw new LoggingRuntimeException("Can't re-initialize; SimMobilityBroker has already been activated.");
+		}
+		
 		this.messageParser = new JsonMessageParser();
 		this.myHandler = myHandler;
 		this.logger = logger;
@@ -112,13 +118,22 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	}
 	
 	/**
-	 * Connect to the server. initialize() must be called first.
+	 * Start the SimMobility Broker (sets it to "active" and connects to the server).
+	 * initialize() must be called first.
 	 */
-	public void connect() {
+	public void activate() {
+		//Silently skip if called twice.
+		if (this.activated) { return; }
+		
 		//Connect our socket.
 		//NOTE: Currently, this task will *only* end if the session is closed. 
 		SimMobServerConnectTask task = new SimMobServerConnectTask(this, this.handlerFactory);
 		task.execute(this.conn);
+		this.activated = true;
+	}
+	
+	public boolean isActive() {
+		return activated;
 	}
 	
 	

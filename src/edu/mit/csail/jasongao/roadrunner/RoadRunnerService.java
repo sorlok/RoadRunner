@@ -52,7 +52,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	public static final String TAG = "RoadRunnerService";
 	
 	//Used for communicating with Sim Mobility.
-	SimMobilityBroker simmob = null;
+	SimMobilityBroker simmob = SimMobilityBroker.getInstance();
 
 	// Android system
 	PowerManager.WakeLock wl = null;
@@ -1055,7 +1055,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	
 	public class PathSetter {
 		public void setPath(String[] path) {
-			if (!Globals.SIM_MOBILITY || simmob==null) {
+			if (!Globals.SIM_MOBILITY || !simmob.isActive()) {
 				return;
 			}
 			
@@ -1076,7 +1076,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 				}
 				
 				//Inform the server (for repeatability/debugging).
-				if (simmob!=null && !reservationsInUse.isEmpty()) {
+				if (simmob.isActive() && !reservationsInUse.isEmpty()) {
 					StringBuffer msg = new StringBuffer();
 					msg.append("Agent received gratis tokens [");
 					String comma = "";
@@ -1324,9 +1324,9 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			//We need this now.
 			retrieveUniqueId();
 			
-			simmob = SimMobilityBroker.getInstance();
+			//simmob = SimMobilityBroker.getInstance();
 			simmob.initialize(mIdStr, myHandler, this, new AdHocAnnouncer(), new LocationSpoofer(), new PathSetter(), new RegionChecker());
-			simmob.connect();
+			simmob.activate();
 			log("Sim Mobility server connected.");
 		}
 
@@ -1386,7 +1386,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	 */
 	private String getRegion(Hashtable<String, Region> rs, Location loc) {
 		//Override: Use the SimMobility-supplied's Region set if appropriate.
-		if (Globals.SIM_MOBILITY && (simmob!=null)) {
+		if (Globals.SIM_MOBILITY && simmob.isActive()) {
 			Hashtable<String, Region> newRegionSet = simmob.getRegionSet();
 			if (newRegionSet!=null) {
 				rs = newRegionSet;
@@ -1394,7 +1394,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		}
 		
 		//Randomized regions only work in a very specific case.
-		boolean randReg = Globals.SIM_MOBILITY && (simmob!=null) && (rs==null);
+		boolean randReg = Globals.SIM_MOBILITY && simmob.isActive() && (rs==null);
 		if (randReg) {
 			if (Globals.SM_ALLOW_RANDOM_REGIONS && firstSecondPassed()) {
 				String newRegionId = simmob.spoofRandomRegion();
@@ -1413,7 +1413,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	///Have we passed the first second of execution time?
 	///This is used as a very coarse-grained test to avoid spurious regions while Region negotiation is still taking place.
 	private boolean firstSecondPassed() {
-		if (simmob!=null) {
+		if (simmob.isActive()) {
 			return simmob.getCurrTimeMs() > 1000;
 		}
 		return false; //Arbitrary; should never be called.

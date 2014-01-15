@@ -67,14 +67,6 @@ public abstract class TestRegions  {
 		logger.log(String.format("Test point 3 is in region %s", RoadRunnerService.GetRegion(regionSet, l)));
 	}
 	
-	
-	/** Regions for our Sim Mobility network */
-	/*public static List<Region> MakeSimMobilityRegions() {
-		//TODO: Actually add regions.
-		return new ArrayList<Region>();
-	}*/
-	
-
 	/** Test regions in Stata courtyard */
 	public static Hashtable<String, Region> MakeExperimentARegions() {
 		Hashtable<String, Region> rs = new Hashtable<String, Region>();
