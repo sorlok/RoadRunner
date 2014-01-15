@@ -1324,7 +1324,9 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			//We need this now.
 			retrieveUniqueId();
 			
-			simmob = new SimMobilityBroker(mIdStr, myHandler, this, new AdHocAnnouncer(), new LocationSpoofer(), new PathSetter(), new RegionChecker());
+			simmob = SimMobilityBroker.getInstance();
+			simmob.initialize(mIdStr, myHandler, this, new AdHocAnnouncer(), new LocationSpoofer(), new PathSetter(), new RegionChecker());
+			simmob.connect();
 			log("Sim Mobility server connected.");
 		}
 

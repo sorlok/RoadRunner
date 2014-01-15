@@ -49,7 +49,15 @@ import edu.mit.smart.sm4and.mina.MinaConnector;
  *       of the MinaConnector, meaning that it will NOT operate in lock step.
  *       Changing this requires modifying the fundamental underlying architecture.
  */
-public class SimMobilityBroker  implements PostExecuteAction {	
+public class SimMobilityBroker  implements PostExecuteAction {
+	//Singleton stuff
+	private static SimMobilityBroker instance = new SimMobilityBroker();
+	private SimMobilityBroker() {}
+	public static SimMobilityBroker getInstance() {
+		return instance;
+	}
+	
+	
 	//We need to maintain an open connection to the Sim Mobility server, since we are in a 
 	//  tight time loop.
 	private Connector conn;
@@ -81,6 +89,38 @@ public class SimMobilityBroker  implements PostExecuteAction {
 	
 	private MessageParser messageParser;
 	private MessageHandlerFactory handlerFactory;
+	
+	
+	/**
+	 * Initialize the Broker. Can be called multiple times, until "Connect" is called.
+	 */
+	public void initialize(String uniqueId, Handler myHandler, LoggerI logger, AdHocAnnouncer adhoc, LocationSpoofer locspoof, PathSetter pathSet, RegionChecker regcheck) {
+		this.messageParser = new JsonMessageParser();
+		this.myHandler = myHandler;
+		this.logger = logger;
+		this.adhoc = adhoc;
+		this.locspoof = locspoof;
+		//this.region_requester = region_requester;
+		this.regcheck = regcheck;
+		
+		//Check that we have a unique ID.
+		this.uniqueId = uniqueId;
+		if (uniqueId==null) { throw new LoggingRuntimeException("Unique Id cannot be null."); }
+		
+		this.handlerFactory = new AndroidHandlerFactory(uniqueId, locspoof, new TimeAdvancer(), new MultiCastReceiver(), new RegionSetter(), pathSet);
+		this.conn = new MinaConnector(myHandler, messageParser, handlerFactory, locspoof, logger);
+	}
+	
+	/**
+	 * Connect to the server. initialize() must be called first.
+	 */
+	public void connect() {
+		//Connect our socket.
+		//NOTE: Currently, this task will *only* end if the session is closed. 
+		SimMobServerConnectTask task = new SimMobServerConnectTask(this, this.handlerFactory);
+		task.execute(this.conn);
+	}
+	
 	
 	public Hashtable<String, Region> getRegionSet() {
 		return simmobRegions;
@@ -199,32 +239,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 			myHandler.obtainMessage(RoadRunnerService.ADHOC_PACKET_RECV, p).sendToTarget();
 		}
 	}
-	
-	
-	/**
-	 * Create the broker entity and connect to the server.
-	 */
-	public SimMobilityBroker(String uniqueId, Handler myHandler, LoggerI logger, AdHocAnnouncer adhoc, LocationSpoofer locspoof, PathSetter pathSet, RegionChecker regcheck) {
-		this.messageParser = new JsonMessageParser();
-		this.myHandler = myHandler;
-		this.logger = logger;
-		this.adhoc = adhoc;
-		this.locspoof = locspoof;
-		//this.region_requester = region_requester;
-		this.regcheck = regcheck;
-		
-		//Check that we have a unique ID.
-		this.uniqueId = uniqueId;
-		if (uniqueId==null) { throw new LoggingRuntimeException("Unique Id cannot be null."); }
-		
-		this.handlerFactory = new AndroidHandlerFactory(uniqueId, locspoof, new TimeAdvancer(), new MultiCastReceiver(), new RegionSetter(), pathSet);
-		this.conn = new MinaConnector(myHandler, messageParser, handlerFactory, locspoof, logger);
-				
-		//Connect our socket.
-		//NOTE: Currently, this task will *only* end if the session is closed. 
-		SimMobServerConnectTask task = new SimMobServerConnectTask(this, this.handlerFactory);
-		task.execute(this.conn);
-	}
+
 	
 	/**
 	 * Convert a byte array to a String, escaping the semicolons.
