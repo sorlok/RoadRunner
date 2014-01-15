@@ -183,7 +183,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 					adhocAnnounce(false);
 				}
 				
-				boolean linkIsViable = Globals.SIM_MOBILITY ? simmob.linkIsViable() : linkIsViableDSRC(mLoc, other);
+				boolean linkIsViable = linkIsViableDSRC(mLoc, other.getLocation());
 				if (!linkIsViable) {
 					break;
 				}
@@ -438,9 +438,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	 *            Location of vehicle 2
 	 * @return true is the link is viable, false if not
 	 */
-	private boolean linkIsViableDSRC(Location v1, AdhocPacket other) {
-		Location v2 = other.getLocation();
-
+	private boolean linkIsViableDSRC(Location v1, Location v2) {
 		if (v1 == null || v2 == null) {
 			log_nodisplay("Link not viable: GPS disabled");
 			return false;
@@ -460,6 +458,11 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	/**
 	 * Determine whether two vehicle's location fixes indicate that a WiFi TCP
 	 * link can be sustained over the next Globals.LINK_LIFETIME_THRESHOLD secs
+	 * 
+	 * NOTE: We currently don't set speed information in Sim Mobility, so we can't
+	 *       use this method. Currently, the DSRC method is the one actually used, so
+	 *       it's not really an issue; just note that we might have to add speed
+	 *       to Location information in the future. 
 	 * 
 	 * @param v1
 	 *            Location of vehicle 1

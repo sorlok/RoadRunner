@@ -293,16 +293,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		return res;
 	}
 	
-	
-	/**
-	 * We don't use speed and heading in our Locations, so I'm replace "viable" with a 
-	 *  simple probability test, rather than take the risk that *all* agents will determine
-	 *  that they aren't viable to each other.
-	 */
-	public boolean linkIsViable() {
-		return RandGen.nextDouble() <= Globals.SM_VIABILITY_PERCENT;
-	}
-	
+
 	public void requestReroute(String blacklistRegion) {
 		RerouteRequest obj = new RerouteRequest();
 		obj.blacklist_region = blacklistRegion;
