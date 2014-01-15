@@ -1216,8 +1216,6 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		// log("Received start id " + startId + ", intent=" + intent);
-
 		// We want this service to continue running until explicitly stopped
 		return START_STICKY;
 	}
@@ -1301,8 +1299,6 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 				.format("Service started with adhocEnabled %b, onDemand %b, directionCcw %b",
 						this.adhocEnabled, this.onDemand, this.directionCcw));
 
-		// say("Service started.");
-
 		// Set up regions
 		if (Globals.SIM_MOBILITY) {
 			//"Null" means "randomize regions".
@@ -1353,12 +1349,6 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			//This is actually done earlier if SimMobility is enabled, 
 			//but doing it twice is harmless.
 			retrieveUniqueId();
-
-			/*
-			 * byte[] bytes = aat.getLocalAddress().getAddress(); long value =
-			 * 0; for (int i = 0; i < bytes.length; i++) { value = (value << 8)
-			 * + (bytes[i] & 0xff); } mId = value;
-			 */
 
 			// Start recurring UDP adhoc announcements
 			if (!Globals.SIM_MOBILITY) {

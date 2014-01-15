@@ -52,8 +52,7 @@ import edu.mit.smart.sm4and.mina.MinaConnector;
 public class SimMobilityBroker  implements PostExecuteAction {	
 	//We need to maintain an open connection to the Sim Mobility server, since we are in a 
 	//  tight time loop.
-	//private Socket smSocket;
-	Connector conn;
+	private Connector conn;
 	
 	//For communicating back to the RoadRunner service.
 	private Handler myHandler;
