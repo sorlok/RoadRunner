@@ -6,6 +6,7 @@ package edu.mit.smart.sm4and.handler;
 
 import edu.mit.smart.sm4and.AbstractMessageHandler;
 import edu.mit.smart.sm4and.MessageHandlerFactory;
+import edu.mit.smart.sm4and.message.Message;
 import edu.mit.smart.sm4and.message.Message.Type;
 
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
@@ -36,27 +37,26 @@ public class AndroidHandlerFactory implements MessageHandlerFactory {
 	}
 	
 	@Override
-	public AbstractMessageHandler create(Type msgType) {
+	public AbstractMessageHandler create(String msgType) {
     	//Respond to the given message.
-    	switch (msgType) {
-            case WHOAREYOU:
-                return new WhoAreYouHandler(clientId);
-            case TIME_DATA: 
-                return new TimeHandler(timeTicker);
-            case READY: 
-                return new ReadyHandler();
-            case LOCATION_DATA: 
-            	return new LocationHandler(locSpoof);
-            case MULTICAST: 
-            	return new MulticastHandler(mcProcess);
-            case UNICAST:
-            	return new UnicastHandler();
-            case READY_TO_RECEIVE:
-            	return new ReadyToReceiveHandler(clientId);
-            case REGIONS_AND_PATH_DATA:
-            	return new SendRegionHandler(regSet, pathSet, clientId);
-            default:
-            	throw new LoggingRuntimeException("Unknown message type: " + msgType.toString() + "  >>NOT HANDLED.");
-        }
+		if (msgType.equals(Message.Type.WHOAREYOU)) {
+			return new WhoAreYouHandler(clientId);
+		} else if (msgType.equals(Message.Type.TIME_DATA)) {
+			return new TimeHandler(timeTicker);
+		} else if (msgType.equals(Message.Type.READY)) {
+			return new ReadyHandler();
+		} else if (msgType.equals(Message.Type.LOCATION_DATA)) {
+			return new LocationHandler(locSpoof);
+		} else if (msgType.equals(Message.Type.MULTICAST)) {
+			return new MulticastHandler(mcProcess);
+		} else if (msgType.equals(Message.Type.UNICAST)) {
+			return new UnicastHandler();
+		} else if (msgType.equals(Message.Type.READY_TO_RECEIVE)) {
+			return new ReadyToReceiveHandler(clientId);
+		} else if (msgType.equals(Message.Type.REGIONS_AND_PATH_DATA)) {
+			return new SendRegionHandler(regSet, pathSet, clientId);
+		} else {
+			throw new LoggingRuntimeException("Unknown message type: " + msgType.toString() + "  >>NOT HANDLED.");
+		}
 	}
 }

@@ -58,8 +58,37 @@ public class SimMobilityBroker extends SimMobilityBrokerImpl implements PostExec
 		return instance;
 	}
 	
+	
+	//
+	//TODO: Currently cleaning.
+	//      The Regions list should be moved back to RoadRunner. 
+	//      In addition, our RegionSetter should be a "Handle" of some kind, registered by RoadRunner for our custom
+	//      "Region" service (since only RR has Regions, so it's not a core message type). 
+	
 	//The list of Regions that Sim Mobility has sent to us. Will be used in place of RoadRunnerService's list if appropriate.
-	private Hashtable<String, Region> simmobRegions;
+	//private Hashtable<String, Region> simmobRegions;
+	//public Hashtable<String, Region> getRegionSet() {
+	//	return simmobRegions;
+	//}
+	public class RegionSetter {
+		public void setRegions(SimpleRegion[] regions) {
+	        if (regions==null) {
+	        	return; //Don't set.
+	        }
+	        
+	        //Change the current region set
+	        simmobRegions = new Hashtable<String, Region>();
+	        for (SimpleRegion sr : regions) {
+	        	Region rg = new Region(sr.id);
+	        	for (SimpleLocation sloc : sr.vertices) {
+	        		rg.addVertex(sloc.latitude, sloc.longitude);
+	        	}
+	        	simmobRegions.put(rg.id, rg);
+	        }
+		}
+	}
+	
+	
 	
 	//What's the time according to Sim Mobility?
 	private long currTimeMs;
@@ -123,13 +152,6 @@ public class SimMobilityBroker extends SimMobilityBrokerImpl implements PostExec
 		return activated;
 	}
 	
-	
-	public Hashtable<String, Region> getRegionSet() {
-		return simmobRegions;
-	}
-	
-
-	
 
 	@Override
 	public void onPostExecute(Exception thrownException, BufferedReader reader, BufferedWriter writer) {
@@ -183,24 +205,6 @@ public class SimMobilityBroker extends SimMobilityBrokerImpl implements PostExec
 				//Perform a region check.
 				regcheck.checkAndReroute();
 			}
-		}
-	}
-	
-	public class RegionSetter {
-		public void setRegions(SimpleRegion[] regions) {
-	        if (regions==null) {
-	        	return; //Don't set.
-	        }
-	        
-	        //Change the current region set
-	        simmobRegions = new Hashtable<String, Region>();
-	        for (SimpleRegion sr : regions) {
-	        	Region rg = new Region(sr.id);
-	        	for (SimpleLocation sloc : sr.vertices) {
-	        		rg.addVertex(sloc.latitude, sloc.longitude);
-	        	}
-	        	simmobRegions.put(rg.id, rg);
-	        }
 		}
 	}
 	

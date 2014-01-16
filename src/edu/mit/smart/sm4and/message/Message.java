@@ -27,65 +27,64 @@ public class Message {
 	//protected String MessageType;
 	
 	//Set by Gson:
-	protected Type MESSAGE_TYPE;
+	protected String MESSAGE_TYPE;
     public String SENDER;       //Sender ID
     public String SENDER_TYPE;  //Almost always "SIMMOBILITY"
 	
 	//Hide from everything except Gson
 	protected Message() {}
 	
-    public enum Type {
+	//Types of messages.
+	public static class Type {
     	//From server.
-        WHOAREYOU,
-        TIME_DATA,
-        READY,
-        LOCATION_DATA,
-        READY_TO_RECEIVE,
-        REGIONS_AND_PATH_DATA,
-        
+		public static final String WHOAREYOU = "WHOAREYOU";
+		public static final String TIME_DATA = "TIME_DATA";
+		public static final String READY = "READY";
+		public static final String LOCATION_DATA = "LOCATION_DATA";
+		public static final String READY_TO_RECEIVE = "READY_TO_RECEIVE";
+		public static final String REGIONS_AND_PATH_DATA = "REGIONS_AND_PATH_DATA";
+
         //Not sure; might be both.
-        MULTICAST,
-        UNICAST,
+		public static final String MULTICAST = "MULTICAST";
+		public static final String UNICAST = "UNICAST";
         
         //To server
-        WHOAMI,
-        CLIENT_MESSAGES_DONE,
-        //SEND_REGIONS,
-        REMOTE_LOG,
-        REROUTE_REQUEST,
-    }
+		public static final String WHOAMI = "WHOAMI";
+		public static final String CLIENT_MESSAGES_DONE = "CLIENT_MESSAGES_DONE";
+		public static final String REMOTE_LOG = "REMOTE_LOG";
+		public static final String REROUTE_REQUEST = "REROUTE_REQUEST";
+	}
     
     //Convert a "MultiCast" into "MultiCastMessage.class"
-    public static Class<? extends Message> GetClassFromType(Type msgType) {
+    public static Class<? extends Message> GetClassFromType(String msgType) {
     	//Sanity check; the switch will explode otherwise.
     	if (msgType==null) {
     		throw new LoggingRuntimeException("Message.GetClassFromType() - Can't switch on a null Message type.");
     	}
     	    	
     	//Dispatch.
-    	switch (msgType) {
-    		case WHOAREYOU:
-    			return WhoAreYouMessage.class;
-    		case TIME_DATA:
-    			return TimeMessage.class;
-    		case READY:
-    			return ReadyMessage.class;
-    		case LOCATION_DATA:
-    			return LocationMessage.class;
-    		case MULTICAST:
-    			return MulticastMessage.class;
-    		case UNICAST:
-    			return UnicastMessage.class;
-    		case READY_TO_RECEIVE:
-    			return ReadyToReceiveMessage.class;
-    		case REGIONS_AND_PATH_DATA:
-    			return SendRegionHandler.SendRegionResponse.class;
-    		default:
-    			throw new LoggingRuntimeException("Message.GetClassFromType() - Unknown message type: " + msgType.toString());
+    	if (msgType.equals(Type.WHOAREYOU)) {
+    		return WhoAreYouMessage.class;
+    	} else if (msgType.equals(Type.TIME_DATA)) {
+    		return TimeMessage.class;
+    	} else if (msgType.equals(Type.READY)) {
+    		return ReadyMessage.class;
+    	} else if (msgType.equals(Type.LOCATION_DATA)) {
+    		return LocationMessage.class;
+    	} else if (msgType.equals(Type.MULTICAST)) {
+    		return MulticastMessage.class;
+    	} else if (msgType.equals(Type.UNICAST)) {
+    		return UnicastMessage.class;
+    	} else if (msgType.equals(Type.READY_TO_RECEIVE)) {
+    		return ReadyToReceiveMessage.class;
+    	} else if (msgType.equals(Type.REGIONS_AND_PATH_DATA)) {
+    		return SendRegionHandler.SendRegionResponse.class;
+    	} else {
+   			throw new LoggingRuntimeException("Message.GetClassFromType() - Unknown message type: " + msgType.toString());
     	}
     }
 
-    public Type getMessageType() {
+    public String getMessageType() {
         return MESSAGE_TYPE;
     }
 }

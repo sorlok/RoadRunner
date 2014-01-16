@@ -4,8 +4,6 @@
 
 package edu.mit.smart.sm4and;
 
-import edu.mit.smart.sm4and.message.Message.Type;
-
 
 /**
  * Used for creating a variety of Handlers to respond to a variety of messages.
@@ -20,5 +18,5 @@ public interface MessageHandlerFactory {
 	 * @param message The message in question.
 	 * @param ID The ID of the current agent.
 	 */
-    AbstractMessageHandler create(Type msgType);
+    AbstractMessageHandler create(String msgType);
 }
