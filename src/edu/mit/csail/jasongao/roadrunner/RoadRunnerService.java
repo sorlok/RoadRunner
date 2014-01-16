@@ -29,6 +29,7 @@ import edu.mit.csail.sethhetu.roadrunner.InterfaceMap;
 import edu.mit.csail.sethhetu.roadrunner.LoggerI;
 import edu.mit.csail.sethhetu.roadrunner.LoggingRuntimeException;
 import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker;
+import edu.mit.csail.sethhetu.roadrunner.IpIdentifier;
 
 import android.app.Service;
 import android.content.Context;
@@ -1273,7 +1274,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		
 		//Sim Mobility requires longer IDs (so we use the entire IP address). 
 		if (Globals.SIM_MOBILITY) {
-			mId = SimMobilityBroker.GenerateIdFromInet(addr);
+			mId = IpIdentifier.GenerateIdFromInet(addr);			
 		} else {
 			//take last octet of IPv4 address as my id
 			if (addr!=null) {

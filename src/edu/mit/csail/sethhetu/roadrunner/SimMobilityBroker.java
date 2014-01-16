@@ -21,6 +21,7 @@ import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.PathSetter;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.RegionChecker;
 import edu.mit.csail.sethhetu.roadrunner.SimMobServerConnectTask.PostExecuteAction;
 import edu.mit.csail.sethhetu.roadrunner.SimpleRegion.SimpleLocation;
+import edu.mit.csail.sethhetu.roadrunner.impl.SimMobilityBrokerImpl;
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.MessageHandlerFactory;
 import edu.mit.smart.sm4and.MessageParser;
@@ -49,27 +50,13 @@ import edu.mit.smart.sm4and.mina.MinaConnector;
  *       of the MinaConnector, meaning that it will NOT operate in lock step.
  *       Changing this requires modifying the fundamental underlying architecture.
  */
-public class SimMobilityBroker  implements PostExecuteAction {
+public class SimMobilityBroker extends SimMobilityBrokerImpl implements PostExecuteAction {
 	//Singleton stuff
 	private static SimMobilityBroker instance = new SimMobilityBroker();
 	private SimMobilityBroker() {}
 	public static SimMobilityBroker getInstance() {
 		return instance;
 	}
-	
-	//Have we started yet?
-	private boolean activated = false;
-	
-	//We need to maintain an open connection to the Sim Mobility server, since we are in a 
-	//  tight time loop.
-	private Connector conn;
-	
-	//For communicating back to the RoadRunner service.
-	private Handler myHandler;
-	private LoggerI logger;
-	private AdHocAnnouncer adhoc;
-	private LocationSpoofer locspoof;
-	private RegionChecker regcheck;
 	
 	//The list of Regions that Sim Mobility has sent to us. Will be used in place of RoadRunnerService's list if appropriate.
 	private Hashtable<String, Region> simmobRegions;
@@ -141,27 +128,7 @@ public class SimMobilityBroker  implements PostExecuteAction {
 		return simmobRegions;
 	}
 	
-	private static final long ToU(byte b) {
-		return ((int)b)&0xFF;
-	}
-	
-	public static final long GenerateIdFromInet(Inet4Address addr) {
-		//If we've got a null address, just fake it.
-		byte[] elements = null;
-		if (addr!=null) {
-			elements = addr.getAddress();
-		} else {
-			elements = new byte[4];
-			SimMobilityBroker.RandGen.nextBytes(elements);
-		}
-		
-		//Try to make something semi-recognizable:
-		long res = ToU(elements[0])*1000000000
-				 + ToU(elements[1])*1000000
-				 + ToU(elements[2])*1000
-				 + ToU(elements[3]);
-		return res;
-	}
+
 	
 
 	@Override
