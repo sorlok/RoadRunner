@@ -6,12 +6,9 @@ package edu.mit.csail.sethhetu.roadrunner;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.util.HashSet;
 import java.util.Random;
-import java.util.Set;
 
 import android.os.Handler;
-import android.util.Base64;
 import edu.mit.csail.jasongao.roadrunner.*;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.AdHocAnnouncer;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
@@ -56,7 +53,7 @@ import edu.mit.smart.sm4and.mina.MinaConnector;
  *       of the MinaConnector, meaning that it will NOT operate in lock step.
  *       Changing this requires modifying the fundamental underlying architecture.
  */
-public class SimMobilityBroker extends SimMobilityBrokerImpl implements PostExecuteAction {
+public class SimMobilityBroker extends SimMobilityBrokerImpl {
 	//Singleton stuff
 	private static SimMobilityBroker instance = new SimMobilityBroker();
 	private SimMobilityBroker() {}
@@ -81,14 +78,14 @@ public class SimMobilityBroker extends SimMobilityBrokerImpl implements PostExec
 	 * Create a MessageHandlerFactory with the appropriate callbacks for Android messages.
 	 * @return
 	 */
-	protected MessageHandlerFactory makeAndroidHandlerFactory(String clientId, LocationSpoofer locSpoof, TimeAdvancer timeTicker, MultiCastReceiver mcProcess) {
+	protected MessageHandlerFactory makeAndroidHandlerFactory(String clientId, LocationSpoofer locSpoof) {
 		//Set up our list of default handlers.
 		MessageHandlerFactory res = new MessageHandlerFactory();
 		res.addDefaultHandler(Message.Type.WHOAREYOU, new WhoAreYouHandler(clientId), this);
-		res.addDefaultHandler(Message.Type.TIME_DATA, new TimeHandler(timeTicker), this);
+		res.addDefaultHandler(Message.Type.TIME_DATA, new TimeHandler(new TimeAdvancer()), this);
 		res.addDefaultHandler(Message.Type.READY, new ReadyHandler(), this);
 		res.addDefaultHandler(Message.Type.LOCATION_DATA, new LocationHandler(locSpoof), this);
-		res.addDefaultHandler(Message.Type.MULTICAST, new MulticastHandler(mcProcess), this);
+		res.addDefaultHandler(Message.Type.MULTICAST, new MulticastHandler(new MultiCastReceiver()), this);
 		res.addDefaultHandler(Message.Type.UNICAST, new UnicastHandler(), this);
 		res.addDefaultHandler(Message.Type.READY_TO_RECEIVE, new ReadyToReceiveHandler(clientId), this);
 		return res;
@@ -136,7 +133,7 @@ public class SimMobilityBroker extends SimMobilityBrokerImpl implements PostExec
 		this.uniqueId = uniqueId;
 		if (uniqueId==null) { throw new LoggingRuntimeException("Unique Id cannot be null."); }
 		
-		this.handlerFactory = makeAndroidHandlerFactory(uniqueId, locspoof, new TimeAdvancer(), new MultiCastReceiver());
+		this.handlerFactory = makeAndroidHandlerFactory(uniqueId, locspoof);
 		this.conn = new MinaConnector(this, handlerFactory);
 	}
 	
@@ -163,7 +160,7 @@ public class SimMobilityBroker extends SimMobilityBrokerImpl implements PostExec
 		
 		//Connect our socket.
 		//NOTE: Currently, this task will *only* end if the session is closed. 
-		SimMobServerConnectTask task = new SimMobServerConnectTask(this, this.handlerFactory, logger);
+		SimMobServerConnectTask task = new SimMobServerConnectTask(new OnConnectAction(), this.handlerFactory, logger);
 		task.execute(this.conn);
 		this.activated = true;
 	}
@@ -172,22 +169,23 @@ public class SimMobilityBroker extends SimMobilityBrokerImpl implements PostExec
 		return activated;
 	}
 	
-
-	@Override
-	public void onPostExecute(Exception thrownException, BufferedReader reader, BufferedWriter writer) {
-		//Was there an error?
-		if (thrownException!=null) {
-			SimMobilityBroker.this.closeStreams();
-			throw new LoggingRuntimeException(thrownException);
+	
+	private class OnConnectAction implements PostExecuteAction {
+		@Override
+		public void onPostExecute(Exception thrownException, BufferedReader reader, BufferedWriter writer) {
+			//Was there an error?
+			if (thrownException!=null) {
+				throw new LoggingRuntimeException(thrownException);
+			}
+					
+			//Assuming everything went ok, start our simulation loop. It looks like this:
+			//   1) Send out an Async task waiting for the "tick done" message.
+			//   2) When that's done, process it and send "android done" for this time step.
+			//As always, messages are sent before the final "done" message.
+			SimMobilityBroker.this.currTimeMs = 0;
+			SimMobilityBroker.this.lastAnnouncePacket = -1 * Globals.ADHOC_ANNOUNCE_PERIOD; //Immediately dispatch an announce packet.
+			SimMobilityBroker.this.nextRegionRerouteCheck = calcNextRegionRerouteCheck();  //Schedule like normal (includes a bit of randomness).
 		}
-				
-		//Assuming everything went ok, start our simulation loop. It looks like this:
-		//   1) Send out an Async task waiting for the "tick done" message.
-		//   2) When that's done, process it and send "android done" for this time step.
-		//As always, messages are sent before the final "done" message.
-		this.currTimeMs = 0;
-		this.lastAnnouncePacket = -1 * Globals.ADHOC_ANNOUNCE_PERIOD; //Immediately dispatch an announce packet.
-		this.nextRegionRerouteCheck = calcNextRegionRerouteCheck();  //Schedule like normal (includes a bit of randomness).
 	}
 	
 	public long getCurrTimeMs() {
@@ -206,6 +204,11 @@ public class SimMobilityBroker extends SimMobilityBrokerImpl implements PostExec
 	        
 	        //Advance
 			currTimeMs += elapsed_ms;
+			
+/////////////////////////
+/// TODO: These two checks should be realized with our new "Timer" class which 
+//        mimics the Android timer.
+/////////////////////////
 			
 			//Time for an announce packet?
 			if (currTimeMs-lastAnnouncePacket >= Globals.ADHOC_ANNOUNCE_PERIOD) {
@@ -238,80 +241,12 @@ public class SimMobilityBroker extends SimMobilityBrokerImpl implements PostExec
 			}
 			
 			//Extract the packet.
-			byte[] packet = string2bytes(base64Data);
+			byte[] packet = ByteArraySerialization.Deserialize(base64Data);
 			AdhocPacket p = AdhocPacketThread.ReadPacket(logger, packet, packet.length);
 			
 			//Send it to Road Runner's message loop as a ADHOC_PACKET_RECV.
 			myHandler.obtainMessage(RoadRunnerService.ADHOC_PACKET_RECV, p).sendToTarget();
 		}
-	}
-
-	
-	/**
-	 * Convert a byte array to a String, escaping the semicolons.
-	 */
-	private static String bytes2string(byte[] bytes) {
-		//First, just convert using Base64
-		String raw = Base64.encodeToString(bytes, Base64.NO_WRAP);
-		
-		//Now escape as follows:
-		//  . becomes ".."
-		//  ; becomes ".1"
-		//  : becomes ".2"
-		//  \n becomes ".3"
-		//(some of these are leftover from UTF-8, and won't occur in Base64)
-		StringBuilder res = new StringBuilder();
-		for (int i=0; i<raw.length(); i++) {
-			char c = raw.charAt(i);
-			if (c=='.') { res.append(".."); }
-			else if (c==';') { res.append(".1"); }
-			else if (c==':') { res.append(".2"); }
-			else if (c=='\n') { res.append(".3"); }
-			else { res.append(c); }
-		}
-		return res.toString();
-	}
-	
-	/**
-	 * Convert a String to a byte array, un-escaping the semicolons.
-	 */
-	private static byte[] string2bytes(String str) {
-		//First, remove our escape sequences.
-		StringBuilder unescaped = new StringBuilder();
-		for (int i=0; i<str.length(); i++) {
-			char c = str.charAt(i);
-			if (c=='.') {
-				char next = str.charAt(i+1);
-				if (next=='.') { unescaped.append("."); }
-				else if (next=='1') { unescaped.append(";"); }
-				else if (next=='2') { unescaped.append(":"); }
-				else if (next=='3') { unescaped.append("\n"); }
-				else { throw new LoggingRuntimeException("Bad escape sequence."); }
-			} else {
-				unescaped.append(c);
-			}
-		}
-		
-		//Next, just convert using Base64
-		return Base64.decode(unescaped.toString(), Base64.NO_WRAP);
-	}
-	
-	
-	
-	/**
-	 * Generate a random set of tokens (usually sampled from 'A' through 'Z').
-	 */
-	public static Set<String> RandomTokens(String token_range, int lower, int upper) {
-		Set<String> res = new HashSet<String>();
-		
-		//How many tokens?
-		int numTokens = RandGen.nextInt(upper-lower)+lower;		
-		for (int i=0; i<numTokens; i++) {
-			//Which letter?
-			res.add(Character.toString(token_range.charAt(RandGen.nextInt(token_range.length()))));
-		}
-		
-		return res;
 	}
 	
 
@@ -329,27 +264,6 @@ public class SimMobilityBroker extends SimMobilityBrokerImpl implements PostExec
 	}
 	
 	
-	/**
-	 * Spoof regions too. Returns null for no region (e.g., "FREE")
-	 */
-	public String spoofRandomRegion() {
-		if (RandGen.nextDouble() <= Globals.SM_FREE_REGION_PERCENT) { return null; }
-		return Character.toString((Globals.SM_TOKEN_RANGE.charAt(RandGen.nextInt(Globals.SM_TOKEN_RANGE.length()))));
-	}
-	
-	
-	
-	//TODO: This does nothing while reader/writer are null.
-	private void closeStreams() {
-		/*try {
-			if (this.reader!=null) { this.reader.close(); }
-		} catch (IOException e2) {}
-		try {
-			if (this.writer!=null) { this.writer.close(); }
-		} catch (IOException e2) {}*/
-	}
-	
-	
 	//Buffer this packet for broadcast at the end of the current time tick.
 	public void sendBroadcastPacket(String myId, byte[] packet) {
 		//A "broadcast" packet looks something like this:
@@ -364,7 +278,7 @@ public class SimMobilityBroker extends SimMobilityBrokerImpl implements PostExec
 		MulticastMessage obj = new MulticastMessage();
 		obj.SENDER = String.valueOf(uniqueId);
 		obj.SENDER_TYPE = "ANDROID_EMULATOR";
-		obj.MULTICAST_DATA = bytes2string(packet);
+		obj.MULTICAST_DATA = ByteArraySerialization.Serialize(packet);
 		
 		//Save it for later.
 		conn.addMessage(obj);

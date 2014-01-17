@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import edu.mit.csail.jasongao.roadrunner.ext.RegionAndPathHandler;
+import edu.mit.csail.jasongao.roadrunner.ext.TokenRandomizer;
 import edu.mit.csail.sethhetu.roadrunner.InterfaceMap;
 import edu.mit.csail.sethhetu.roadrunner.LoggerI;
 import edu.mit.csail.sethhetu.roadrunner.LoggingRuntimeException;
@@ -1012,7 +1013,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		if (!Globals.SIM_MOBILITY) {
 			p.tokensOffered = queueKeySet(this.offers);
 		} else {
-			p.tokensOffered = SimMobilityBroker.RandomTokens(Globals.SM_TOKEN_RANGE, Globals.SM_NUM_TOKENS_LOWER, Globals.SM_NUM_TOKENS_UPPER);
+			p.tokensOffered = TokenRandomizer.RandomTokens(simmob.getRand(), Globals.SM_TOKEN_RANGE, Globals.SM_NUM_TOKENS_LOWER, Globals.SM_NUM_TOKENS_UPPER);
 		}
 
 		p.triggerAnnounce = triggerAnnounce_;
@@ -1369,7 +1370,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		boolean randReg = Globals.SIM_MOBILITY && simmob.isActive() && (rs==null);
 		if (randReg) {
 			if (Globals.SM_ALLOW_RANDOM_REGIONS && firstSecondPassed()) {
-				String newRegionId = simmob.spoofRandomRegion();
+				String newRegionId = TokenRandomizer.SpoofRandomRegion(simmob.getRand(), Globals.SM_TOKEN_RANGE, Globals.SM_FREE_REGION_PERCENT);
 				if (newRegionId!=null) {
 					return newRegionId; //The Region was successfully spoofed.
 				}
