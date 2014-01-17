@@ -18,5 +18,14 @@ public interface MessageHandlerFactory {
 	 * @param message The message in question.
 	 * @param ID The ID of the current agent.
 	 */
-    AbstractMessageHandler create(String msgType);
+    public abstract AbstractMessageHandler create(String msgType);
+    
+    
+	/**
+	 * Adds a custom handler for a given message type. If a "base" type (like WHOAREYOU) is given 
+	 *   a custom handler, it will be combined with the default handler and executed after it.
+	 * @param msgType The message type, as a unique string.
+	 * @param handler The handler to call when this message type is encountered.
+	 */
+    public abstract void addCustomHandler(String msgType, AbstractMessageHandler handler);
 }

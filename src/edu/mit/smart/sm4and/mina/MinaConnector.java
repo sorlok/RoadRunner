@@ -4,6 +4,7 @@
 
 package edu.mit.smart.sm4and.mina;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -17,7 +18,6 @@ import edu.mit.smart.sm4and.message.Message;
 
 import org.apache.mina.core.future.ConnectFuture;
 import org.apache.mina.core.service.IoConnector;
-import org.apache.mina.core.service.IoHandler;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.codec.textline.TextLineCodecFactory;
@@ -27,7 +27,6 @@ import android.os.Handler;
 
 import edu.mit.csail.jasongao.roadrunner.Globals;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
-import edu.mit.csail.sethhetu.roadrunner.LoggerI;
 
 /**
  * A connector which targets Apache Mina.
@@ -36,19 +35,17 @@ import edu.mit.csail.sethhetu.roadrunner.LoggerI;
  * @author Vahid
  */
 public class MinaConnector extends Connector {
+	private volatile boolean connected;
+	
 	private Handler myHandler;
     private IoConnector connector;
-    private volatile boolean connected;
     private IoSession session;
-    private IoHandler ioHandler;
     private MessageParser parser;
     private MessageHandlerFactory handlerFactory;
     
-    //private final int BUFFER_SIZE = 2048;
     private final int BUFFER_SIZE = 20480;
     
     private final java.util.logging.Logger LOG = java.util.logging.Logger.getLogger(getClass().getCanonicalName());
-    private LoggerI logger;
     
     public void setSession(IoSession sess) {
     	session = sess;
@@ -59,12 +56,10 @@ public class MinaConnector extends Connector {
      * @param locspoof   A handler for spoofing location-based updates. Used to set software lat/lng.
      * @param logger     A handler for logging.
      */
-    public MinaConnector(Handler myHandler, MessageParser parser, MessageHandlerFactory handlerFactory, LocationSpoofer locspoof, LoggerI logger) {
+    public MinaConnector(Handler myHandler, MessageParser parser, MessageHandlerFactory handlerFactory, LocationSpoofer locspoof) {
     	this.myHandler = myHandler;
-        this.logger = logger;
         this.parser = parser;
         this.handlerFactory = handlerFactory;
-        this.ioHandler = new MinaIoHandler(this, LOG);
     }
 
     
@@ -73,70 +68,63 @@ public class MinaConnector extends Connector {
      * This function will also start processing messages. 
      */
     @Override
-    public void connect(String host, int port) {
-    	if (connected) {
-    		System.out.println("NOTE: MinaConnector.connect() called, but already connected.");
-    		return;
-    	}
+    public void connect(String host, int port) throws IOException {
+    	if (connected) { return; }
     	
     	//Reset the session and connector if they are in use.
         if (session!=null && session.isConnected()) {
             session.close(true);
+            session = null;
         }
         if (connector!=null) {
             connector.dispose();
+            connector = null;
         }
         
-        //Initialize the connector object.
+        //Initialize the connector object, set its handler.
         connector = new NioSocketConnector();
         connector.getSessionConfig().setUseReadOperation(true);
+        connector.setHandler(new MinaIoHandler(this, LOG));
         
-        //NOTE: I'm setting the maximum read/line length here, although it *seems* that the TextLineCodecFactory's 
-        //      maximum length is all that matters. ~Seth
-        connector.getSessionConfig().setMinReadBufferSize(BUFFER_SIZE);
+        //Create a UTF-8 decoder, make sure that all buffers are the right size.
+        //NOTE: it seems that TextLineCodecFactory's's lengthis all that matters. ~Seth
         TextLineCodecFactory utf8Filter = new TextLineCodecFactory(Charset.forName("UTF-8"));
         utf8Filter.setDecoderMaxLineLength(BUFFER_SIZE);
+        connector.getSessionConfig().setMinReadBufferSize(BUFFER_SIZE);
         
-        //Now add the codec factory to the filter chain.
+        //Add this codec to the filter chain.
         connector.getFilterChain().addLast("codec", new ProtocolCodecFilter(utf8Filter));
-        connector.setHandler(ioHandler);
         
         //Connect to the server and wait forever until it makes contact.
-        logger.log("Attempting to connect to MINA server on " + host + ":" + port);
         ConnectFuture future = connector.connect(new InetSocketAddress(host, port));
         future.awaitUninterruptibly();
         
         //Check if an actual connection was made, or if some error occurred.
-        if (future.isConnected()) {
-        	connected = true;
-        } else {
-            logger.log("Connection could not be established:");
-            logger.log(future.getException().toString());
-            return;
+        if (!future.isConnected()) {
+        	throw new IOException("Connection could not be established: " + future.getException().toString());
         }
         
         //Set some properties of the session.
-        //NOTE: I am not 100% sure how "setUseReadOperation()" affects data sent *before* it is called.
         session = future.getSession();
         session.getConfig().setUseReadOperation(true);
         
-        //NOTE: This shouldn't be needed; we don't *need* to wait for the session to close here.
-        //session.getCloseFuture().awaitUninterruptibly();
+        //If we've reached this point, we're connected.
+        connected = true;
     }
 
     @Override
     public void disconnect() {
-        if (connected) {
-            if (session != null) {
-                session.close(true).awaitUninterruptibly();
-                session = null;
-            }
-            if (connector != null) { //Not likely, but check anyway.
-            	connector.dispose();
-            	connector = null;
-            }
-            connected = false;
+    	if (!connected) { return; }
+
+        if (session != null) {
+            session.close(true).awaitUninterruptibly();
+            session = null;
         }
+        if (connector != null) {
+        	connector.dispose();
+        	connector = null;
+        }
+        connected = false;
     }
     
 
@@ -160,7 +148,6 @@ public class MinaConnector extends Connector {
     @Override
     public void handleMessage(String data) {
     	//Trim the first 8 bytes.
-    	//String trim = data.substring(0,8);
     	data = data.substring(8);
     	
     	//Just pass off each message to "handle()"

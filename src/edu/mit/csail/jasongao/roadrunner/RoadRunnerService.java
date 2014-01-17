@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import edu.mit.csail.jasongao.roadrunner.ext.RegionAndPathHandler;
 import edu.mit.csail.sethhetu.roadrunner.InterfaceMap;
 import edu.mit.csail.sethhetu.roadrunner.LoggerI;
 import edu.mit.csail.sethhetu.roadrunner.LoggingRuntimeException;
@@ -101,6 +102,9 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	 */
 	private long lastDataActivity = 0;
 
+	/**
+	 * Set of known Regions, indexed by Region ID.
+	 */
 	private Hashtable<String, Region> regions;
 
 	private Location mLoc;
@@ -154,6 +158,45 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 
 		return null;
 	}	
+	
+	
+	//Handler for SM region messages.
+	public class RegionSetter  {
+		public void setRegions(Hashtable<String, Region> regions) {
+	        if (regions!=null) { 
+	        	RoadRunnerService.this.regions = regions; 
+	        }
+		}
+	}
+	
+	//Handler for SM path messages.
+	public class PathSetter {
+		public void setPath(ArrayList<ResRequest> path, ArrayList<ResRequest> gratis) {
+			//Can't set a Path without actual, defined Regions.
+			if (RoadRunnerService.this.regions==null) {
+				throw new LoggingRuntimeException("PathSetter.setPath() - Can't set a path without pre-defined Regions.");
+			}
+			
+			//Set the gratis Regions if this is the first time our path is being set.
+			if (getsPending.isEmpty() && gratis!=null) {
+				for (ResRequest rr : gratis) {
+					log("Got a free token for: " + rr.regionId);
+					reservationsInUse.put(rr.regionId, rr);
+				}
+			}
+			
+			//Set the path.
+			if (path!=null) {
+				getsPending.clear();
+				for (int i=0; i<path.size(); i++) {
+					//Don't add the token if we already have it.
+					if (!reservationsInUse.containsKey(path.get(i).regionId)) {
+						makeRequest(path.get(i), i==path.size()-1); //Announce on the last one only.
+					}
+				}
+			}
+		}
+	}
 	
 	
 
@@ -881,12 +924,12 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		if (nextRes==null || nextRes.regionId==null || mLoc==null) { return; }
 		
 		//This relies on SimMob regions.
-		if (simmob.getRegionSet()==null) {
+		if (this.regions==null) {
 			throw new LoggingRuntimeException("RoadRunnerService.checkNextRegionAndReroute() - SimMob regions should be on by now.");
 		}
 		
 		//Retrieve the region.
-		Region region = simmob.getRegionSet().get(nextRes.regionId);
+		Region region = this.regions.get(nextRes.regionId);
 		if (region==null) {
 			throw new LoggingRuntimeException("RoadRunnerService.checkNextRegionAndReroute() - Unexpected null region for key: " + nextRes.regionId);
 		}
@@ -1013,8 +1056,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	}
 
 	public void log_nodisplay(String message) {
-		mainHandler.obtainMessage(MainActivity.LOG_NODISPLAY, message)
-				.sendToTarget();
+		mainHandler.obtainMessage(MainActivity.LOG_NODISPLAY, message).sendToTarget();
 	}
 
 	public void log(String message) {
@@ -1027,8 +1069,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		update.add(String.format("%s", this.mRegion));
 		update.add(String.format("%s", this.reservationsInUse.keySet()));
 		update.add(String.format("%s", queueKeySet(this.offers)));
-		mainHandler.obtainMessage(MainActivity.UPDATE_DISPLAY, update)
-				.sendToTarget();
+		mainHandler.obtainMessage(MainActivity.UPDATE_DISPLAY, update).sendToTarget();
 	}
 
 	/***********************************************
@@ -1051,56 +1092,8 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			// send directly to cloud
 			new ResRequestTask().execute(r1, Globals.CLOUD_HOST);
 		}
-	}
-	
-	
-	public class PathSetter {
-		public void setPath(String[] path) {
-			if (!Globals.SIM_MOBILITY || !simmob.isActive()) {
-				return;
-			}
-			
-			//Can't set a Path without actual, defined Regions.
-			if (simmob.getRegionSet()==null) {
-				throw new LoggingRuntimeException("PathSetter.setPath() - Can't set a path without pre-defined Regions.");
-			}
-			
-			//If this is the first time the path is set, assign some free tokens.
-			double[] probs = Globals.SM_INITIAL_TOKEN_PROBABILITIES;
-			if (getsPending.isEmpty() && probs!=null && probs.length>0) {
-				double prob = probs[(path.length-1)<probs.length ? (path.length-1) : probs.length-1];
-				for (int i=0; i<path.length; i++) {
-					if (rand.nextDouble() <= prob) {
-						log("Got a free token for: " + path[i]);
-						reservationsInUse.put(path[i], new ResRequest(mId, ResRequest.RES_GET, path[i]));
-					}
-				}
-				
-				//Inform the server (for repeatability/debugging).
-				if (simmob.isActive() && !reservationsInUse.isEmpty()) {
-					StringBuffer msg = new StringBuffer();
-					msg.append("Agent received gratis tokens [");
-					String comma = "";
-					for (String key : reservationsInUse.keySet()) {
-						msg.append(comma).append(key);
-						comma = ",";
-					}
-					msg.append("]");
-					simmob.ReflectToServer(msg.toString());
-				}
-			}
-			
-			//Add each Region to the list of requests.
-			//Announce on the last one only.
-			getsPending.clear();
-			for (int i=0; i<path.length; i++) {
-				//Don't add the token if we already have it.
-				if (!reservationsInUse.containsKey(path[i])) {
-					makeRequest(new ResRequest(mId, ResRequest.RES_GET, path[i]), i==path.length-1);
-				}
-			}
-		}
-	}
+	}	
+
 
 	public void resetCloud() {
 		log(String.format("Sending ResRequest for DEBUG-RESET"));
@@ -1229,10 +1222,8 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		super.onCreate();
 
 		// Get a wakelock to keep everything running
-		PowerManager pm = (PowerManager) getApplicationContext()
-				.getSystemService(Context.POWER_SERVICE);
-		wl = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK
-				| PowerManager.ON_AFTER_RELEASE, TAG);
+		PowerManager pm = (PowerManager) getApplicationContext().getSystemService(Context.POWER_SERVICE);
+		wl = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE, TAG);
 		wl.acquire();
 
 		lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -1292,8 +1283,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	}
 	
 
-	public synchronized void start(TextToSpeech mTts_, boolean adhocEnabled_,
-			boolean onDemand_, boolean directionCcw_) {
+	public synchronized void start(TextToSpeech mTts_, boolean adhocEnabled_, boolean onDemand_, boolean directionCcw_) {
 		this.mTts = mTts_;
 		this.adhocEnabled = adhocEnabled_;
 		this.onDemand = onDemand_;
@@ -1325,8 +1315,11 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			//We need this now.
 			retrieveUniqueId();
 			
-			//simmob = SimMobilityBroker.getInstance();
+			//Initialize, register some handlers.
 			simmob.initialize(mIdStr, myHandler, this, new AdHocAnnouncer(), new LocationSpoofer(), new PathSetter(), new RegionChecker());
+			simmob.addCustomMessageHandler(edu.mit.smart.sm4and.message.Message.Type.REGIONS_AND_PATH_DATA, new RegionAndPathHandler(new RegionSetter(), new PathSetter()));
+			
+			//Activate.
 			simmob.activate();
 			log("Sim Mobility server connected.");
 		}
@@ -1371,29 +1364,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	 * TODO: This may not work exactly as expected; rrs.getRegion() *must* be called
 	 *       if you want the application to be aware of Sim Mobility server integration.
 	 */
-	// http://stackoverflow.com/questions/1066589/java-iterate-through-hashmap
-	public static String GetRegion(Hashtable<String, Region> rs, Location loc) {
-		for (Region r : rs.values()) {
-			if (r.contains(loc)) {
-				return r.id;
-			}
-		}
-		return Globals.FREE_REGION_TAG;
-	}
-	
-	/**
-	 * TODO: This may not work exactly as expected; rrs.getRegion() *must* be called
-	 *       if you want the application to be aware of Sim Mobility server integration.
-	 */
-	private String getRegion(Hashtable<String, Region> rs, Location loc) {
-		//Override: Use the SimMobility-supplied's Region set if appropriate.
-		if (Globals.SIM_MOBILITY && simmob.isActive()) {
-			Hashtable<String, Region> newRegionSet = simmob.getRegionSet();
-			if (newRegionSet!=null) {
-				rs = newRegionSet;
-			}
-		}
-		
+	private String getRegion(Hashtable<String, Region> rs, Location loc) {	
 		//Randomized regions only work in a very specific case.
 		boolean randReg = Globals.SIM_MOBILITY && simmob.isActive() && (rs==null);
 		if (randReg) {
@@ -1407,7 +1378,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		}
 		
 		//If we *have* a Region dataset, use it.
-		return GetRegion(rs, loc);
+		return Region.Loc2Region(rs, loc, Globals.FREE_REGION_TAG);
 	}
 	
 	

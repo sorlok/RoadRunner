@@ -3,9 +3,6 @@ package edu.mit.csail.sethhetu.roadrunner;
 import java.net.Inet4Address;
 import java.util.Random;
 
-import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker;
-
-
 /**
  * Allows a unique identifier to be constructed from an IPv4 address.
  * @author Seth N. Hetu

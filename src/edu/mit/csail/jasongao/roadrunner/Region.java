@@ -1,6 +1,7 @@
 package edu.mit.csail.jasongao.roadrunner;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 import android.location.Location;
@@ -21,8 +22,24 @@ public class Region {
 		v.setLatitude(latitude);
 		vertices.add(v);
 	}
+	
+	/**
+	 * Return the first Region in the region set that contains the given Location.
+	 * @param rs The set of regions to check.
+	 * @param loc The Location we are searching for.
+	 * @param def The default value to return if no Regions contain the given Location.
+	 * @return The first valid Region, or the default value.
+	 */
+	public static String Loc2Region(Hashtable<String, Region> rs, Location loc, String def) {
+		for (Region r : rs.values()) {
+			if (r.contains(loc)) {
+				return r.id;
+			}
+		}
+		return def;
+	}
 
-	/* Test if a Location p is inside this Region */
+	/** Test if a Location p is inside this Region */
 	public boolean contains(Location p) {
 
 		double x = p.getLongitude();

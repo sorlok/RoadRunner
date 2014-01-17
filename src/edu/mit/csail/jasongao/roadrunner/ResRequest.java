@@ -32,6 +32,10 @@ public class ResRequest implements Serializable {
 	public long issued, expires;
 	public String tokenString;
 	public String signature;
+	
+	public ResRequest(String srcId_, int type_, String regionId_) {
+		this(Long.parseLong(srcId_), type_, regionId_);
+	}
 
 	public ResRequest(long srcId_, int type_, String regionId_) {
 		this.created = System.currentTimeMillis();

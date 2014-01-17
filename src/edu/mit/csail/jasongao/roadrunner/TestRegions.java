@@ -48,23 +48,30 @@ public abstract class TestRegions  {
 		return rs;
 	}
 	
+	
+	/** Helper */
+	public static String GetRegion(Hashtable<String, Region> rs, Location loc) {
+		return Region.Loc2Region(rs, loc, Globals.FREE_REGION_TAG);
+	}
+	
+	
 	public static void TestStataRegions(Hashtable<String, Region> regionSet, LoggerI logger) {
 		logger.log("Testing regions and getRegion logic...");
 		Location l;
 		l = new Location("");
 		l.setLatitude(42.36196871959442);
 		l.setLongitude(-71.0893964767456);
-		logger.log(String.format("Test point 1 is in region %s", RoadRunnerService.GetRegion(regionSet, l)));
+		logger.log(String.format("Test point 1 is in region %s", GetRegion(regionSet, l)));
 
 		l = new Location("");
 		l.setLatitude(42.361659543737126);
 		l.setLongitude(-71.0893964767456);
-		logger.log(String.format("Test point 2 is in region %s", RoadRunnerService.GetRegion(regionSet, l)));
+		logger.log(String.format("Test point 2 is in region %s", GetRegion(regionSet, l)));
 
 		l = new Location("");
 		l.setLatitude(42.36140585984613);
 		l.setLongitude(-71.0893964767456);
-		logger.log(String.format("Test point 3 is in region %s", RoadRunnerService.GetRegion(regionSet, l)));
+		logger.log(String.format("Test point 3 is in region %s", GetRegion(regionSet, l)));
 	}
 	
 	/** Test regions in Stata courtyard */
@@ -90,8 +97,7 @@ public abstract class TestRegions  {
 		l = new Location("");
 		l.setLatitude(42.361921154176926);
 		l.setLongitude(-71.09134912490845);
-		logger.log(String.format("Test point Stata-1 is in region %s",
-				RoadRunnerService.GetRegion(regionSet, l)));
+		logger.log(String.format("Test point Stata-1 is in region %s", GetRegion(regionSet, l)));
 	}
 	
 
@@ -213,103 +219,86 @@ public abstract class TestRegions  {
 		l = new Location("");
 		l.setLatitude(42.36035940296916);
 		l.setLongitude(-71.0944926738739);
-		logger.log(String.format("Test point on Vassar is in region %s",
-				RoadRunnerService.GetRegion(regionSet, l)));
+		logger.log(String.format("Test point on Vassar is in region %s", GetRegion(regionSet, l)));
 
 		l = new Location("");
 		l.setLatitude(42.36081921192526);
 		l.setLongitude(-71.09338760375977);
-		logger.log(String.format("Test point on Vassar is in region %s",
-				RoadRunnerService.GetRegion(regionSet, l)));
+		logger.log(String.format("Test point on Vassar is in region %s", GetRegion(regionSet, l)));
 
 		l = new Location("");
 		l.setLatitude(42.36160405047349);
 		l.setLongitude(-71.0919177532196);
-		logger.log(String.format("Test point on Vassar is in region %s",
-				RoadRunnerService.GetRegion(regionSet, l)));
+		logger.log(String.format("Test point on Vassar is in region %s", GetRegion(regionSet, l)));
 
 		l = new Location("");
 		l.setLatitude(42.3619370093201);
 		l.setLongitude(-71.09123110771179);
-		logger.log(String.format("Test point on Vassar is in region %s",
-				RoadRunnerService.GetRegion(regionSet, l)));
+		logger.log(String.format("Test point on Vassar is in region %s", GetRegion(regionSet, l)));
 
 		l = new Location("");
 		l.setLatitude(42.36234924163794);
 		l.setLongitude(-71.09039425849915);
-		logger.log(String.format("Test point on Vassar is in region %s",
-				RoadRunnerService.GetRegion(regionSet, l)));
+		logger.log(String.format("Test point on Vassar is in region %s", GetRegion(regionSet, l)));
 
 		l = new Location("");
 		l.setLatitude(42.3631736981596);
 		l.setLongitude(-71.09626293182373);
-		logger.log(String.format("Test point on Main-1 is in region %s",
-				RoadRunnerService.GetRegion(regionSet, l)));
+		logger.log(String.format("Test point on Main-1 is in region %s", GetRegion(regionSet, l)));
 
 		l = new Location("");
 		l.setLatitude(42.36303893196785);
 		l.setLongitude(-71.09436392784119);
-		logger.log(String.format("Test point on Main-1 is in region %s",
-				RoadRunnerService.GetRegion(regionSet, l)));
+		logger.log(String.format("Test point on Main-1 is in region %s", GetRegion(regionSet, l)));
 
 		l = new Location("");
 		l.setLatitude(42.362935875273244);
 		l.setLongitude(-71.09288334846497);
-		logger.log(String.format("Test point on Main-2 is in region %s",
-				RoadRunnerService.GetRegion(regionSet, l)));
+		logger.log(String.format("Test point on Main-2 is in region %s", GetRegion(regionSet, l)));
 
 		l = new Location("");
 		l.setLatitude(42.362785253646265);
 		l.setLongitude(-71.09100580215454);
-		logger.log(String.format("Test point on Main-3 is in region %s",
-				RoadRunnerService.GetRegion(regionSet, l)));
+		logger.log(String.format("Test point on Main-3 is in region %s", GetRegion(regionSet, l)));
 
 		l = new Location("");
 		l.setLatitude(42.362476081807);
 		l.setLongitude(-71.0936987400055);
-		logger.log(String.format("Test point on Portland-1 is in region %s",
-				RoadRunnerService.GetRegion(regionSet, l)));
+		logger.log(String.format("Test point on Portland-1 is in region %s", GetRegion(regionSet, l)));
 
 		l = new Location("");
 		l.setLatitude(42.36099362133876);
 		l.setLongitude(-71.09561920166016);
-		logger.log(String.format("Test point on Albany-1 is in region %s",
-				RoadRunnerService.GetRegion(regionSet, l)));
+		logger.log(String.format("Test point on Albany-1 is in region %s", GetRegion(regionSet, l)));
 
 		l = new Location("");
 		l.setLatitude(42.36154855716084);
 		l.setLongitude(-71.0943853855133);
-		logger.log(String.format("Test point on Albany-1 is in region %s",
-				RoadRunnerService.GetRegion(regionSet, l)));
+		logger.log(String.format("Test point on Albany-1 is in region %s", GetRegion(regionSet, l)));
 
 		l = new Location("");
 		l.setLatitude(42.362008357414815);
 		l.setLongitude(-71.093430519104);
-		logger.log(String.format("Test point on Albany-2 is in region %s",
-				RoadRunnerService.GetRegion(regionSet, l)));
+		logger.log(String.format("Test point on Albany-2 is in region %s", GetRegion(regionSet, l)));
 
 		l = new Location("");
 		l.setLatitude(42.362610849206014);
 		l.setLongitude(-71.09221816062927);
-		logger.log(String.format("Test point on Albany-2 is in region %s",
-				RoadRunnerService.GetRegion(regionSet, l)));
+		logger.log(String.format("Test point on Albany-2 is in region %s", GetRegion(regionSet, l)));
 
 		l = new Location("");
 		l.setLatitude(42.3611521749309);
 		l.setLongitude(-71.09653115272522);
-		logger.log(String.format("Test point on Mass-1 is in region %s",
-				RoadRunnerService.GetRegion(regionSet, l)));
+		logger.log(String.format("Test point on Mass-1 is in region %s", GetRegion(regionSet, l)));
 
 		l = new Location("");
 		l.setLatitude(42.3604862471552);
 		l.setLongitude(-71.09537243843079);
-		logger.log(String.format("Test point on Mass-2 is in region %s",
-				RoadRunnerService.GetRegion(regionSet, l)));
+		logger.log(String.format("Test point on Mass-2 is in region %s", GetRegion(regionSet, l)));
 
 		l = new Location("");
 		l.setLatitude(42.36238887921827);
 		l.setLongitude(-71.09683156013489);
-		logger.log(String.format("Test point on Windsor-1 is in region %s",
-				RoadRunnerService.GetRegion(regionSet, l)));
+		logger.log(String.format("Test point on Windsor-1 is in region %s", GetRegion(regionSet, l)));
 	}
 }

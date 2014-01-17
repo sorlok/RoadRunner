@@ -4,6 +4,7 @@
 
 package edu.mit.smart.sm4and;
 
+import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker;
 import edu.mit.smart.sm4and.message.Message;
 
 /**
@@ -22,4 +23,23 @@ public abstract class AbstractMessageHandler {
      *  functionality.
      */
     public abstract void handle(Message message, Connector connector, MessageParser parser);
+    
+    /**
+     * Set the Broker for this message handler. This function will be called by the SimMobilityBroker; 
+     * there is no need to call it explicitly.
+     * @param broker
+     */
+    public void setBroker(SimMobilityBroker broker) {
+    	this.broker = broker;
+    }
+    
+    /**
+     * Test if a Broker has been set. Called internally.
+     * @return
+     */
+    public boolean hasBroker() {
+    	return this.broker != null;
+    }
+    
+    protected SimMobilityBroker broker;
 }

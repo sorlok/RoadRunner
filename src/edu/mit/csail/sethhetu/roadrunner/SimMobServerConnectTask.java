@@ -29,11 +29,12 @@ public class SimMobServerConnectTask extends AsyncTask<Connector, Void, Boolean>
 	private BufferedWriter writer;
 	private Exception errorEx;
 	private PostExecuteAction onComplete;
+	private LoggerI logger;
 
 	
-	public SimMobServerConnectTask(PostExecuteAction onComplete, MessageHandlerFactory handlerFactory) {
+	public SimMobServerConnectTask(PostExecuteAction onComplete, MessageHandlerFactory handlerFactory, LoggerI logger) {
 		this.onComplete = onComplete;
-		//this.handlerFactory = handlerFactory;
+		this.logger = logger;
 	}
 	
 	protected void onPreExecute() {
@@ -42,23 +43,10 @@ public class SimMobServerConnectTask extends AsyncTask<Connector, Void, Boolean>
 	protected Boolean doInBackground(Connector... mnConnect) {
 		if (mnConnect.length!=1) { throw new LoggingRuntimeException("Only one Connector allowed."); }
 		try {
+			logger.log("Attempting to connect to MINA server on " + Globals.SM_HOST + ":" + Globals.SM_PORT);
 	        mnConnect[0].connect(Globals.SM_HOST, Globals.SM_PORT);
-			/*mnConnect[0].connect(new InetSocketAddress(Globals.SM_HOST, Globals.SM_PORT), Globals.SM_TIMEOUT);
-
-			//Retrieve underlying input/output streams.
-			InputStream in = smSocket[0].getInputStream();
-			OutputStream out = smSocket[0].getOutputStream();
-
-			//Wrap these with Buffered readers/writers.
-			this.reader = new BufferedReader(new InputStreamReader(in));
-			this.writer = new BufferedWriter(new OutputStreamWriter(out));
-			
-			//Now we read one line, and see if the Sim Mobility server will accept us.
-			String firstResponse = reader.readLine();
-			if (!firstResponse.equals("OK")) {
-				throw new IOException("Sim Mobility Server refused to accept us; received \"" + firstResponse + "\"");
-			}*/
 		} catch (Exception ex) {
+			logger.log(ex.toString());
 			this.errorEx = ex;
 		}
 		

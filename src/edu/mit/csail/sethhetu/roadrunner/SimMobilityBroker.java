@@ -19,16 +19,17 @@ import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.AdHocAnnouncer;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.PathSetter;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.RegionChecker;
+import edu.mit.csail.jasongao.roadrunner.ext.SendRegionHandler.RemoteLogMessage;
+import edu.mit.csail.jasongao.roadrunner.ext.SendRegionHandler.RerouteRequest;
 import edu.mit.csail.sethhetu.roadrunner.SimMobServerConnectTask.PostExecuteAction;
 import edu.mit.csail.sethhetu.roadrunner.SimpleRegion.SimpleLocation;
 import edu.mit.csail.sethhetu.roadrunner.impl.SimMobilityBrokerImpl;
+import edu.mit.smart.sm4and.AbstractMessageHandler;
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.MessageHandlerFactory;
 import edu.mit.smart.sm4and.MessageParser;
 import edu.mit.smart.sm4and.handler.AndroidHandlerFactory;
 import edu.mit.smart.sm4and.handler.MulticastHandler.MulticastMessage;
-import edu.mit.smart.sm4and.handler.SendRegionHandler.RemoteLogMessage;
-import edu.mit.smart.sm4and.handler.SendRegionHandler.RerouteRequest;
 import edu.mit.smart.sm4and.json.JsonMessageParser;
 import edu.mit.smart.sm4and.mina.MinaConnector;
 
@@ -58,34 +59,16 @@ public class SimMobilityBroker extends SimMobilityBrokerImpl implements PostExec
 		return instance;
 	}
 	
-	
-	//
-	//TODO: Currently cleaning.
-	//      The Regions list should be moved back to RoadRunner. 
-	//      In addition, our RegionSetter should be a "Handle" of some kind, registered by RoadRunner for our custom
-	//      "Region" service (since only RR has Regions, so it's not a core message type). 
-	
-	//The list of Regions that Sim Mobility has sent to us. Will be used in place of RoadRunnerService's list if appropriate.
-	//private Hashtable<String, Region> simmobRegions;
-	//public Hashtable<String, Region> getRegionSet() {
-	//	return simmobRegions;
-	//}
-	public class RegionSetter {
-		public void setRegions(SimpleRegion[] regions) {
-	        if (regions==null) {
-	        	return; //Don't set.
-	        }
-	        
-	        //Change the current region set
-	        simmobRegions = new Hashtable<String, Region>();
-	        for (SimpleRegion sr : regions) {
-	        	Region rg = new Region(sr.id);
-	        	for (SimpleLocation sloc : sr.vertices) {
-	        		rg.addVertex(sloc.latitude, sloc.longitude);
-	        	}
-	        	simmobRegions.put(rg.id, rg);
-	        }
-		}
+	/**
+	 * Register a custom MessageHandler with the current MessageHandlerFactory.
+	 * This handler will be called if a message of the given type is received.
+	 * @param msgType The unique identifier of the Message to handle.
+	 * @param handler The handler to be called when this message arrives.
+	 */
+	public void addCustomMessageHandler(String msgType, AbstractMessageHandler handler) {
+		if (handlerFactory==null) { return; }
+		handler.setBroker(this);
+		handlerFactory.addCustomHandler(msgType, handler);
 	}
 	
 	
@@ -101,9 +84,11 @@ public class SimMobilityBroker extends SimMobilityBrokerImpl implements PostExec
 	
 	//Let's make this non-deterministic.
 	private static Random RandGen = new Random();
+	public Random getRand() { return SimMobilityBroker.RandGen; }
 	
 	//Synced to the "m_id" field in RoadRunner.
 	private String uniqueId;
+	public String getUniqueId() { return uniqueId; }
 	
 	private MessageParser messageParser;
 	private MessageHandlerFactory handlerFactory;
@@ -122,15 +107,14 @@ public class SimMobilityBroker extends SimMobilityBrokerImpl implements PostExec
 		this.logger = logger;
 		this.adhoc = adhoc;
 		this.locspoof = locspoof;
-		//this.region_requester = region_requester;
 		this.regcheck = regcheck;
 		
 		//Check that we have a unique ID.
 		this.uniqueId = uniqueId;
 		if (uniqueId==null) { throw new LoggingRuntimeException("Unique Id cannot be null."); }
 		
-		this.handlerFactory = new AndroidHandlerFactory(uniqueId, locspoof, new TimeAdvancer(), new MultiCastReceiver(), new RegionSetter(), pathSet);
-		this.conn = new MinaConnector(myHandler, messageParser, handlerFactory, locspoof, logger);
+		this.handlerFactory = new AndroidHandlerFactory(uniqueId, locspoof, new TimeAdvancer(), new MultiCastReceiver());
+		this.conn = new MinaConnector(myHandler, messageParser, handlerFactory, locspoof);
 	}
 	
 	/**
@@ -143,7 +127,7 @@ public class SimMobilityBroker extends SimMobilityBrokerImpl implements PostExec
 		
 		//Connect our socket.
 		//NOTE: Currently, this task will *only* end if the session is closed. 
-		SimMobServerConnectTask task = new SimMobServerConnectTask(this, this.handlerFactory);
+		SimMobServerConnectTask task = new SimMobServerConnectTask(this, this.handlerFactory, logger);
 		task.execute(this.conn);
 		this.activated = true;
 	}

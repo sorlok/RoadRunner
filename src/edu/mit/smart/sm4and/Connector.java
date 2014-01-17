@@ -4,6 +4,7 @@
 
 package edu.mit.smart.sm4and;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import edu.mit.smart.sm4and.message.Message;
@@ -23,8 +24,10 @@ public abstract class Connector {
      * Connects to server.
      * @param host of the server.
      * @param port of the server.
+     * 
+     * Throws an exception if the connection could not be made.
      */
-    public abstract void connect(String host, int port);
+    public abstract void connect(String host, int port) throws IOException;
     
     /**
      * Disconnects from the server.
