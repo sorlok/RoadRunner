@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import edu.mit.smart.sm4and.AbstractMessageHandler;
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.MessageHandlerFactory;
-import edu.mit.smart.sm4and.MessageParser;
-import edu.mit.smart.sm4and.handler.SimpleAndroidHandler;
 import edu.mit.smart.sm4and.message.Message;
 
 import org.apache.mina.core.future.ConnectFuture;
@@ -23,10 +21,8 @@ import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.codec.textline.TextLineCodecFactory;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
-import android.os.Handler;
-
 import edu.mit.csail.jasongao.roadrunner.Globals;
-import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
+import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker;
 
 /**
  * A connector which targets Apache Mina.
@@ -37,10 +33,10 @@ import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 public class MinaConnector extends Connector {
 	private volatile boolean connected;
 	
-	private Handler myHandler;
+	private SimMobilityBroker broker;
+	
     private IoConnector connector;
     private IoSession session;
-    private MessageParser parser;
     private MessageHandlerFactory handlerFactory;
     
     private final int BUFFER_SIZE = 20480;
@@ -56,9 +52,8 @@ public class MinaConnector extends Connector {
      * @param locspoof   A handler for spoofing location-based updates. Used to set software lat/lng.
      * @param logger     A handler for logging.
      */
-    public MinaConnector(Handler myHandler, MessageParser parser, MessageHandlerFactory handlerFactory, LocationSpoofer locspoof) {
-    	this.myHandler = myHandler;
-        this.parser = parser;
+    public MinaConnector(SimMobilityBroker broker, MessageHandlerFactory handlerFactory) {
+        this.broker = broker;
         this.handlerFactory = handlerFactory;
     }
 
@@ -151,16 +146,13 @@ public class MinaConnector extends Connector {
     	data = data.substring(8);
     	
     	//Just pass off each message to "handle()"
-    	ArrayList<Message> messages = parser.parse(data);
+    	ArrayList<Message> messages = broker.getParser().parse(data);
     	for (Message message : messages) {
     		//Get an appropriate response handler.
     		AbstractMessageHandler handler = handlerFactory.create(message.getMessageType());
     		
-    		//We want to process this on the main thread, as we may want to interact with the user.
-    		//Thus, we post it to the message queue.
-    		SimpleAndroidHandler sam = new SimpleAndroidHandler(handler, message, this, parser);
-    		myHandler.post(sam);
+    		//Ask the Broker to post this message on the main thread.
+    		broker.handleMessage(handler, message);
     	}
     }
-    
 }

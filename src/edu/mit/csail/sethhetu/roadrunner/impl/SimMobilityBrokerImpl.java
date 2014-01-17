@@ -7,6 +7,7 @@ import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.RegionChecker;
 import edu.mit.csail.sethhetu.roadrunner.LoggerI;
 import edu.mit.smart.sm4and.Connector;
 
+
 /**
  * Contains the protected implementation of RoadRunnerService. 
  * You will never have to interact with this class directly.
@@ -27,6 +28,5 @@ public class SimMobilityBrokerImpl {
 	protected AdHocAnnouncer adhoc;
 	protected LocationSpoofer locspoof;
 	protected RegionChecker regcheck;
-
 
 }

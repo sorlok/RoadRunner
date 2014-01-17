@@ -6,9 +6,7 @@ package edu.mit.csail.sethhetu.roadrunner;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.net.Inet4Address;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Random;
 import java.util.Set;
 
@@ -22,15 +20,22 @@ import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.RegionChecker;
 import edu.mit.csail.jasongao.roadrunner.ext.SendRegionHandler.RemoteLogMessage;
 import edu.mit.csail.jasongao.roadrunner.ext.SendRegionHandler.RerouteRequest;
 import edu.mit.csail.sethhetu.roadrunner.SimMobServerConnectTask.PostExecuteAction;
-import edu.mit.csail.sethhetu.roadrunner.SimpleRegion.SimpleLocation;
 import edu.mit.csail.sethhetu.roadrunner.impl.SimMobilityBrokerImpl;
 import edu.mit.smart.sm4and.AbstractMessageHandler;
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.MessageHandlerFactory;
 import edu.mit.smart.sm4and.MessageParser;
-import edu.mit.smart.sm4and.handler.AndroidHandlerFactory;
+import edu.mit.smart.sm4and.handler.LocationHandler;
+import edu.mit.smart.sm4and.handler.MulticastHandler;
+import edu.mit.smart.sm4and.handler.ReadyHandler;
+import edu.mit.smart.sm4and.handler.ReadyToReceiveHandler;
+import edu.mit.smart.sm4and.handler.SimpleAndroidHandler;
+import edu.mit.smart.sm4and.handler.TimeHandler;
+import edu.mit.smart.sm4and.handler.UnicastHandler;
+import edu.mit.smart.sm4and.handler.WhoAreYouHandler;
 import edu.mit.smart.sm4and.handler.MulticastHandler.MulticastMessage;
 import edu.mit.smart.sm4and.json.JsonMessageParser;
+import edu.mit.smart.sm4and.message.Message;
 import edu.mit.smart.sm4and.mina.MinaConnector;
 
 /**
@@ -69,6 +74,24 @@ public class SimMobilityBroker extends SimMobilityBrokerImpl implements PostExec
 		if (handlerFactory==null) { return; }
 		handler.setBroker(this);
 		handlerFactory.addCustomHandler(msgType, handler);
+	}
+	
+	
+	/**
+	 * Create a MessageHandlerFactory with the appropriate callbacks for Android messages.
+	 * @return
+	 */
+	protected MessageHandlerFactory makeAndroidHandlerFactory(String clientId, LocationSpoofer locSpoof, TimeAdvancer timeTicker, MultiCastReceiver mcProcess) {
+		//Set up our list of default handlers.
+		MessageHandlerFactory res = new MessageHandlerFactory();
+		res.addDefaultHandler(Message.Type.WHOAREYOU, new WhoAreYouHandler(clientId), this);
+		res.addDefaultHandler(Message.Type.TIME_DATA, new TimeHandler(timeTicker), this);
+		res.addDefaultHandler(Message.Type.READY, new ReadyHandler(), this);
+		res.addDefaultHandler(Message.Type.LOCATION_DATA, new LocationHandler(locSpoof), this);
+		res.addDefaultHandler(Message.Type.MULTICAST, new MulticastHandler(mcProcess), this);
+		res.addDefaultHandler(Message.Type.UNICAST, new UnicastHandler(), this);
+		res.addDefaultHandler(Message.Type.READY_TO_RECEIVE, new ReadyToReceiveHandler(clientId), this);
+		return res;
 	}
 	
 	
@@ -113,9 +136,22 @@ public class SimMobilityBroker extends SimMobilityBrokerImpl implements PostExec
 		this.uniqueId = uniqueId;
 		if (uniqueId==null) { throw new LoggingRuntimeException("Unique Id cannot be null."); }
 		
-		this.handlerFactory = new AndroidHandlerFactory(uniqueId, locspoof, new TimeAdvancer(), new MultiCastReceiver());
-		this.conn = new MinaConnector(myHandler, messageParser, handlerFactory, locspoof);
+		this.handlerFactory = makeAndroidHandlerFactory(uniqueId, locspoof, new TimeAdvancer(), new MultiCastReceiver());
+		this.conn = new MinaConnector(this, handlerFactory);
 	}
+	
+	public MessageParser getParser() {
+		return messageParser;
+	}
+	
+	//Handle a Message as received from MINA.
+	public void handleMessage(AbstractMessageHandler handler, Message message) {
+		//We want to process this on the main thread, as we may want to interact with the user.
+		//Thus, we post it to the message queue.
+		SimpleAndroidHandler sam = new SimpleAndroidHandler(handler, message, conn, messageParser);
+		myHandler.post(sam);
+	}
+	
 	
 	/**
 	 * Start the SimMobility Broker (sets it to "active" and connects to the server).
