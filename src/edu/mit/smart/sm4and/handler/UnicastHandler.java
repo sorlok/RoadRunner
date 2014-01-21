@@ -5,6 +5,7 @@
 package edu.mit.smart.sm4and.handler;
 
 import edu.mit.smart.sm4and.connector.Connector;
+import edu.mit.smart.sm4and.message.DefaultMessageTypes.UnicastMessage;
 import edu.mit.smart.sm4and.message.Message;
 import edu.mit.smart.sm4and.message.MessageParser;
 
@@ -12,20 +13,7 @@ import edu.mit.smart.sm4and.message.MessageParser;
  * Handle a unicast message.
  * @author Vahid
  */
-public class UnicastHandler extends AbstractMessageHandler {
-	/** A unicast message. Contains an opaque block of Base64-encoded data. */
-	public static class UnicastMessage extends Message { 
-		public UnicastMessage(String uniqueId, String ucData) {
-			super(Type.UNICAST, uniqueId);
-			this.UNICAST_DATA = ucData;
-		}
-		private String UNICAST_DATA;
-		
-		//This constructor is only used by GSON
-		@SuppressWarnings("unused")
-		private UnicastMessage() { this("0", ""); }
-	}
-	    
+public class UnicastHandler extends AbstractMessageHandler {	    
     public UnicastHandler() {
     }
 

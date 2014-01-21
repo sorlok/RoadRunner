@@ -5,6 +5,7 @@
 package edu.mit.smart.sm4and.handler;
 
 import edu.mit.smart.sm4and.connector.Connector;
+import edu.mit.smart.sm4and.message.DefaultMessageTypes.WhoAmIResponse;
 import edu.mit.smart.sm4and.message.Message;
 import edu.mit.smart.sm4and.message.MessageParser;
 
@@ -14,37 +15,7 @@ import edu.mit.smart.sm4and.message.MessageParser;
  * @author Pedro Gandola
  * @author Vahid
  */
-public class WhoAreYouHandler extends AbstractMessageHandler {
-	/** A message from the server requesting that the client identify itself. */
-	public static class WhoAreYouMessage extends Message {
-		public WhoAreYouMessage(String uniqueId) {
-			super(Type.WHOAREYOU, uniqueId); 
-		}
-		
-		//This constructor is only used by GSON
-		@SuppressWarnings("unused")
-		private WhoAreYouMessage() { this("0"); }
-	}
-	
-	/** A response to the server identifying oneself. */
-	public static class WhoAmIResponse extends Message {
-		public WhoAmIResponse(String uniqueId, String[] requiredServices) {
-			super(Type.WHOAMI, uniqueId);
-			this.REQUIRED_SERVICES = requiredServices;
-			
-			//These are duplicated, but necessary for now.
-			this.ID = this.SENDER;
-			this.TYPE = this.SENDER_TYPE;
-		}
-	    public String ID;
-	    public String TYPE;
-	    public String[] REQUIRED_SERVICES;
-	    
-		//This constructor is only used by GSON
-		@SuppressWarnings("unused")
-		private WhoAmIResponse() { this("0", null); }
-	}
-	
+public class WhoAreYouHandler extends AbstractMessageHandler {	
     private String clientID;
     
     public WhoAreYouHandler(String clientID) {

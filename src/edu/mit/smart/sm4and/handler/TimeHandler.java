@@ -6,6 +6,7 @@ package edu.mit.smart.sm4and.handler;
 
 import edu.mit.smart.sm4and.android.AndroidSimMobilityBroker.TimeAdvancer;
 import edu.mit.smart.sm4and.connector.Connector;
+import edu.mit.smart.sm4and.message.DefaultMessageTypes.TimeMessage;
 import edu.mit.smart.sm4and.message.Message;
 import edu.mit.smart.sm4and.message.MessageParser;
 
@@ -14,22 +15,7 @@ import edu.mit.smart.sm4and.message.MessageParser;
  * @author Pedro Gandola
  * @author Vahid
  */
-public class TimeHandler extends AbstractMessageHandler {
-	/** A message from the server indicating that the current time has advanced. */
-	public static class TimeMessage extends Message {		
-		public TimeMessage(String uniqueId, int tick, int elapsed_ms) {
-			super(Type.TIME_DATA, uniqueId);
-			this.tick = tick;
-			this.elapsed_ms = elapsed_ms;
-		}
-		private int tick;    
-		private int elapsed_ms;
-		
-		//This constructor is only used by GSON
-		@SuppressWarnings("unused")
-		private TimeMessage() { this("0", 0, 0); }
-	}
-	
+public class TimeHandler extends AbstractMessageHandler {	
 	private TimeAdvancer timeTicker;
 	
     public TimeHandler(TimeAdvancer timeTicker) {

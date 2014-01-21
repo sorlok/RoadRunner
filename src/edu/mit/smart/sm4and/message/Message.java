@@ -7,8 +7,6 @@ package edu.mit.smart.sm4and.message;
 /**
  * Parent class for all Messages.
  * 
- * TODO: Enum-switching defeats the entire purpose of object-oriented inheritance.
- * 
  * @author Pedro Gandola
  */
 public class Message {

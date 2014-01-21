@@ -6,6 +6,7 @@ package edu.mit.smart.sm4and.handler;
 
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 import edu.mit.smart.sm4and.connector.Connector;
+import edu.mit.smart.sm4and.message.DefaultMessageTypes.LocationMessage;
 import edu.mit.smart.sm4and.message.Message;
 import edu.mit.smart.sm4and.message.MessageParser;
 
@@ -13,22 +14,7 @@ import edu.mit.smart.sm4and.message.MessageParser;
  * Handle a location-update message.
  * @author Vahid
  */
-public class LocationHandler extends AbstractMessageHandler {
-	/** A location update message. Uses projected (x,y) coordinates, not Latitude/Longitude. */
-	public static class LocationMessage extends Message { 
-		public LocationMessage(String uniqueId, double lat, double lng) {
-			super(Type.LOCATION_DATA, uniqueId);
-			this.lat = lat;
-			this.lng = lng;
-		}
-	    private double lat;
-	    private double lng;
-	    
-		//This constructor is only used by GSON
-		@SuppressWarnings("unused")
-		private LocationMessage() { this("0", 0, 0); }
-	}
-	
+public class LocationHandler extends AbstractMessageHandler {	
     private LocationSpoofer locspoof;
     
     public LocationHandler(LocationSpoofer locspoof) {

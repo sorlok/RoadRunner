@@ -6,6 +6,7 @@ package edu.mit.smart.sm4and.handler;
 
 import edu.mit.smart.sm4and.android.AndroidSimMobilityBroker.MultiCastReceiver;
 import edu.mit.smart.sm4and.connector.Connector;
+import edu.mit.smart.sm4and.message.DefaultMessageTypes.MulticastMessage;
 import edu.mit.smart.sm4and.message.Message;
 import edu.mit.smart.sm4and.message.MessageParser;
 
@@ -13,20 +14,7 @@ import edu.mit.smart.sm4and.message.MessageParser;
  * Handle a multicast message.
  * @author Vahid
  */
-public class MulticastHandler extends AbstractMessageHandler {
-	/** A multicast message. Contains an opaque block of Base64-encoded data. */
-	public static class MulticastMessage extends Message { 
-		public MulticastMessage(String uniqueId, String mcData) { 
-			super(Type.MULTICAST, uniqueId);
-			this.MULTICAST_DATA = mcData;
-		}
-		public String MULTICAST_DATA;
-		
-		//This constructor is only used by GSON
-		@SuppressWarnings("unused")
-		private MulticastMessage() { this("0", ""); }
-	}
-	
+public class MulticastHandler extends AbstractMessageHandler {	
 	private MultiCastReceiver mcProcess;
 	    
     public MulticastHandler(MultiCastReceiver mcProcess) {
