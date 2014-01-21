@@ -2,7 +2,7 @@
 //Licensed under the terms of the MIT License, as described in the file:
 //   license.txt   (http://opensource.org/licenses/MIT)
 
-package edu.mit.csail.sethhetu.roadrunner;
+package edu.mit.csail.jasongao.roadrunner.util;
 
 /**
  * Subclasses RuntimeException, logging the error message upon creation.

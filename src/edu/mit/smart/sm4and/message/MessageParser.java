@@ -7,7 +7,7 @@ package edu.mit.smart.sm4and.message;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import edu.mit.csail.sethhetu.roadrunner.LoggingRuntimeException;
+import edu.mit.csail.jasongao.roadrunner.util.LoggingRuntimeException;
 
 
 /**

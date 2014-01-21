@@ -8,7 +8,7 @@ import org.apache.mina.core.service.*;
 import org.apache.mina.core.session.*;
 
 import edu.mit.csail.jasongao.roadrunner.Globals;
-import edu.mit.csail.sethhetu.roadrunner.LoggingRuntimeException;
+import edu.mit.csail.jasongao.roadrunner.util.LoggingRuntimeException;
 
 import java.util.logging.Logger;
 

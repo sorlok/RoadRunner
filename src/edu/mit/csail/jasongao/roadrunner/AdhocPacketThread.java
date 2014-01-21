@@ -10,8 +10,8 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
-import edu.mit.csail.sethhetu.roadrunner.InterfaceMap;
-import edu.mit.csail.sethhetu.roadrunner.LoggerI;
+import edu.mit.csail.jasongao.roadrunner.util.InterfaceMap;
+import edu.mit.csail.jasongao.roadrunner.util.LoggerI;
 
 import android.os.Handler;
 

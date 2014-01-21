@@ -9,11 +9,12 @@ import edu.mit.csail.jasongao.roadrunner.ResRequest;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.PathSetter;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.RegionSetter;
 import edu.mit.csail.jasongao.roadrunner.ext.RegionMessages.SendRegionResponse;
-import edu.mit.csail.sethhetu.roadrunner.LoggingRuntimeException;
-import edu.mit.csail.sethhetu.roadrunner.SimpleRegion;
-import edu.mit.csail.sethhetu.roadrunner.SimpleRegion.SimpleLocation;
+import edu.mit.csail.jasongao.roadrunner.ext.RegionMessages.SimpleRegion;
+import edu.mit.csail.jasongao.roadrunner.ext.RegionMessages.SimpleRegion.SimpleLocation;
+import edu.mit.csail.jasongao.roadrunner.util.LoggingRuntimeException;
 import edu.mit.smart.sm4and.connector.Connector;
 import edu.mit.smart.sm4and.handler.AbstractMessageHandler;
+import edu.mit.smart.sm4and.message.Message;
 import edu.mit.smart.sm4and.message.MessageParser;
 
 public class RegionAndPathHandler extends AbstractMessageHandler {
@@ -32,7 +33,7 @@ public class RegionAndPathHandler extends AbstractMessageHandler {
 	
 	
 	@Override
-	public void handle(edu.mit.smart.sm4and.message.Message message, Connector connector, MessageParser parser) {
+	public void handle(Message message, Connector connector, MessageParser parser) {
         SendRegionResponse regionMsg = (SendRegionResponse)message;
         
         //Parts of this may be null

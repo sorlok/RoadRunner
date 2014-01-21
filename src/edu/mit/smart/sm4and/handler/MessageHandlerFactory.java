@@ -9,7 +9,7 @@ import java.util.Hashtable;
 
 import edu.mit.smart.sm4and.SimMobilityBroker;
 import edu.mit.smart.sm4and.handler.MessageHandlerFactory;
-import edu.mit.csail.sethhetu.roadrunner.LoggingRuntimeException;
+import edu.mit.csail.jasongao.roadrunner.util.LoggingRuntimeException;
 
 
 /**

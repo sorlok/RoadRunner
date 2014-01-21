@@ -14,7 +14,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
 import edu.mit.csail.jasongao.roadrunner.Globals;
-import edu.mit.csail.sethhetu.roadrunner.LoggingRuntimeException;
+import edu.mit.csail.jasongao.roadrunner.util.LoggingRuntimeException;
 import edu.mit.smart.sm4and.message.Message;
 import edu.mit.smart.sm4and.message.MessageParser;
 

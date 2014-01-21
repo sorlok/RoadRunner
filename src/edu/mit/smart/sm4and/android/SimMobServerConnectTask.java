@@ -2,7 +2,7 @@
 //Licensed under the terms of the MIT License, as described in the file:
 //   license.txt   (http://opensource.org/licenses/MIT)
 
-package edu.mit.csail.sethhetu.roadrunner;
+package edu.mit.smart.sm4and.android;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -10,6 +10,8 @@ import java.io.BufferedWriter;
 import android.os.AsyncTask;
 
 import edu.mit.csail.jasongao.roadrunner.Globals;
+import edu.mit.csail.jasongao.roadrunner.util.LoggerI;
+import edu.mit.csail.jasongao.roadrunner.util.LoggingRuntimeException;
 import edu.mit.smart.sm4and.connector.Connector;
 import edu.mit.smart.sm4and.handler.MessageHandlerFactory;
 

@@ -4,7 +4,6 @@
 
 package edu.mit.csail.jasongao.roadrunner.ext;
 
-import edu.mit.csail.sethhetu.roadrunner.SimpleRegion;
 import edu.mit.smart.sm4and.message.Message;
 
 /**
@@ -12,6 +11,18 @@ import edu.mit.smart.sm4and.message.Message;
  * @author Seth N. Hetu
  */
 public class RegionMessages  {
+	/** A simpler version of a Region, used for serialization. */
+	public static class SimpleRegion {
+		public static class SimpleLocation {
+			public double longitude;
+			public double latitude;
+		}
+		
+		public String id;
+		public SimpleLocation[] vertices;
+	}
+	
+	
 	/** A message from the client asking the server to re-route it. */
 	public static class RerouteRequest extends Message {
 		public static final String MessageType = "REROUTE_REQUEST";
