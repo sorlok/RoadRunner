@@ -22,8 +22,10 @@ import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker;
  * @author Seth N. Hetu
  */
 public class MessageHandlerFactory  {
-	//Additional handlers.
+	//The default handlers are defined by Sim Mobility.
 	private Hashtable<String, AbstractMessageHandler> defaultHandlers = new Hashtable<String, AbstractMessageHandler>();
+	
+	//Any custom handlers have to be supported in Sim Mobility, but are defined by the user in the Android app.
 	private Hashtable<String, AbstractMessageHandler> customHandlers = new Hashtable<String, AbstractMessageHandler>();
 	
 

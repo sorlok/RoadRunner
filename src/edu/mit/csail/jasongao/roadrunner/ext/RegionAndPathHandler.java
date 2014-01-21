@@ -20,6 +20,7 @@ public class RegionAndPathHandler extends AbstractMessageHandler {
 	private RegionSetter regSetter;
 	private PathSetter pathSetter;
 	
+
 	public RegionAndPathHandler(RegionSetter regSetter, PathSetter pathSetter) {
 		if (regSetter==null || pathSetter==null) {
 			throw new LoggingRuntimeException("Region and Path settings need to be non-null.");

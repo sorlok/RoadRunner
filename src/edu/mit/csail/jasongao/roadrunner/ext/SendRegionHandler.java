@@ -14,13 +14,17 @@ import edu.mit.smart.sm4and.message.Message;
 public class SendRegionHandler  {
 	/** A message from the client asking the server to re-route it. */
 	public static class RerouteRequest extends Message {
-		public RerouteRequest() { this.MESSAGE_TYPE = Type.REROUTE_REQUEST; }
+		public static final String MessageType = "REROUTE_REQUEST";
+		
+		public RerouteRequest() { this.MESSAGE_TYPE = MessageType; }
 		public String blacklist_region;
 	}
 	
 	/** A response from the server with an attached list of Regions. */
 	public static class SendRegionResponse extends Message {
-		public SendRegionResponse() { this.MESSAGE_TYPE = Type.REGIONS_AND_PATH_DATA; }
+		public static final String MessageType = "REGIONS_AND_PATH_DATA";
+		
+		public SendRegionResponse() { this.MESSAGE_TYPE = MessageType; }
 	    public SimpleRegion[] all_regions;
 	    public String[] region_path;
 	}

@@ -5,7 +5,9 @@
 package edu.mit.smart.sm4and;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 
+import edu.mit.csail.sethhetu.roadrunner.LoggingRuntimeException;
 import edu.mit.smart.sm4and.message.Message;
 
 
@@ -19,18 +21,34 @@ import edu.mit.smart.sm4and.message.Message;
  * @author Pedro Gandola
  * @author Vahid
  */
-public interface MessageParser {
+public abstract class MessageParser {
+	//Types of Messages we expect to parse.
+	protected Hashtable<String, Class<? extends Message>> messageTypes = new Hashtable<String, Class<? extends Message>>();
+
+	/**
+	 * Adds a message type to the list of lookups. Throws an exception if that type already has a class associated with it.
+	 * @param msgType The message type, as a unique string.
+	 * @param msgClass The class representing this Message Type.
+	 */
+	public void addMessagetype(String msgType, Class<? extends Message> msgClass) {
+		if (messageTypes.containsKey(msgType)) {
+			throw new LoggingRuntimeException("addMessageType() trying to add a class which already exists: " + msgType);
+		}
+		messageTypes.put(msgType, msgClass);
+	}
+
+	
 	/**
 	 * Turns a String into an array of Messages, which is independent of encoding.
 	 * @param src The input String.
 	 * @return The Message it corresponds to.
 	 */
-	ArrayList<Message> parse(String src);
+	public abstract ArrayList<Message> parse(String src);
 	
 	/**
 	 * Serializes a message into a String format familiar to the server.
 	 * @param msg The message to serialize.
 	 * @return A string representation of that message.
 	 */
-	String serialize(ArrayList<Message> messages);
+	public abstract String serialize(ArrayList<Message> messages);
 }

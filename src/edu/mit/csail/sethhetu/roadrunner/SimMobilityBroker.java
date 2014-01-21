@@ -17,7 +17,6 @@ import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.RegionChecker;
 import edu.mit.csail.jasongao.roadrunner.ext.SendRegionHandler.RemoteLogMessage;
 import edu.mit.csail.jasongao.roadrunner.ext.SendRegionHandler.RerouteRequest;
 import edu.mit.csail.sethhetu.roadrunner.SimMobServerConnectTask.PostExecuteAction;
-import edu.mit.csail.sethhetu.roadrunner.impl.SimMobilityBrokerImpl;
 import edu.mit.smart.sm4and.AbstractMessageHandler;
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.MessageHandlerFactory;
@@ -30,7 +29,13 @@ import edu.mit.smart.sm4and.handler.SimpleAndroidHandler;
 import edu.mit.smart.sm4and.handler.TimeHandler;
 import edu.mit.smart.sm4and.handler.UnicastHandler;
 import edu.mit.smart.sm4and.handler.WhoAreYouHandler;
+import edu.mit.smart.sm4and.handler.LocationHandler.LocationMessage;
 import edu.mit.smart.sm4and.handler.MulticastHandler.MulticastMessage;
+import edu.mit.smart.sm4and.handler.ReadyHandler.ReadyMessage;
+import edu.mit.smart.sm4and.handler.ReadyToReceiveHandler.ReadyToReceiveMessage;
+import edu.mit.smart.sm4and.handler.TimeHandler.TimeMessage;
+import edu.mit.smart.sm4and.handler.UnicastHandler.UnicastMessage;
+import edu.mit.smart.sm4and.handler.WhoAreYouHandler.WhoAreYouMessage;
 import edu.mit.smart.sm4and.json.JsonMessageParser;
 import edu.mit.smart.sm4and.message.Message;
 import edu.mit.smart.sm4and.mina.MinaConnector;
@@ -53,7 +58,21 @@ import edu.mit.smart.sm4and.mina.MinaConnector;
  *       of the MinaConnector, meaning that it will NOT operate in lock step.
  *       Changing this requires modifying the fundamental underlying architecture.
  */
-public class SimMobilityBroker extends SimMobilityBrokerImpl {
+public class SimMobilityBroker {
+	//Have we started yet?
+	protected boolean activated = false;
+	
+	//We need to maintain an open connection to the Sim Mobility server, since we are in a 
+	//  tight time loop.
+	protected Connector conn;
+	
+	//For communicating back to the RoadRunner service.
+	protected Handler myHandler;
+	protected LoggerI logger;
+	protected AdHocAnnouncer adhoc;
+	protected LocationSpoofer locspoof;
+	protected RegionChecker regcheck;
+	
 	//Singleton stuff
 	private static SimMobilityBroker instance = new SimMobilityBroker();
 	private SimMobilityBroker() {}
@@ -62,16 +81,26 @@ public class SimMobilityBroker extends SimMobilityBrokerImpl {
 	}
 	
 	/**
-	 * Register a custom MessageHandler with the current MessageHandlerFactory.
-	 * This handler will be called if a message of the given type is received.
+	 * Register a custom message type and corresponding callback action.  
+	 * This callback will be triggered if a message of the given type is received.
 	 * @param msgType The unique identifier of the Message to handle.
+	 * @param msgClass The type of this message (e.g., MyCustomMessage.class). This will 
+	 *        be parsed via Gson into an appropriate message.
 	 * @param handler The handler to be called when this message arrives.
 	 */
-	public void addCustomMessageHandler(String msgType, AbstractMessageHandler handler) {
-		if (handlerFactory==null) { return; }
+	public void addCustomMessageType(String msgType, Class<? extends Message> msgClass, AbstractMessageHandler handler) {
+		if (handlerFactory==null || messageParser==null) { 
+			throw new LoggingRuntimeException("Cannot add a custom message type; the Sim Mobility Broker has not been initialized yet.");
+		}
+		
+		//Add the message type.
+		messageParser.addMessagetype(msgType, msgClass);
+
+		//Add the handler.
 		handler.setBroker(this);
 		handlerFactory.addCustomHandler(msgType, handler);
 	}
+
 	
 	
 	/**
@@ -89,6 +118,18 @@ public class SimMobilityBroker extends SimMobilityBrokerImpl {
 		res.addDefaultHandler(Message.Type.UNICAST, new UnicastHandler(), this);
 		res.addDefaultHandler(Message.Type.READY_TO_RECEIVE, new ReadyToReceiveHandler(clientId), this);
 		return res;
+	}
+	
+	protected MessageParser makeJsonMessageParser() {
+		 MessageParser res = new JsonMessageParser();
+		 res.addMessagetype(Message.Type.WHOAREYOU, WhoAreYouMessage.class);
+		 res.addMessagetype(Message.Type.TIME_DATA, TimeMessage.class);
+		 res.addMessagetype(Message.Type.READY, ReadyMessage.class);
+		 res.addMessagetype(Message.Type.LOCATION_DATA, LocationMessage.class);
+		 res.addMessagetype(Message.Type.MULTICAST, MulticastMessage.class);
+		 res.addMessagetype(Message.Type.UNICAST, UnicastMessage.class);
+		 res.addMessagetype(Message.Type.READY_TO_RECEIVE, ReadyToReceiveMessage.class);
+		 return res;
 	}
 	
 	
@@ -122,7 +163,7 @@ public class SimMobilityBroker extends SimMobilityBrokerImpl {
 			throw new LoggingRuntimeException("Can't re-initialize; SimMobilityBroker has already been activated.");
 		}
 		
-		this.messageParser = new JsonMessageParser();
+		this.messageParser = makeJsonMessageParser();
 		this.myHandler = myHandler;
 		this.logger = logger;
 		this.adhoc = adhoc;

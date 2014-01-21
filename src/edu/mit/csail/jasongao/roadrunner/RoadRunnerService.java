@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import edu.mit.csail.jasongao.roadrunner.ext.RegionAndPathHandler;
+import edu.mit.csail.jasongao.roadrunner.ext.SendRegionHandler;
 import edu.mit.csail.jasongao.roadrunner.ext.TokenRandomizer;
 import edu.mit.csail.sethhetu.roadrunner.InterfaceMap;
 import edu.mit.csail.sethhetu.roadrunner.LoggerI;
@@ -1316,9 +1317,16 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			//We need this now.
 			retrieveUniqueId();
 			
-			//Initialize, register some handlers.
+			//Initialize.
 			simmob.initialize(mIdStr, myHandler, this, new AdHocAnnouncer(), new LocationSpoofer(), new PathSetter(), new RegionChecker());
-			simmob.addCustomMessageHandler(edu.mit.smart.sm4and.message.Message.Type.REGIONS_AND_PATH_DATA, new RegionAndPathHandler(new RegionSetter(), new PathSetter()));
+			
+			//Register our "Regions and Paths" handler, which is specific to Road Runner.
+			simmob.addCustomMessageType(
+				SendRegionHandler.SendRegionResponse.MessageType,
+				SendRegionHandler.SendRegionResponse.class, 
+				new RegionAndPathHandler(new RegionSetter(), new PathSetter())
+			);
+			
 			
 			//Activate.
 			simmob.activate();

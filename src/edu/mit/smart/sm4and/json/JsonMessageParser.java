@@ -24,7 +24,23 @@ import edu.mit.smart.sm4and.message.Message;
  * @author Pedro Gandola
  * @author Vahid
  */
-public class JsonMessageParser implements MessageParser {
+public class JsonMessageParser extends MessageParser {
+    //Convert a "MultiCast" into "MultiCastMessage.class"
+    private Class<? extends Message> GetClassFromType(String msgType) {
+    	//Sanity check; the switch will explode otherwise.
+    	if (msgType==null) {
+    		throw new LoggingRuntimeException("Message.GetClassFromType() - Can't switch on a null Message type.");
+    	}
+    	
+    	//Return the registered type.
+    	if (messageTypes.containsKey(msgType)) {
+    		return messageTypes.get(msgType);
+    	} else {
+   			throw new LoggingRuntimeException("JsonMessageParser.GetClassFromType() - Unknown message type: " + msgType.toString());
+    	}
+    }
+	
+	
 	private static String FilterJson(String src) {
     	final String msg = src;
         int lastBracket = -1;
@@ -86,7 +102,7 @@ public class JsonMessageParser implements MessageParser {
         	Message rawObject = gson.fromJson(msg, Message.class);
 
         	//Depending on the type, re-parse it as a sub-class.
-        	Class<? extends Message> msgClass = Message.GetClassFromType(rawObject.getMessageType());
+        	Class<? extends Message> msgClass = GetClassFromType(rawObject.getMessageType());
         	Message specificObject = null;
         	try {
         		specificObject = gson.fromJson(msg, msgClass); //This line is failing for the new message type.
