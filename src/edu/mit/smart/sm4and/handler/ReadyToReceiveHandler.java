@@ -21,11 +21,11 @@ public class ReadyToReceiveHandler extends AbstractMessageHandler {
     }
     
     @Override
-    public void handle(Message message, Connector connector, MessageParser parser) {        
-        ClientDoneResponse obj = new ClientDoneResponse(clientID);
+    public void handle(Message message, Connector connector, MessageParser parser) {
+    	//Send a response.
+        connector.addMessage(new ClientDoneResponse(clientID));
         
-        //Done
-        connector.addMessage(obj);
+        //This means we're done; instruct the connector to send all remaining messages.
         connector.sendAll(parser.serialize(connector.getAndClearMessages()));
     }
     

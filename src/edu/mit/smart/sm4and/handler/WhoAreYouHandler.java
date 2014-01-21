@@ -20,18 +20,14 @@ public class WhoAreYouHandler extends AbstractMessageHandler {
     
     public WhoAreYouHandler(String clientID) {
         this.clientID = clientID;
-        System.out.println("creating WhoAreYouHandler");
     }
 
     @Override
     public void handle(Message message, Connector connector, MessageParser parser) {
-        System.out.println("WhoAreYouHandler is handling");
-        
         //Prepare a response.
-        WhoAmIResponse obj = new WhoAmIResponse(clientID, new String[]{"SIMMOB_SRV_TIME","SIMMOB_SRV_LOCATION","SIMMOB_SRV_REGIONS_AND_PATH"});
+        connector.addMessage(new WhoAmIResponse(clientID, new String[]{"SIMMOB_SRV_TIME","SIMMOB_SRV_LOCATION","SIMMOB_SRV_REGIONS_AND_PATH"}));
         
         //The "WhoAmIResponse" is unique in that it *always* triggers a send.
-        connector.addMessage(obj);
         connector.sendAll(parser.serialize(connector.getAndClearMessages()));
     }
 }

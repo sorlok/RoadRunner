@@ -24,10 +24,8 @@ public class TimeHandler extends AbstractMessageHandler {
 
     @Override
     public void handle(Message message, Connector connector, MessageParser parser) {  
-    	TimeMessage timeMsg= (TimeMessage)message;
-        System.out.println("current tick is " + timeMsg.tick + " +" + timeMsg.elapsed_ms + "ms");
-        
         //Ensure that some amount of time has elapsed.
+    	TimeMessage timeMsg= (TimeMessage)message;
         timeTicker.advance(timeMsg.tick, timeMsg.elapsed_ms);
     }
 }

@@ -13,9 +13,6 @@ import edu.mit.smart.sm4and.message.MessageParser;
  * @author Vahid
  */
 public class ReadyHandler extends AbstractMessageHandler {	
-    public ReadyHandler() {
-    }
-    
     @Override
     public void handle(Message message, Connector connector, MessageParser parser) {
         System.out.println("Server Knows you. You can send and receive now.");

@@ -22,14 +22,10 @@ public class MulticastHandler extends AbstractMessageHandler {
     }
 
     @Override
-    public void handle(Message message, Connector connector, MessageParser parser) { 
+    public void handle(Message message, Connector connector, MessageParser parser) {
+    	//Hand back to the Broker
     	MulticastMessage mcMsg = (MulticastMessage)message;
-        System.out.println("Multicast message from agent " + mcMsg.SENDER + " received of length: " + mcMsg.MULTICAST_DATA.length());
-        
-        //Hand back to the Broker
         mcProcess.receive(mcMsg.SENDER, mcMsg.MULTICAST_DATA);
-        
-        
     }
     
 }

@@ -23,13 +23,7 @@ public class LocationHandler extends AbstractMessageHandler {
 
     @Override
     public void handle(Message message, Connector connector, MessageParser parser) {
-        /*
-         * TODO: This currently uses X/Y coordinates. We need to reverse project back to lat/lng
-         *       (but randomized networks need a fallback, as there is no projection matrix). 
-         */  
         LocationMessage locMsg = (LocationMessage)message;
-        System.out.println("Current location is lat:"+ locMsg.lat + ", lng:" + locMsg.lng);
         locspoof.setLocation(locMsg.lat, locMsg.lng);
-    }
-    
+    }    
 }
