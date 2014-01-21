@@ -11,13 +11,13 @@ import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.AdHocAnnouncer;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.PathSetter;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.RegionChecker;
-import edu.mit.csail.jasongao.roadrunner.ext.RegionMessages.RemoteLogMessage;
 import edu.mit.csail.sethhetu.roadrunner.LoggerI;
 import edu.mit.smart.sm4and.android.AndroidSimMobilityBroker;
 import edu.mit.smart.sm4and.connector.Connector;
 import edu.mit.smart.sm4and.handler.AbstractMessageHandler;
 import edu.mit.smart.sm4and.message.Message;
 import edu.mit.smart.sm4and.message.MessageParser;
+import edu.mit.smart.sm4and.message.RemoteLogMessage;
 
 /**
  * The SimMobilityBroker is used by RoadRunner to communicate with Sim Mobility. 
@@ -104,14 +104,8 @@ public abstract class SimMobilityBroker {
     
 	//Helper: Log to server (remote)
     public static void ReflectToServer(Connector connector, String clientID, String msg) {
-        //Prepare a response.
-    	RemoteLogMessage obj = new RemoteLogMessage();
-        obj.log_message = msg;
-        obj.SENDER_TYPE = "ANDROID_EMULATOR";
-        obj.SENDER = clientID;
-        
-        //Append it.
-        connector.addMessage(obj);
+    	//Append a response.
+        connector.addMessage(new RemoteLogMessage(clientID, msg));
     }
 
 }

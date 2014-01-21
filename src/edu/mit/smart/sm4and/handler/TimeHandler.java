@@ -16,10 +16,18 @@ import edu.mit.smart.sm4and.message.MessageParser;
  */
 public class TimeHandler extends AbstractMessageHandler {
 	/** A message from the server indicating that the current time has advanced. */
-	public static class TimeMessage extends Message {
-		public TimeMessage() { this.MESSAGE_TYPE = Type.TIME_DATA; }
+	public static class TimeMessage extends Message {		
+		public TimeMessage(String uniqueId, int tick, int elapsed_ms) {
+			super(Type.TIME_DATA, uniqueId);
+			this.tick = tick;
+			this.elapsed_ms = elapsed_ms;
+		}
 		private int tick;    
 		private int elapsed_ms;
+		
+		//This constructor is only used by GSON
+		@SuppressWarnings("unused")
+		private TimeMessage() { this("0", 0, 0); }
 	}
 	
 	private TimeAdvancer timeTicker;

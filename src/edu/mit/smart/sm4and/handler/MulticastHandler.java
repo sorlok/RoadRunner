@@ -16,8 +16,15 @@ import edu.mit.smart.sm4and.message.MessageParser;
 public class MulticastHandler extends AbstractMessageHandler {
 	/** A multicast message. Contains an opaque block of Base64-encoded data. */
 	public static class MulticastMessage extends Message { 
-		public MulticastMessage() { this.MESSAGE_TYPE = Type.MULTICAST; }
+		public MulticastMessage(String uniqueId, String mcData) { 
+			super(Type.MULTICAST, uniqueId);
+			this.MULTICAST_DATA = mcData;
+		}
 		public String MULTICAST_DATA;
+		
+		//This constructor is only used by GSON
+		@SuppressWarnings("unused")
+		private MulticastMessage() { this("0", ""); }
 	}
 	
 	private MultiCastReceiver mcProcess;

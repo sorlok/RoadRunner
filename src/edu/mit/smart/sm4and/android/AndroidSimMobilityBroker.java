@@ -286,10 +286,7 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 		if (myId==null || packet==null) { throw new LoggingRuntimeException("Can't broadcast without data or an id."); }
 		
 		//Prepare the packet.
-		MulticastMessage obj = new MulticastMessage();
-		obj.SENDER = String.valueOf(uniqueId);
-		obj.SENDER_TYPE = "ANDROID_EMULATOR";
-		obj.MULTICAST_DATA = ByteArraySerialization.Serialize(packet);
+		MulticastMessage obj = new MulticastMessage(uniqueId, ByteArraySerialization.Serialize(packet));
 		
 		//Save it for later.
 		conn.addMessage(obj);

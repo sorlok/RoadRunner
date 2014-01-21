@@ -15,7 +15,13 @@ import edu.mit.smart.sm4and.message.MessageParser;
 public class ReadyHandler extends AbstractMessageHandler {
 	/** A message from the server indicating that the client may proceed. */
 	public static class ReadyMessage extends Message {
-		public ReadyMessage() { this.MESSAGE_TYPE = Type.READY; }
+		public ReadyMessage(String uniqueId) {
+			super(Type.READY, uniqueId); 
+		}
+		
+		//This constructor is only used by GSON
+		@SuppressWarnings("unused")
+		private ReadyMessage() { this("0"); }
 	}
 	
     public ReadyHandler() {

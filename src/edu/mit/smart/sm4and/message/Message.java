@@ -16,9 +16,13 @@ public class Message {
 	protected String MESSAGE_TYPE;
     public String SENDER;       //Sender ID
     public String SENDER_TYPE;  //Almost always "SIMMOBILITY"
-	
-	//Hide from everything except Gson
-	protected Message() {}
+    
+    //Sub-classes should call this.
+	protected Message(String msgType, String sender) {
+		this.MESSAGE_TYPE = msgType;
+		this.SENDER = sender;
+		this.SENDER_TYPE = "ANDROID_EMULATOR";
+	}
 	
 	//Types of messages.
 	public static class Type {
@@ -42,4 +46,8 @@ public class Message {
     public String getMessageType() {
         return MESSAGE_TYPE;
     }
+    
+	//Only GSON should call this.
+    @SuppressWarnings("unused")
+	private Message() { this("UNDEFINED", "0"); }
 }

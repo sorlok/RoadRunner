@@ -16,29 +16,33 @@ public class RegionMessages  {
 	public static class RerouteRequest extends Message {
 		public static final String MessageType = "REROUTE_REQUEST";
 		
-		public RerouteRequest(String uniqueId, String blacklistRegion) { 
-			this.MESSAGE_TYPE = MessageType;
+		public RerouteRequest(String uniqueId, String blacklistRegion) {
+			super(MessageType, uniqueId);
 			this.blacklist_region = blacklistRegion;
-			this.SENDER_TYPE = "ANDROID_EMULATOR";
-			this.SENDER = uniqueId;
 		}
 		
 		public String blacklist_region;
+		
+		//This constructor is only used by Gson.
+		@SuppressWarnings("unused")
+		private RerouteRequest() { this("0", ""); }
 	}
 	
 	/** A response from the server with an attached list of Regions. */
 	public static class SendRegionResponse extends Message {
 		public static final String MessageType = "REGIONS_AND_PATH_DATA";
 		
-		public SendRegionResponse() { this.MESSAGE_TYPE = MessageType; }
+		public SendRegionResponse(String uniqueId, SimpleRegion[] all_regions, String[] region_path) { 
+			super(MessageType, uniqueId);
+			this.all_regions = all_regions;
+			this.region_path = region_path;
+		}
 	    public SimpleRegion[] all_regions;
 	    public String[] region_path;
-	}
-	
-	/** Simple remote-Log message. (TODO: put into its own file). */
-	public static class RemoteLogMessage extends Message {
-		public RemoteLogMessage() { this.MESSAGE_TYPE = Type.REMOTE_LOG; }
-	    public String log_message;
-	}    
+	    
+		//This constructor is only used by Gson.
+		@SuppressWarnings("unused")
+		private SendRegionResponse() { this("0", null, null); }
+	} 
 
 }

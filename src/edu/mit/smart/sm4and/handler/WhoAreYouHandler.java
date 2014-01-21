@@ -17,15 +17,32 @@ import edu.mit.smart.sm4and.message.MessageParser;
 public class WhoAreYouHandler extends AbstractMessageHandler {
 	/** A message from the server requesting that the client identify itself. */
 	public static class WhoAreYouMessage extends Message {
-		public WhoAreYouMessage() { this.MESSAGE_TYPE = Type.WHOAREYOU; }
+		public WhoAreYouMessage(String uniqueId) {
+			super(Type.WHOAREYOU, uniqueId); 
+		}
+		
+		//This constructor is only used by GSON
+		@SuppressWarnings("unused")
+		private WhoAreYouMessage() { this("0"); }
 	}
 	
 	/** A response to the server identifying oneself. */
 	public static class WhoAmIResponse extends Message {
-		public WhoAmIResponse() { this.MESSAGE_TYPE = Type.WHOAMI; }
+		public WhoAmIResponse(String uniqueId, String[] requiredServices) {
+			super(Type.WHOAMI, uniqueId);
+			this.REQUIRED_SERVICES = requiredServices;
+			
+			//These are duplicated, but necessary for now.
+			this.ID = this.SENDER;
+			this.TYPE = this.SENDER_TYPE;
+		}
 	    public String ID;
 	    public String TYPE;
 	    public String[] REQUIRED_SERVICES;
+	    
+		//This constructor is only used by GSON
+		@SuppressWarnings("unused")
+		private WhoAmIResponse() { this("0", null); }
 	}
 	
     private String clientID;
@@ -40,12 +57,7 @@ public class WhoAreYouHandler extends AbstractMessageHandler {
         System.out.println("WhoAreYouHandler is handling");
         
         //Prepare a response.
-        WhoAmIResponse obj = new WhoAmIResponse();
-        obj.SENDER = clientID;
-        obj.ID = String.valueOf(clientID);
-        obj.TYPE = "ANDROID_EMULATOR";
-        obj.SENDER_TYPE = "ANDROID_EMULATOR";
-        obj.REQUIRED_SERVICES = new String[]{"SIMMOB_SRV_TIME","SIMMOB_SRV_LOCATION","SIMMOB_SRV_REGIONS_AND_PATH"};
+        WhoAmIResponse obj = new WhoAmIResponse(clientID, new String[]{"SIMMOB_SRV_TIME","SIMMOB_SRV_LOCATION","SIMMOB_SRV_REGIONS_AND_PATH"});
         
         //The "WhoAmIResponse" is unique in that it *always* triggers a send.
         connector.addMessage(obj);

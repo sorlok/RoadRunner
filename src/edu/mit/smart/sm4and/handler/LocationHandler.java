@@ -16,9 +16,17 @@ import edu.mit.smart.sm4and.message.MessageParser;
 public class LocationHandler extends AbstractMessageHandler {
 	/** A location update message. Uses projected (x,y) coordinates, not Latitude/Longitude. */
 	public static class LocationMessage extends Message { 
-		public LocationMessage() { this.MESSAGE_TYPE = Type.LOCATION_DATA; }
+		public LocationMessage(String uniqueId, double lat, double lng) {
+			super(Type.LOCATION_DATA, uniqueId);
+			this.lat = lat;
+			this.lng = lng;
+		}
 	    private double lat;
 	    private double lng;
+	    
+		//This constructor is only used by GSON
+		@SuppressWarnings("unused")
+		private LocationMessage() { this("0", 0, 0); }
 	}
 	
     private LocationSpoofer locspoof;

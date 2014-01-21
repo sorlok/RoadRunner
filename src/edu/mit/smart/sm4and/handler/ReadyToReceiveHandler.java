@@ -15,12 +15,24 @@ import edu.mit.smart.sm4and.message.MessageParser;
 public class ReadyToReceiveHandler extends AbstractMessageHandler {
 	/** A message from the server indicating that the server is now ready for this time tick. */
 	public static class ReadyToReceiveMessage extends Message {
-		public ReadyToReceiveMessage() { this.MESSAGE_TYPE = Type.READY_TO_RECEIVE; }
+		public ReadyToReceiveMessage(String uniqueId) {
+			super(Type.READY_TO_RECEIVE, uniqueId); 
+		}
+		
+		//This constructor is only used by GSON
+		@SuppressWarnings("unused")
+		private ReadyToReceiveMessage() { this("0"); }
 	}
 	
 	/** Client tells the server to continue. */
 	public static class ClientDoneResponse extends Message {
-		public ClientDoneResponse() { this.MESSAGE_TYPE = Type.CLIENT_MESSAGES_DONE; }
+		public ClientDoneResponse(String uniqueId) {
+			super(Type.CLIENT_MESSAGES_DONE, uniqueId); 
+		}
+		
+		//This constructor is only used by GSON
+		@SuppressWarnings("unused")
+		private ClientDoneResponse() { this("0"); }
 	}
 	
 	private String clientID;
@@ -31,9 +43,7 @@ public class ReadyToReceiveHandler extends AbstractMessageHandler {
     
     @Override
     public void handle(Message message, Connector connector, MessageParser parser) {        
-        ClientDoneResponse obj = new ClientDoneResponse();
-        obj.SENDER = clientID;
-        obj.SENDER_TYPE = "ANDROID_EMULATOR";
+        ClientDoneResponse obj = new ClientDoneResponse(clientID);
         
         //Done
         connector.addMessage(obj);
