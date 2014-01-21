@@ -21,11 +21,11 @@ import edu.mit.smart.sm4and.AbstractMessageHandler;
 import edu.mit.smart.sm4and.Connector;
 import edu.mit.smart.sm4and.MessageHandlerFactory;
 import edu.mit.smart.sm4and.MessageParser;
+import edu.mit.smart.sm4and.android.HandleOnMainThread;
 import edu.mit.smart.sm4and.handler.LocationHandler;
 import edu.mit.smart.sm4and.handler.MulticastHandler;
 import edu.mit.smart.sm4and.handler.ReadyHandler;
 import edu.mit.smart.sm4and.handler.ReadyToReceiveHandler;
-import edu.mit.smart.sm4and.handler.SimpleAndroidHandler;
 import edu.mit.smart.sm4and.handler.TimeHandler;
 import edu.mit.smart.sm4and.handler.UnicastHandler;
 import edu.mit.smart.sm4and.handler.WhoAreYouHandler;
@@ -186,8 +186,7 @@ public class SimMobilityBroker {
 	public void handleMessage(AbstractMessageHandler handler, Message message) {
 		//We want to process this on the main thread, as we may want to interact with the user.
 		//Thus, we post it to the message queue.
-		SimpleAndroidHandler sam = new SimpleAndroidHandler(handler, message, conn, messageParser);
-		myHandler.post(sam);
+		myHandler.post(new HandleOnMainThread(handler, message, conn, messageParser));
 	}
 	
 	
