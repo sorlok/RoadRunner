@@ -2,7 +2,7 @@
 //Licensed under the terms of the MIT License, as described in the file:
 //   license.txt   (http://opensource.org/licenses/MIT)
 
-package edu.mit.csail.sethhetu.roadrunner;
+package edu.mit.smart.sm4and;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -16,13 +16,17 @@ import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.PathSetter;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.RegionChecker;
 import edu.mit.csail.jasongao.roadrunner.ext.SendRegionHandler.RemoteLogMessage;
 import edu.mit.csail.jasongao.roadrunner.ext.SendRegionHandler.RerouteRequest;
+import edu.mit.csail.sethhetu.roadrunner.ByteArraySerialization;
+import edu.mit.csail.sethhetu.roadrunner.LoggerI;
+import edu.mit.csail.sethhetu.roadrunner.LoggingRuntimeException;
+import edu.mit.csail.sethhetu.roadrunner.SimMobServerConnectTask;
 import edu.mit.csail.sethhetu.roadrunner.SimMobServerConnectTask.PostExecuteAction;
-import edu.mit.smart.sm4and.AbstractMessageHandler;
-import edu.mit.smart.sm4and.Connector;
-import edu.mit.smart.sm4and.MessageHandlerFactory;
-import edu.mit.smart.sm4and.MessageParser;
 import edu.mit.smart.sm4and.android.HandleOnMainThread;
+import edu.mit.smart.sm4and.connector.Connector;
+import edu.mit.smart.sm4and.connector.MinaConnector;
+import edu.mit.smart.sm4and.handler.AbstractMessageHandler;
 import edu.mit.smart.sm4and.handler.LocationHandler;
+import edu.mit.smart.sm4and.handler.MessageHandlerFactory;
 import edu.mit.smart.sm4and.handler.MulticastHandler;
 import edu.mit.smart.sm4and.handler.ReadyHandler;
 import edu.mit.smart.sm4and.handler.ReadyToReceiveHandler;
@@ -38,7 +42,7 @@ import edu.mit.smart.sm4and.handler.UnicastHandler.UnicastMessage;
 import edu.mit.smart.sm4and.handler.WhoAreYouHandler.WhoAreYouMessage;
 import edu.mit.smart.sm4and.json.JsonMessageParser;
 import edu.mit.smart.sm4and.message.Message;
-import edu.mit.smart.sm4and.mina.MinaConnector;
+import edu.mit.smart.sm4and.message.MessageParser;
 
 /**
  * The SimMobilityBroker is used by RoadRunner to communicate with Sim Mobility. 

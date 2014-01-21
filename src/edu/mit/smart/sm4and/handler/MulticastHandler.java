@@ -4,11 +4,10 @@
 
 package edu.mit.smart.sm4and.handler;
 
-import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker.MultiCastReceiver;
-import edu.mit.smart.sm4and.Connector;
-import edu.mit.smart.sm4and.AbstractMessageHandler;
-import edu.mit.smart.sm4and.MessageParser;
+import edu.mit.smart.sm4and.SimMobilityBroker.MultiCastReceiver;
+import edu.mit.smart.sm4and.connector.Connector;
 import edu.mit.smart.sm4and.message.Message;
+import edu.mit.smart.sm4and.message.MessageParser;
 
 /**
  * Handle a multicast message.

@@ -2,16 +2,14 @@
 //Licensed under the terms of the MIT License, as described in the file:
 //   license.txt   (http://opensource.org/licenses/MIT)
 
-package edu.mit.smart.sm4and;
+package edu.mit.smart.sm4and.handler;
 
 
 import java.util.Hashtable;
 
-import edu.mit.smart.sm4and.AbstractMessageHandler;
-import edu.mit.smart.sm4and.MessageHandlerFactory;
-import edu.mit.smart.sm4and.handler.BifurcatedHandler;
+import edu.mit.smart.sm4and.SimMobilityBroker;
+import edu.mit.smart.sm4and.handler.MessageHandlerFactory;
 import edu.mit.csail.sethhetu.roadrunner.LoggingRuntimeException;
-import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker;
 
 
 /**

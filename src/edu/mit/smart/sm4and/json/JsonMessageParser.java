@@ -15,8 +15,8 @@ import com.google.gson.JsonSyntaxException;
 
 import edu.mit.csail.jasongao.roadrunner.Globals;
 import edu.mit.csail.sethhetu.roadrunner.LoggingRuntimeException;
-import edu.mit.smart.sm4and.MessageParser;
 import edu.mit.smart.sm4and.message.Message;
+import edu.mit.smart.sm4and.message.MessageParser;
 
 /**
  * A specific handler factory for dealing with Json-formatted messages.

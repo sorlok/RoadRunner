@@ -2,7 +2,7 @@
 //Licensed under the terms of the MIT License, as described in the file:
 //   license.txt   (http://opensource.org/licenses/MIT)
 
-package edu.mit.smart.sm4and;
+package edu.mit.smart.sm4and.connector;
 
 import java.io.IOException;
 import java.util.ArrayList;

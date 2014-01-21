@@ -2,16 +2,16 @@
 //Licensed under the terms of the MIT License, as described in the file:
 //   license.txt   (http://opensource.org/licenses/MIT)
 
-package edu.mit.smart.sm4and.mina;
+package edu.mit.smart.sm4and.connector;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 
-import edu.mit.smart.sm4and.AbstractMessageHandler;
-import edu.mit.smart.sm4and.Connector;
-import edu.mit.smart.sm4and.MessageHandlerFactory;
+import edu.mit.smart.sm4and.SimMobilityBroker;
+import edu.mit.smart.sm4and.handler.AbstractMessageHandler;
+import edu.mit.smart.sm4and.handler.MessageHandlerFactory;
 import edu.mit.smart.sm4and.message.Message;
 
 import org.apache.mina.core.future.ConnectFuture;
@@ -22,7 +22,6 @@ import org.apache.mina.filter.codec.textline.TextLineCodecFactory;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
 import edu.mit.csail.jasongao.roadrunner.Globals;
-import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker;
 
 /**
  * A connector which targets Apache Mina.

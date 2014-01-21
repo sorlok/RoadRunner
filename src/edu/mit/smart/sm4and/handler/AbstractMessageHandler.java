@@ -2,18 +2,17 @@
 //Licensed under the terms of the MIT License, as described in the file:
 //   license.txt   (http://opensource.org/licenses/MIT)
 
-package edu.mit.smart.sm4and;
+package edu.mit.smart.sm4and.handler;
 
-import edu.mit.csail.sethhetu.roadrunner.SimMobilityBroker;
+import edu.mit.smart.sm4and.SimMobilityBroker;
+import edu.mit.smart.sm4and.connector.Connector;
 import edu.mit.smart.sm4and.message.Message;
+import edu.mit.smart.sm4and.message.MessageParser;
 
 /**
- * Interface for all message handler implementations.
- * 
- * Note that the message can only be set in the constructor (which is protected), 
- * and then only retrieved with the "getMessage()" function. Thus, we avoid the need
- * for a generic <T extends Message> which really only serves to simplify "getMessage()".
- * Now, you can just have the subclass cast the result of "getMessage()".
+ * Interface for all message handler implementations. Any custom message type will need
+ *  a Handler which reacts to received messages of that type.
+ * The only method you should concern yourself with is handle().
  *
  * @author Pedro Gandola
  */

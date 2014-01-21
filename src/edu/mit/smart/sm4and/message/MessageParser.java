@@ -2,13 +2,12 @@
 //Licensed under the terms of the MIT License, as described in the file:
 //   license.txt   (http://opensource.org/licenses/MIT)
 
-package edu.mit.smart.sm4and;
+package edu.mit.smart.sm4and.message;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
 
 import edu.mit.csail.sethhetu.roadrunner.LoggingRuntimeException;
-import edu.mit.smart.sm4and.message.Message;
 
 
 /**
