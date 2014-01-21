@@ -8,7 +8,7 @@ import edu.mit.csail.jasongao.roadrunner.Region;
 import edu.mit.csail.jasongao.roadrunner.ResRequest;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.PathSetter;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.RegionSetter;
-import edu.mit.csail.jasongao.roadrunner.ext.SendRegionHandler.SendRegionResponse;
+import edu.mit.csail.jasongao.roadrunner.ext.RegionMessages.SendRegionResponse;
 import edu.mit.csail.sethhetu.roadrunner.LoggingRuntimeException;
 import edu.mit.csail.sethhetu.roadrunner.SimpleRegion;
 import edu.mit.csail.sethhetu.roadrunner.SimpleRegion.SimpleLocation;

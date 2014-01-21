@@ -11,12 +11,18 @@ import edu.mit.smart.sm4and.message.Message;
  * Handles a "Send me Regions" request from the client to the server and back.
  * @author Seth N. Hetu
  */
-public class SendRegionHandler  {
+public class RegionMessages  {
 	/** A message from the client asking the server to re-route it. */
 	public static class RerouteRequest extends Message {
 		public static final String MessageType = "REROUTE_REQUEST";
 		
-		public RerouteRequest() { this.MESSAGE_TYPE = MessageType; }
+		public RerouteRequest(String uniqueId, String blacklistRegion) { 
+			this.MESSAGE_TYPE = MessageType;
+			this.blacklist_region = blacklistRegion;
+			this.SENDER_TYPE = "ANDROID_EMULATOR";
+			this.SENDER = uniqueId;
+		}
+		
 		public String blacklist_region;
 	}
 	

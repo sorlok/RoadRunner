@@ -4,7 +4,7 @@
 
 package edu.mit.smart.sm4and.handler;
 
-import edu.mit.smart.sm4and.SimMobilityBroker.TimeAdvancer;
+import edu.mit.smart.sm4and.android.AndroidSimMobilityBroker.TimeAdvancer;
 import edu.mit.smart.sm4and.connector.Connector;
 import edu.mit.smart.sm4and.message.Message;
 import edu.mit.smart.sm4and.message.MessageParser;

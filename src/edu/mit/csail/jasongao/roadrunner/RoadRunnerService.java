@@ -26,8 +26,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import edu.mit.csail.jasongao.roadrunner.ext.RegionAndPathHandler;
-import edu.mit.csail.jasongao.roadrunner.ext.SendRegionHandler;
+import edu.mit.csail.jasongao.roadrunner.ext.RegionMessages;
 import edu.mit.csail.jasongao.roadrunner.ext.TokenRandomizer;
+import edu.mit.csail.jasongao.roadrunner.ext.RegionMessages.RerouteRequest;
 import edu.mit.csail.sethhetu.roadrunner.InterfaceMap;
 import edu.mit.csail.sethhetu.roadrunner.LoggerI;
 import edu.mit.csail.sethhetu.roadrunner.LoggingRuntimeException;
@@ -965,8 +966,13 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		//System.out.println("Current distance to next Region (" + nextRes.regionId + ") is: " + minDist);
 		if (minDist<Globals.SM_REROUTE_DISTANCE) {
 			//Request a re-route from the server.
-			log("No token; requesting that the server re-route...");
-			simmob.requestReroute(nextRes.regionId);
+			String blRegion = nextRes.regionId;
+			simmob.postMessage(new RerouteRequest(mIdStr, blRegion));
+			
+			//Log
+			log("No token; requesting that the server re-route around region: " + blRegion);
+			simmob.ReflectToServer("Requested re-route from Sim Mobility, blacklisting Region: " + blRegion);
+			
 			lastRequestedReroute = nextRes.regionId;
 		} 
 	}
@@ -1322,8 +1328,8 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			
 			//Register our "Regions and Paths" handler, which is specific to Road Runner.
 			simmob.addCustomMessageType(
-				SendRegionHandler.SendRegionResponse.MessageType,
-				SendRegionHandler.SendRegionResponse.class, 
+				RegionMessages.SendRegionResponse.MessageType,
+				RegionMessages.SendRegionResponse.class, 
 				new RegionAndPathHandler(new RegionSetter(), new PathSetter())
 			);
 			
