@@ -29,6 +29,7 @@ import edu.mit.csail.jasongao.roadrunner.ext.RegionAndPathHandler;
 import edu.mit.csail.jasongao.roadrunner.ext.RegionMessages;
 import edu.mit.csail.jasongao.roadrunner.ext.TokenRandomizer;
 import edu.mit.csail.jasongao.roadrunner.ext.RegionMessages.RerouteRequest;
+import edu.mit.csail.jasongao.roadrunner.util.Geometry;
 import edu.mit.csail.jasongao.roadrunner.util.InterfaceMap;
 import edu.mit.csail.jasongao.roadrunner.util.IpIdentifier;
 import edu.mit.csail.jasongao.roadrunner.util.LinkViability;
@@ -648,54 +649,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	
 	/**
 	 * Region checker
-	 */
-	
-	///This code is taken from the OpenJDK.
-	//Returns the distance between this point and the line (extended to infinity), or 0 if the point is on the line.
-	///http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/7-b147/java/awt/geom/Line2D.java
-	private static double pt_line_dist(PointF p1, PointF p2, PointF pt) {
-		//Adjust vectors relative to x1,y1
-		// x2,y2 becomes relative vector from x1,y1 to end of segment
-		p2.x -= p1.x;
-		p2.y -= p1.y;
-		// px,py becomes relative vector from x1,y1 to test point
-		pt.x -= p1.x;
-		pt.y -= p1.y;
-		double dotprod = pt.x * p2.x + pt.y * p2.y;
-		// dotprod is the length of the px,py vector
-		// projected on the x1,y1=>x2,y2 vector times the
-		// length of the x1,y1=>x2,y2 vector
-		double projlenSq = dotprod * dotprod / (p2.x * p2.x + p2.y * p2.y);
-		// Distance to line is now the length of the relative point
-		// vector minus the length of its projection onto the line
-		double lenSq = pt.x * pt.x + pt.y * pt.y - projlenSq;
-		if (lenSq < 0) {
-			lenSq = 0;
-		}
-		return Math.sqrt(lenSq);
-	}
-	
-	
-	///This is a hack; it just normalizes the points to each other then converts them LINEARLY to meters as if
-	/// they were at the equator. It's accurate enough for the kinds of distance checks we're doing (re-routing).
-	///NOTE: Since this hack is only used for distances, we do not invert latitude.
-	private void normalize_to_meters(Location l1, Location l2, Location l3, PointF p1, PointF p2, PointF p3) {
-		double minLat = Math.min(Math.min(l1.getLatitude(), l2.getLatitude()), l3.getLatitude());
-		double minLng = Math.min(Math.min(l1.getLongitude(), l2.getLongitude()), l3.getLongitude());
-		
-		//Now convert.
-		linear_convert_to_meters(l1.getLatitude() - minLat, l1.getLongitude() - minLng, p1);
-		linear_convert_to_meters(l2.getLatitude() - minLat, l2.getLongitude() - minLng, p2);
-		linear_convert_to_meters(l3.getLatitude() - minLat, l3.getLongitude() - minLng, p3);
-	}
-	
-	///Linearly convert a Lat/Lng pair to meters. Only works if the difference is small (hence, call normalize_to_meters() first).
-	private void linear_convert_to_meters(double lat, double lng, PointF res) {
-		//Assume we are at the equator.
-		res.x = (float)(lng * 111.321 * 1000);
-		res.y = (float)(lat * 110.567 * 1000);
-	}
-	
+	 */	
 	
 	//Check if we are too close to our next Region and must re-route.
 	private void checkNextRegionAndReroute() {
@@ -728,10 +682,10 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			PointF ourPos = new PointF();
 			PointF currPos = new PointF();
 			PointF prevPos = new PointF();
-			normalize_to_meters(mLoc, currPt, prevPt, ourPos, currPos, prevPos);
+			Geometry.normalize_to_meters(mLoc, currPt, prevPt, ourPos, currPos, prevPos);
 			
 			//Calculate the intersection.
-			double ptLineDist = pt_line_dist(prevPos, currPos, ourPos);
+			double ptLineDist = Geometry.pt_line_dist(prevPos, currPos, ourPos);
 			minDist = Math.min(minDist, ptLineDist);
 			if (minDist<Globals.SM_REROUTE_DISTANCE) { break; }
 			
