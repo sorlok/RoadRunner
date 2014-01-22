@@ -123,7 +123,7 @@ public class MinaConnector extends Connector {
     
 
     @Override
-    public void sendAll(String data) {        
+    public void sendAll(String data) {       
         if (connected && (data!=null) && (session!=null) && session.isConnected()) {
         	String str = String.format("%8h%s", data.toString().length()+1, data.toString());
         	if (Globals.SM_VERBOSE_TRACE) {
@@ -140,7 +140,7 @@ public class MinaConnector extends Connector {
     }
     
     @Override
-    public void handleMessage(String data) {
+    public void handleMessage(String data) {    	
     	//Trim the first 8 bytes.
     	data = data.substring(8);
     	

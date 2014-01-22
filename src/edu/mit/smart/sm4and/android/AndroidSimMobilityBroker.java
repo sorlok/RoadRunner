@@ -6,13 +6,12 @@ package edu.mit.smart.sm4and.android;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.util.PriorityQueue;
 
 import android.os.Handler;
 import edu.mit.csail.jasongao.roadrunner.*;
-import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.AdHocAnnouncer;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.PathSetter;
-import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.RegionChecker;
 import edu.mit.csail.jasongao.roadrunner.util.LoggerI;
 import edu.mit.csail.jasongao.roadrunner.util.LoggingRuntimeException;
 import edu.mit.smart.sm4and.SimMobilityBroker;
@@ -42,22 +41,11 @@ import edu.mit.smart.sm4and.message.Message;
 import edu.mit.smart.sm4and.message.MessageParser;
 
 /**
- * The SimMobilityBroker is used by RoadRunner to communicate with Sim Mobility. 
- * The basic structure of this communication is as follows:
- *     1) Android entity establishes the connection (similar to how it connects to a Cloud).
- *     2) Sim Mobility signals that the connection was successful. 
- *     3) Sim Mobility signals that time tick 1 is complete.
- *        A) Any number of additional messages may be bundled with this update.
- *     4) Android entity confirms that time tick 1 is complete.
- *        A) Any number of additional messages may be bundled with this update.
- *     5) Steps 3 and 4 continue for time ticks 2, 3, 4, etc.
- * This behavior can be enabled by setting Globals.SIM_MOBILITY to "true".
+ * A subclass of SimMobilityBroker which implements all of the desired functionality for 
+ * Android entity interaction. Note: apps should use SimMobilityBroker to communicate with
+ * Sim Mobility; this class merely contains the implementation. 
  * 
  * @author Seth N. Hetu
- * 
- * TODO: At the moment, the Broker will handle all messages via the post-back methods
- *       of the MinaConnector, meaning that it will NOT operate in lock step.
- *       Changing this requires modifying the fundamental underlying architecture.
  */
 public class AndroidSimMobilityBroker extends SimMobilityBroker {
 	//Have we started yet?
@@ -70,9 +58,29 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 	//For communicating back to the RoadRunner service.
 	protected Handler myHandler;
 	protected LoggerI logger;
-	protected AdHocAnnouncer adhoc;
 	protected LocationSpoofer locspoof;
-	protected RegionChecker regcheck;
+	
+
+	private static class StartRun implements Comparable<StartRun> {
+		Runnable run;
+		long startTimeMs;
+		StartRun(Runnable run, long startTimeMs) {
+			this.run = run;
+			this.startTimeMs = startTimeMs;
+		}
+		public int compareTo(StartRun other) {
+			if (this.startTimeMs<other.startTimeMs) { return -1; }
+			if (this.startTimeMs>other.startTimeMs) { return 1; }
+			return 0;
+		}
+	}
+			
+	//Used for scheduling "postX()" messages.
+	protected PriorityQueue<StartRun> upcomingPosts = new PriorityQueue<StartRun>();
+
+	public void postOnHandlerDelayed(Runnable r, long delayMs) {
+		upcomingPosts.add(new StartRun(r, currTimeMs+delayMs));
+	}
 	
 	
 	/**
@@ -96,6 +104,16 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 		handlerFactory.addCustomHandler(msgType, handler);
 	}
 
+	
+	public void addCustomMessageHandler(String msgType, AbstractMessageHandler handler) {
+		if (handlerFactory==null || messageParser==null) { 
+			throw new LoggingRuntimeException("Cannot add a custom message type; the Sim Mobility Broker has not been initialized yet.");
+		}
+		
+		//Add the handler.
+		handler.setBroker(this);
+		handlerFactory.addCustomHandler(msgType, handler);
+	}
 	
 	
 	/**
@@ -128,10 +146,10 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 	}
 	
 	//We send announce packets every 2 seconds (2000 ms)
-	private long lastAnnouncePacket;
+	//private long lastAnnouncePacket;
 	
 	//We check the current route's token feasibilty every N + rand(0,M) seconds.
-	private long nextRegionRerouteCheck;
+	//private long nextRegionRerouteCheck;
 	
 	private MessageParser messageParser;
 	private MessageHandlerFactory handlerFactory;
@@ -140,7 +158,7 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 	/**
 	 * Initialize the Broker. Can be called multiple times, until "Connect" is called.
 	 */
-	public void initialize(String uniqueId, Handler myHandler, LoggerI logger, AdHocAnnouncer adhoc, LocationSpoofer locspoof, PathSetter pathSet, RegionChecker regcheck) {
+	public void initialize(String uniqueId, Handler myHandler, LoggerI logger, LocationSpoofer locspoof, PathSetter pathSet) {
 		if (this.activated) {
 			throw new LoggingRuntimeException("Can't re-initialize; SimMobilityBroker has already been activated.");
 		}
@@ -148,9 +166,7 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 		this.messageParser = makeJsonMessageParser();
 		this.myHandler = myHandler;
 		this.logger = logger;
-		this.adhoc = adhoc;
 		this.locspoof = locspoof;
-		this.regcheck = regcheck;
 		
 		//Check that we have a unique ID.
 		this.uniqueId = uniqueId;
@@ -205,13 +221,7 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 			//   2) When that's done, process it and send "android done" for this time step.
 			//As always, messages are sent before the final "done" message.
 			AndroidSimMobilityBroker.this.currTimeMs = 0;
-			AndroidSimMobilityBroker.this.lastAnnouncePacket = -1 * Globals.ADHOC_ANNOUNCE_PERIOD; //Immediately dispatch an announce packet.
-			AndroidSimMobilityBroker.this.nextRegionRerouteCheck = calcNextRegionRerouteCheck();  //Schedule like normal (includes a bit of randomness).
 		}
-	}
-	
-	private long calcNextRegionRerouteCheck() {
-		return RandGen.nextInt(Globals.SM_REROUTE_CHECK_ADDITIVE) + Globals.SM_REROUTE_CHECK_BASE;
 	}
 	
 	public class TimeAdvancer {
@@ -222,29 +232,13 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 	        
 	        //Advance
 			currTimeMs += elapsed_ms;
-			
-/////////////////////////
-/// TODO: These two checks should be realized with our new "Timer" class which 
-//        mimics the Android timer.
-/////////////////////////
-			
-			//Time for an announce packet?
-			if (currTimeMs-lastAnnouncePacket >= Globals.ADHOC_ANNOUNCE_PERIOD) {
-				lastAnnouncePacket += Globals.ADHOC_ANNOUNCE_PERIOD;
-				
-				//Send announce packet!
-				adhoc.announce(false);
-			}
-			
-			//Time for a Region rerouting check?
-			nextRegionRerouteCheck -= currTimeMs;
-			if (nextRegionRerouteCheck <= 0) {
-				//Carry over the remainder.
-				long nextCheck = calcNextRegionRerouteCheck();
-				nextRegionRerouteCheck += nextCheck;
-				
-				//Perform a region check.
-				regcheck.checkAndReroute();
+
+			//Check our "to be posted" message list.
+			while (upcomingPosts.peek()!=null) {
+				if (upcomingPosts.peek().startTimeMs > currTimeMs) { break; }
+							
+				//Else, remove it and post it.
+				myHandler.post(upcomingPosts.poll().run);
 			}
 		}
 	}

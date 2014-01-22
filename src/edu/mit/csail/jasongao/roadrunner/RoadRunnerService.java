@@ -34,6 +34,9 @@ import edu.mit.csail.jasongao.roadrunner.util.IpIdentifier;
 import edu.mit.csail.jasongao.roadrunner.util.LoggerI;
 import edu.mit.csail.jasongao.roadrunner.util.LoggingRuntimeException;
 import edu.mit.smart.sm4and.SimMobilityBroker;
+import edu.mit.smart.sm4and.connector.Connector;
+import edu.mit.smart.sm4and.handler.AbstractMessageHandler;
+import edu.mit.smart.sm4and.message.MessageParser;
 
 import android.app.Service;
 import android.content.Context;
@@ -133,6 +136,13 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	/** Pending GET RES_REQUESTS that can be sent to either cloud or to adhoc */
 	private Queue<ResRequest> getsPending;
 
+	
+	//Schedule like normal (includes a bit of randomness).
+	private long calcNextRegionRerouteCheck() {
+		return simmob.getRand().nextInt(Globals.SM_REROUTE_CHECK_ADDITIVE) + Globals.SM_REROUTE_CHECK_BASE;
+	}
+	
+	
 	/***********************************************
 	 * Queue helpers
 	 ***********************************************/
@@ -977,30 +987,29 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		} 
 	}
 	
-	public class RegionChecker {
-		public void checkAndReroute() {
+	
+	/** Periodically check if we need to re-route. */
+	private Runnable rerouteCheckR = new Runnable() {
+		public void run() {
 			checkNextRegionAndReroute();
+			
+			//TODO: Check why RoadRunner doesn't use this.
+			if (simmob.isActive()) {
+				simmob.postOnHandlerDelayed(this, calcNextRegionRerouteCheck());
+			}
 		}
-	}
+	};
 	
 
 	/***********************************************
 	 * Adhoc announcements
 	 ***********************************************/
-	
-	//Wrap it in an object.
-	public class AdHocAnnouncer {
-		public void announce(boolean triggerAnnounceback) {
-			adhocAnnounce(triggerAnnounceback);
-		}
-	}
-	
 
 	private void adhocAnnounce(boolean triggerAnnounce_) {
 		if (!this.adhocEnabled) {
 			return;
 		}
-
+		
 		//Just need to make sure we're not tied to the 2s clock but rather simulation time.
 		if (Globals.SIM_MOBILITY) {
 			//log("ad-hoc announcement sending..."); //Too wordy
@@ -1032,7 +1041,12 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	private Runnable adhocAnnounceR = new Runnable() {
 		public void run() {
 			adhocAnnounce(false);
-			myHandler.postDelayed(this, Globals.ADHOC_ANNOUNCE_PERIOD);
+			
+			if (simmob.isActive()) {
+				simmob.postOnHandlerDelayed(this, Globals.ADHOC_ANNOUNCE_PERIOD);
+			} else {
+				myHandler.postDelayed(this, Globals.ADHOC_ANNOUNCE_PERIOD);
+			}
 		}
 	};
 
@@ -1324,7 +1338,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			retrieveUniqueId();
 			
 			//Initialize.
-			simmob.initialize(mIdStr, myHandler, this, new AdHocAnnouncer(), new LocationSpoofer(), new PathSetter(), new RegionChecker());
+			simmob.initialize(mIdStr, myHandler, this, new LocationSpoofer(), new PathSetter());
 			
 			//Register our "Regions and Paths" handler, which is specific to Road Runner.
 			simmob.addCustomMessageType(
@@ -1332,6 +1346,18 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 				RegionMessages.SendRegionResponse.class, 
 				new RegionAndPathHandler(new RegionSetter(), new PathSetter())
 			);
+			
+			//We also need a custom handler for the "WHOAREYOU" message type; this is when we will start our recurring tasks.
+			simmob.addCustomMessageHandler(edu.mit.smart.sm4and.message.Message.Type.WHOAREYOU, new AbstractMessageHandler() {
+				@Override
+				public void handle(edu.mit.smart.sm4and.message.Message message, Connector connector, MessageParser parser) {
+					//TODO: This should occur in the same place in RoadRunner.
+					myHandler.post(adhocAnnounceR);
+					
+					//TODO: Figure out why this initialization only occurs in SimMobility mode. When does the normal app check?
+					simmob.postOnHandlerDelayed(rerouteCheckR, calcNextRegionRerouteCheck());  
+				}
+			});
 			
 			
 			//Activate.
@@ -1365,6 +1391,8 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			retrieveUniqueId();
 
 			// Start recurring UDP adhoc announcements
+			//TODO: This should also push the item to the broker. However, we can't push it now, since
+			//      the Broker's not ready to send data. We *should* pend it (later).
 			if (!Globals.SIM_MOBILITY) {
 				myHandler.post(adhocAnnounceR);
 			}

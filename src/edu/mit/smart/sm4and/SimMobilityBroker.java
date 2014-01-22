@@ -7,10 +7,8 @@ package edu.mit.smart.sm4and;
 import java.util.Random;
 
 import android.os.Handler;
-import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.AdHocAnnouncer;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.PathSetter;
-import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.RegionChecker;
 import edu.mit.csail.jasongao.roadrunner.util.LoggerI;
 import edu.mit.smart.sm4and.android.AndroidSimMobilityBroker;
 import edu.mit.smart.sm4and.connector.Connector;
@@ -20,7 +18,11 @@ import edu.mit.smart.sm4and.message.MessageParser;
 import edu.mit.smart.sm4and.message.RemoteLogMessage;
 
 /**
- * The SimMobilityBroker is used by RoadRunner to communicate with Sim Mobility. 
+ * The SimMobilityBroker is used to connect Android apps to Sim Mobility.
+ * This class should be accessed using its singleton getInstance() method, which will
+ *   return the sub-class AndroidSimMobilityBroker. Apps interfacing with Sim Mobility
+ *   can rely on the SimMobilityBroker alone; there is no need to look at the sub-class.  
+ *  
  * The basic structure of this communication is as follows:
  *     1) Android entity establishes the connection (similar to how it connects to a Cloud).
  *     2) Sim Mobility signals that the connection was successful. 
@@ -32,10 +34,6 @@ import edu.mit.smart.sm4and.message.RemoteLogMessage;
  * This behavior can be enabled by setting Globals.SIM_MOBILITY to "true".
  * 
  * @author Seth N. Hetu
- * 
- * TODO: At the moment, the Broker will handle all messages via the post-back methods
- *       of the MinaConnector, meaning that it will NOT operate in lock step.
- *       Changing this requires modifying the fundamental underlying architecture.
  */
 public abstract class SimMobilityBroker {
 	//Singleton stuff
@@ -72,11 +70,23 @@ public abstract class SimMobilityBroker {
 	 */
 	public abstract void addCustomMessageType(String msgType, Class<? extends Message> msgClass, AbstractMessageHandler handler);
 	
+	/**
+	 * Add a custom handler only, not a new message type. This handler will be called after the default handler, if one exists.
+	 * @param msgType The unique identifier of the Message to handle.
+	 * @param handler The handler to be called when this message arrives.
+	 */
+	public abstract void addCustomMessageHandler(String msgType, AbstractMessageHandler handler);
+	
 	
 	/**
 	 * Initialize the Broker. Can be called multiple times, until "Connect" is called.
 	 */
-	public abstract void initialize(String uniqueId, Handler myHandler, LoggerI logger, AdHocAnnouncer adhoc, LocationSpoofer locspoof, PathSetter pathSet, RegionChecker regcheck);
+	public abstract void initialize(String uniqueId, Handler myHandler, LoggerI logger, LocationSpoofer locspoof, PathSetter pathSet);
+	
+	
+	//Replaces post() and postDelayed(). Uses the handler passed in to Broker::initialize()
+	//public abstract void postOnHandler(Runnable r);
+	public abstract void postOnHandlerDelayed(Runnable r, long delayMs);
 	
 	
 	public abstract MessageParser getParser();
