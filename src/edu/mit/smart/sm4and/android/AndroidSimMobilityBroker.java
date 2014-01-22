@@ -145,12 +145,6 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 		 return res;
 	}
 	
-	//We send announce packets every 2 seconds (2000 ms)
-	//private long lastAnnouncePacket;
-	
-	//We check the current route's token feasibilty every N + rand(0,M) seconds.
-	//private long nextRegionRerouteCheck;
-	
 	private MessageParser messageParser;
 	private MessageHandlerFactory handlerFactory;
 	
@@ -262,7 +256,7 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 	}
 	
 
-	public void postMessage(Message obj) {
+	public void forwardMessageToServer(Message obj) {
         //Append it.
         conn.addMessage(obj);
 	}

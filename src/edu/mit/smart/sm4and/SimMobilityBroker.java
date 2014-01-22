@@ -107,7 +107,7 @@ public abstract class SimMobilityBroker {
 	//Buffer this packet for broadcast at the end of the current time tick.
 	public abstract void sendBroadcastPacket(String myId, byte[] packet);
 	
-	public abstract void postMessage(Message obj);
+	public abstract void forwardMessageToServer(Message obj);
 		
     //Helper: Log to server (remote)
     public abstract void ReflectToServer(String msg);

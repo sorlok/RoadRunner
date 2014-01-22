@@ -698,7 +698,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		if (minDist<Globals.SM_REROUTE_DISTANCE) {
 			//Request a re-route from the server.
 			String blRegion = nextRes.regionId;
-			simmob.postMessage(new RerouteRequest(mIdStr, blRegion));
+			simmob.forwardMessageToServer(new RerouteRequest(mIdStr, blRegion));
 			
 			//Log
 			log("No token; requesting that the server re-route around region: " + blRegion);
