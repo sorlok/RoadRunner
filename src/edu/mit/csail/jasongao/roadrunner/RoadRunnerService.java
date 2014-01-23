@@ -2,6 +2,7 @@ package edu.mit.csail.jasongao.roadrunner;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectOutput;
@@ -10,9 +11,14 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
 import java.net.Socket;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -1000,7 +1006,9 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		Inet4Address addr = null;
 		if (Globals.SIM_MOBILITY) {
 			//Currently, "eth0" or "wlan0" can identify this phone.
+			System.out.println("Retrieving interface map");
 			addr = InterfaceMap.GetInstance().getAddress(Globals.SM_IDENTIFYING_INTERFACES);
+			System.out.println("Done");
 		} else {
 			//"eth0" only.
 			addr = InterfaceMap.GetInstance().getAddress(Globals.ADHOC_IFACE_NAME);
@@ -1026,7 +1034,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	}
 	
 
-	public synchronized void start(TextToSpeech mTts_, boolean adhocEnabled_, boolean onDemand_, boolean directionCcw_) {
+	public synchronized void start(TextToSpeech mTts_, boolean adhocEnabled_, boolean onDemand_, boolean directionCcw_) {		
 		this.mTts = mTts_;
 		this.adhocEnabled = adhocEnabled_;
 		this.onDemand = onDemand_;
@@ -1057,7 +1065,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		if (Globals.SIM_MOBILITY) {
 			//We need this now.
 			retrieveUniqueId();
-			
+						
 			//Initialize.
 			simmob.initialize(mIdStr, myHandler, this, new LocationSpoofer(), new PathSetter());
 			

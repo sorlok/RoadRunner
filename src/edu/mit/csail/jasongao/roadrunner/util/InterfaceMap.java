@@ -29,18 +29,36 @@ public class InterfaceMap  {
 	 * Retrieves the first address from a set of interface names. Returns null if none match.
 	 */
 	public Inet4Address getAddress(String[] intNames) {
-		Inet4Address res = null;
+		NetAndAddr res = null;
 		for (String name : intNames) {
 			res = mappings.get(name);
 			if (res != null) {
 				break;
 			}
 		}
-		return res;
+		return res!=null ? res.netAddress : null;
 	}
 	
 	public Inet4Address getAddress(String intName) {
 		return getAddress(new String[]{intName});
+	}
+	
+	/**
+	 * Retrieves the first interface from a set of interface names. Returns null if none match.
+	 */
+	public NetworkInterface getInterface(String[] intNames) {
+		NetAndAddr res = null;
+		for (String name : intNames) {
+			res = mappings.get(name);
+			if (res != null) {
+				break;
+			}
+		}
+		return res!=null ? res.netInterface : null;
+	}
+	
+	public NetworkInterface getInterface(String intName) {
+		return getInterface(new String[]{intName});
 	}
 	
 	private void buildMappings() {
@@ -57,20 +75,30 @@ public class InterfaceMap  {
 			for (Enumeration<InetAddress> enumIpAddr = nif.getInetAddresses(); enumIpAddr.hasMoreElements();) {
 				InetAddress inetAddress = enumIpAddr.nextElement();
 				if (!inetAddress.isLoopbackAddress() && (inetAddress instanceof Inet4Address)) {
-					mappings.put(nif.getName(), (Inet4Address)inetAddress);
+					mappings.put(nif.getName(), new NetAndAddr(nif, (Inet4Address)inetAddress));
 					break;
 				}
 			}
 		}
 	}
 	
+	//Store this too.
+	private static class NetAndAddr {
+		private NetworkInterface netInterface;
+		private Inet4Address netAddress;
+		private NetAndAddr(NetworkInterface netInterface, Inet4Address netAddress) {
+			this.netInterface = netInterface;
+			this.netAddress = netAddress;
+		}
+	}
+	
 	//Storage is relatively simple.
-	private Hashtable<String, Inet4Address> mappings;
+	private Hashtable<String, NetAndAddr> mappings;
 	
 	//It's a singleton.
 	private static InterfaceMap instance;
 	private InterfaceMap() {
-		mappings = new Hashtable<String, Inet4Address>();
+		mappings = new Hashtable<String, NetAndAddr>();
 		buildMappings();
 	}
 }

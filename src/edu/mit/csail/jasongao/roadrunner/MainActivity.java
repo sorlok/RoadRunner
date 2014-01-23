@@ -3,9 +3,17 @@ package edu.mit.csail.jasongao.roadrunner;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 
@@ -35,6 +43,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocalBinder;
+import edu.mit.csail.jasongao.roadrunner.util.InterfaceMap;
 import android.graphics.PorterDuff;
 
 public class MainActivity extends Activity implements OnInitListener {
@@ -433,6 +442,50 @@ public class MainActivity extends Activity implements OnInitListener {
 		
 		//NOTE: Uncomment this if you want to try connecting to the cloud.
 		//mClicked.onClick(findViewById(R.id.start_stop_button));
+		
+		//TEMP
+		try {
+			log("Bound foreign addressess:");
+			
+			Process process = new ProcessBuilder()
+		       .command("/system/bin/netstat", "-rn")
+		       .redirectErrorStream(true)
+		       .start();
+		   try {
+		     InputStream in = process.getInputStream();
+		     OutputStream out = process.getOutputStream();
+		     BufferedReader br = new BufferedReader(new InputStreamReader(in));
+
+		     String line;
+		     boolean skip = true;
+		     while ((line = br.readLine()) != null) {
+		    	 if (!skip) {
+		    		 String[] items = line.trim().split(" +");
+		    		 if (items[0].equals("tcp")) {
+		    			 log(items[4].split(":")[0]);
+		    		 }
+		    	 }
+		       
+		       skip = false;
+		     }
+		   } finally {
+		     process.destroy();
+		   }			
+			
+			//InetAddress temp = InetAddress.getByAddress(new byte[]{10,0,0,1});
+			/*InetAddress temp = InetAddress.getByAddress(new byte[]{(byte)128,30,87,(byte)128});
+			NetworkInterface nif = InterfaceMap.GetInstance().getInterface(Globals.SM_IDENTIFYING_INTERFACES);
+			log("Testing network interface: " + nif.getName());
+			List<InterfaceAddress> addrs = nif.getInterfaceAddresses();
+			for (InterfaceAddress addr : addrs) {
+				log("  Bound: " + addr.toString());
+			}*/
+		} catch (UnknownHostException ex) {
+			log("UNKNOWN HOST.");
+		} catch (IOException ex) {
+			log("IOEXCEPT.");
+		}
+		//END TEMP
 	}
 
 	@Override
