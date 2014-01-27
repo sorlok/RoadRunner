@@ -93,6 +93,9 @@ public class JsonMessageParser extends MessageParser {
     	//Ensure our message count lines up.
     	int count = head.get("NOF_MESSAGES").getAsInt();
     	if (data.size() != count) { throw new LoggingRuntimeException("Header/body size mismatch."); }
+    	
+    	//Ensure this message was meant for us.
+    	String destId = head.get("DEST_AGENT").getAsString();
 
     	//Iterate through each DATA element and add an appropriate Message type to the result list.
     	Gson gson = new Gson();
@@ -106,6 +109,7 @@ public class JsonMessageParser extends MessageParser {
         	Message specificObject = null;
         	try {
         		specificObject = gson.fromJson(msg, msgClass); //This line is failing for the new message type.
+        		specificObject.destId = destId;
         	} catch (JsonSyntaxException ex) {
         		ex.printStackTrace();
         		throw new LoggingRuntimeException(ex);

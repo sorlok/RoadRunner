@@ -22,6 +22,7 @@ import org.apache.mina.filter.codec.textline.TextLineCodecFactory;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
 import edu.mit.csail.jasongao.roadrunner.Globals;
+import edu.mit.csail.jasongao.roadrunner.util.LoggingRuntimeException;
 
 /**
  * A connector which targets Apache Mina.
@@ -147,6 +148,11 @@ public class MinaConnector extends Connector {
     	//Just pass off each message to "handle()"
     	ArrayList<Message> messages = broker.getParser().parse(data);
     	for (Message message : messages) {
+    		//Double-check
+    		if (!message.destId.equals("0") && !broker.getUniqueId().equals(message.destId)) { 
+    			throw new LoggingRuntimeException("Agent destination ID mismatch; expected: " + broker.getUniqueId() + "; was: " + message.destId); 
+    		}
+    		
     		//Get an appropriate response handler.
     		AbstractMessageHandler handler = handlerFactory.create(message.getMessageType());
     		

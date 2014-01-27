@@ -5,7 +5,8 @@ public class Globals {
 	public static final boolean SIM_MOBILITY = true;
 	//public static final String SM_HOST = "10.0.0.1"; //Note that 127.0.0.1 won't work; Android assigns this to the phone.
 	public static final String SM_HOST = "128.30.87.128";
-	public static final int SM_PORT = 6745;
+	//public static final int SM_PORT = 6745; //Direct
+	public static final int SM_PORT = 6799; //Relay
 	public static final int SM_TIMEOUT = 0;  //0=infinite
 	public static final boolean SM_AUTORUN = true; //Set to "true" to auto-run the app (good for MegaDroid)
 	public static final boolean SM_VERBOSE_TRACE = false; //Set to "true" to get a trace of all messages sent and received.

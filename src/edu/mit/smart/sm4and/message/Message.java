@@ -14,6 +14,7 @@ public class Message {
 	protected String MESSAGE_TYPE;
     public String SENDER;       //Sender ID
     public String SENDER_TYPE;  //Almost always "SIMMOBILITY"
+    public String destId; //This is stored at the PACKET_HEADER level, but is copied over by the message parser. 
     
     //Sub-classes should call this.
 	protected Message(String msgType, String sender) {
