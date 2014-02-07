@@ -6,6 +6,7 @@ package edu.mit.smart.sm4and.handler;
 
 import edu.mit.smart.sm4and.connector.Connector;
 import edu.mit.smart.sm4and.message.DefaultMessageTypes.WhoAmIResponse;
+import edu.mit.smart.sm4and.message.DefaultMessageTypes.WhoAreYouMessage;
 import edu.mit.smart.sm4and.message.Message;
 import edu.mit.smart.sm4and.message.MessageParser;
 
@@ -24,8 +25,11 @@ public class WhoAreYouHandler extends AbstractMessageHandler {
 
     @Override
     public void handle(Message message, Connector connector, MessageParser parser) {
+    	//Pass back the token as-is.
+    	WhoAreYouMessage whoMsg = (WhoAreYouMessage)message;
+    	
         //Prepare a response.
-        connector.addMessage(new WhoAmIResponse(clientID, new String[]{"SIMMOB_SRV_TIME","SIMMOB_SRV_LOCATION","SIMMOB_SRV_REGIONS_AND_PATH"}));
+        connector.addMessage(new WhoAmIResponse(clientID, new String[]{"SIMMOB_SRV_TIME","SIMMOB_SRV_LOCATION","SIMMOB_SRV_REGIONS_AND_PATH"}, whoMsg.token));
         
         //The "WhoAmIResponse" is unique in that it *always* triggers a send.
         connector.sendAll(parser.serialize(connector.getAndClearMessages()));

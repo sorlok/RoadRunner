@@ -3,10 +3,17 @@ package edu.mit.csail.jasongao.roadrunner;
 public class Globals {
 	/** Enable communication via Sim Mobility, including time-step synchronization. */
 	public static final boolean SIM_MOBILITY = true;
+	
+	private static final int HDirect = 6745;
+	private static final int HRelay = 6799;
+	
 	//public static final String SM_HOST = "10.0.0.1"; //Note that 127.0.0.1 won't work; Android assigns this to the phone.
-	public static final String SM_HOST = "128.30.87.128";
-	//public static final int SM_PORT = 6745; //Direct
-	public static final int SM_PORT = 6799; //Relay
+	public static final String SM_HOST = "128.30.87.128"; //Desktop
+	
+	//public static final String SM_HOST = Hermes11;
+	public static final int SM_PORT = HDirect;
+	
+	
 	public static final int SM_TIMEOUT = 0;  //0=infinite
 	public static final boolean SM_AUTORUN = true; //Set to "true" to auto-run the app (good for MegaDroid)
 	public static final boolean SM_VERBOSE_TRACE = false; //Set to "true" to get a trace of all messages sent and received.

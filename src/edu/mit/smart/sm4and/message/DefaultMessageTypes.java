@@ -91,6 +91,8 @@ public class DefaultMessageTypes {
 			super(Type.WHOAREYOU, uniqueId); 
 		}
 		
+		public String token;
+		
 		//This constructor is only used by GSON
 		@SuppressWarnings("unused")
 		private WhoAreYouMessage() { this("0"); }
@@ -98,9 +100,10 @@ public class DefaultMessageTypes {
 	
 	/** A response to the server identifying oneself. */
 	public static class WhoAmIResponse extends Message {
-		public WhoAmIResponse(String uniqueId, String[] requiredServices) {
+		public WhoAmIResponse(String uniqueId, String[] requiredServices, String token) {
 			super(Type.WHOAMI, uniqueId);
 			this.REQUIRED_SERVICES = requiredServices;
+			this.token = token;
 			
 			//These are duplicated, but necessary for now.
 			this.ID = this.SENDER;
@@ -109,10 +112,11 @@ public class DefaultMessageTypes {
 	    public String ID;
 	    public String TYPE;
 	    public String[] REQUIRED_SERVICES;
+	    public String token;
 	    
 		//This constructor is only used by GSON
 		@SuppressWarnings("unused")
-		private WhoAmIResponse() { this("0", null); }
+		private WhoAmIResponse() { this("0", null, ""); }
 	}
 	
 	/** A location update message. Uses projected (x,y) coordinates, not Latitude/Longitude. */
