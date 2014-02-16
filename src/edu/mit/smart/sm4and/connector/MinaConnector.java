@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import edu.mit.smart.sm4and.SimMobilityBroker;
 import edu.mit.smart.sm4and.handler.AbstractMessageHandler;
 import edu.mit.smart.sm4and.handler.MessageHandlerFactory;
+import edu.mit.smart.sm4and.json.JsonMessageParser;
 import edu.mit.smart.sm4and.message.Message;
 
 import org.apache.mina.core.future.ConnectFuture;
@@ -124,7 +125,7 @@ public class MinaConnector extends Connector {
     
 
     @Override
-    public void sendAll(String data) {       
+    public void sendAll(String data) {
         if (connected && (data!=null) && (session!=null) && session.isConnected()) {
         	String str = String.format("%8h%s", data.toString().length()+1, data.toString());
         	if (Globals.SM_VERBOSE_TRACE) {
@@ -140,10 +141,28 @@ public class MinaConnector extends Connector {
         }
     }
     
+    public static String escape_invalid_json(String src) {
+    	StringBuilder res = new StringBuilder();
+		for (int i=0; i<src.length(); i++) {
+			char c = src.charAt(i);
+			if (c=='&') { res.append("&&"); }
+			else if (c=='\\') { res.append("&1"); }
+			else if (c=='"') { res.append("&2"); }
+			else { res.append(c); }
+		}
+		return res.toString();
+    }
+    
+    
     @Override
     public void handleMessage(String data) {    	
     	//Trim the first 8 bytes.
     	data = data.substring(8);
+    	
+    	//Remote log:
+    	if (Globals.SM_LOG_TRACE_ALL_MESSAGES) {	
+    		broker.ReflectToServer("RECIEVE: " + escape_invalid_json(JsonMessageParser.FilterJson(data)));
+    	}
     	
     	//Just pass off each message to "handle()"
     	ArrayList<Message> messages = broker.getParser().parse(data);

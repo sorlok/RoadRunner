@@ -9,9 +9,7 @@ public class Globals {
 	
 	//public static final String SM_HOST = "10.0.0.1"; //Note that 127.0.0.1 won't work; Android assigns this to the phone.
 	public static final String SM_HOST = "128.30.87.128"; //Desktop
-	
-	//public static final String SM_HOST = Hermes11;
-	public static final int SM_PORT = HDirect;
+	public static final int SM_PORT = HRelay;
 	
 	
 	public static final int SM_TIMEOUT = 0;  //0=infinite
@@ -57,7 +55,10 @@ public class Globals {
 	 *   you don't get any free tokens.
 	 */
 	//"roughly 50%" chance of getting at least 1 token. After path size 10, starts increasing >65%
-	public static final double[] SM_INITIAL_TOKEN_PROBABILITIES = {0.5, 0.25, 0.2, 0.2, 0.1}; 
+	public static final double[] SM_INITIAL_TOKEN_PROBABILITIES = {0.5, 0.25, 0.2, 0.2, 0.1};
+	
+	/** Used for generating a message trace (will be saved remotely). */
+	public static final boolean SM_LOG_TRACE_ALL_MESSAGES = false;
 	
 	/** What string constitutes a "free" region. */
 	public static final String FREE_REGION_TAG = "FREE";

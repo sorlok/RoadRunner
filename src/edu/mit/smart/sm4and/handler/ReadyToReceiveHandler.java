@@ -4,10 +4,16 @@
 
 package edu.mit.smart.sm4and.handler;
 
+import java.util.ArrayList;
+
+import edu.mit.csail.jasongao.roadrunner.Globals;
 import edu.mit.smart.sm4and.connector.Connector;
+import edu.mit.smart.sm4and.connector.MinaConnector;
+import edu.mit.smart.sm4and.json.JsonMessageParser;
 import edu.mit.smart.sm4and.message.DefaultMessageTypes.ClientDoneResponse;
 import edu.mit.smart.sm4and.message.Message;
 import edu.mit.smart.sm4and.message.MessageParser;
+import edu.mit.smart.sm4and.message.RemoteLogMessage;
 
 /**
  * Handle a "ready to receive" message from the server.
@@ -25,8 +31,14 @@ public class ReadyToReceiveHandler extends AbstractMessageHandler {
     	//Send a response.
         connector.addMessage(new ClientDoneResponse(clientID));
         
+        //Need to append the log here.
+        ArrayList<Message> messages = connector.getAndClearMessages();
+        if (Globals.SM_LOG_TRACE_ALL_MESSAGES) {
+        	messages.add(new RemoteLogMessage(clientID, "SEND: " + MinaConnector.escape_invalid_json(JsonMessageParser.FilterJson(parser.serialize(messages)))));
+        }
+        
         //This means we're done; instruct the connector to send all remaining messages.
-        connector.sendAll(parser.serialize(connector.getAndClearMessages()));
+        connector.sendAll(parser.serialize(messages));
     }
     
 }

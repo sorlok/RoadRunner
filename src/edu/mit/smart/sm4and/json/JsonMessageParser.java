@@ -41,7 +41,7 @@ public class JsonMessageParser extends MessageParser {
     }
 	
 	
-	private static String FilterJson(String src) {
+	public static String FilterJson(String src) {
     	final String msg = src;
         int lastBracket = -1;
         int numLeft = 0;
