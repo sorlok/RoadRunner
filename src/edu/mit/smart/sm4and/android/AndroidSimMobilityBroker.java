@@ -6,9 +6,21 @@ package edu.mit.smart.sm4and.android;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.PriorityQueue;
+import java.util.Random;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
+import android.os.AsyncTask;
 import android.os.Handler;
+import android.text.TextUtils.StringSplitter;
 import edu.mit.csail.jasongao.roadrunner.*;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.PathSetter;
@@ -17,6 +29,7 @@ import edu.mit.csail.jasongao.roadrunner.util.LoggingRuntimeException;
 import edu.mit.smart.sm4and.SimMobilityBroker;
 import edu.mit.smart.sm4and.android.HandleOnMainThread;
 import edu.mit.smart.sm4and.android.SimMobServerConnectTask.PostExecuteAction;
+import edu.mit.smart.sm4and.automate.Automation;
 import edu.mit.smart.sm4and.connector.Connector;
 import edu.mit.smart.sm4and.connector.MinaConnector;
 import edu.mit.smart.sm4and.handler.AbstractMessageHandler;
@@ -59,6 +72,14 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 	protected Handler myHandler;
 	protected LoggerI logger;
 	protected LocationSpoofer locspoof;
+	
+	//For automation
+	protected int receive_counter;
+	protected long automationStartMs;
+	
+	protected DatagramSocket serverSampleSocket;
+	protected InetAddress serverSampleAddress;
+	protected int serverSamplePort;
 	
 
 	private static class StartRun implements Comparable<StartRun> {
@@ -195,11 +216,89 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 		SimMobServerConnectTask task = new SimMobServerConnectTask(new OnConnectAction(), this.handlerFactory, logger);
 		task.execute(this.conn);
 		this.activated = true;
+		
+		//We're waiting for the server to send WHOAMI, among other things. So, we start pumping messages ourselves.
+		if (Globals.SM_RERUN_FULL_TRACE) {
+			this.receive_counter = 0;
+			this.automationStartMs = System.currentTimeMillis();
+			myHandler.post(receiveTraceR);
+			
+		}
 	}
 	
 	public boolean isActive() {
 		return activated;
 	}
+	
+	
+	private class DGRunTask extends AsyncTask<DatagramPacket, Void, Void> {
+		protected Void doInBackground(DatagramPacket... params) {
+			if (params.length!=1) { throw new LoggingRuntimeException("Only one DatagramPacket allowed."); }
+			for (int i=0; i<Globals.SM_RERUN_TRAFFIC_MULTIPLIER; i++) {
+				try {
+					serverSampleSocket.send(params[0]);
+				} catch (IOException e) {
+					throw new LoggingRuntimeException(e);
+				}
+			}
+			return null;
+		}
+	}
+
+	
+	
+	private Runnable receiveTraceR = new Runnable() {
+		public void run() {
+			String line = Automation.receive_buffer.get(receive_counter);
+			conn.handleMessage("12345678" + line);
+			
+			//Send a UDP message
+			if (!Globals.SM_RERUN_UDP_SERVER.isEmpty()) {
+				//Init?
+				if (serverSampleSocket==null) {
+					try {
+						serverSampleSocket = new DatagramSocket();
+					} catch (SocketException e) {
+						throw new LoggingRuntimeException(e);
+					}
+					serverSamplePort = Integer.parseInt(Globals.SM_RERUN_PORTS[RandGen.nextInt(Globals.SM_RERUN_PORTS.length)]);
+					try {
+						serverSampleAddress = InetAddress.getByName(Globals.SM_RERUN_UDP_SERVER);
+					} catch (UnknownHostException e) {
+						throw new LoggingRuntimeException(e);
+					}
+				}
+				
+				//Retrieve the latest message to send.
+				int send_counter = receive_counter;
+				if (send_counter<0 || send_counter>=Automation.send_buffer.size()) {
+					send_counter = Automation.send_buffer.size()-1;
+				}
+				byte[] outgoing = Automation.send_buffer.get(send_counter).getBytes();
+				
+				//Send!
+				DGRunTask task = new DGRunTask();
+				task.execute(new DatagramPacket(outgoing, outgoing.length, serverSampleAddress, serverSamplePort));
+				try {
+					task.get(2000, TimeUnit.MILLISECONDS);
+				} catch (TimeoutException ex) {
+					throw new LoggingRuntimeException(ex);
+				} catch (InterruptedException ex) {
+					throw new LoggingRuntimeException(ex);
+				} catch (ExecutionException ex) {
+					throw new LoggingRuntimeException(ex);
+				}
+			}
+
+			//Immediately post the next message.
+			if (++receive_counter < Automation.receive_buffer.size()) {
+				myHandler.post(this);
+			} else {
+				long automationEndMs = System.currentTimeMillis();
+				logger.log("Automation done: " + Math.round((automationEndMs-automationStartMs)/10.0)/100.0 + " s");
+			}
+		}
+	};
 	
 	
 	private class OnConnectAction implements PostExecuteAction {

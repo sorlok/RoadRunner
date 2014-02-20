@@ -46,7 +46,9 @@ public class SimMobServerConnectTask extends AsyncTask<Connector, Void, Boolean>
 		if (mnConnect.length!=1) { throw new LoggingRuntimeException("Only one Connector allowed."); }
 		try {
 			logger.log("Attempting to connect to MINA server on " + Globals.SM_HOST + ":" + Globals.SM_PORT);
-	        mnConnect[0].connect(Globals.SM_HOST, Globals.SM_PORT);
+			if (!Globals.SM_RERUN_FULL_TRACE) {
+				mnConnect[0].connect(Globals.SM_HOST, Globals.SM_PORT);
+			}
 		} catch (Exception ex) {
 			logger.log(ex.toString());
 			this.errorEx = ex;

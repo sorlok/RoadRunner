@@ -60,6 +60,17 @@ public class Globals {
 	/** Used for generating a message trace (will be saved remotely). */
 	public static final boolean SM_LOG_TRACE_ALL_MESSAGES = false;
 	
+	/** Used to run a trace, stored in Automation.java */
+	public static final boolean SM_RERUN_FULL_TRACE = true;
+	
+	/** If non-empty, send a 512byte packet every tick to a port on this address. */
+	public static final String SM_RERUN_UDP_SERVER = "128.30.66.123"; //H5
+	public static final int SM_RERUN_TRAFFIC_MULTIPLIER = 1; //Multiply data sent each time tick.
+	public static final String[] SM_RERUN_PORTS = {
+		"6800", "6801", "6802", "6803", "6804", "6805", "6806", "6807", "6808", "6809",
+		"6810", "6811", "6812", "6813", "6814", "6815", "6816", "6817", "6818", "6819",
+	};
+	
 	/** What string constitutes a "free" region. */
 	public static final String FREE_REGION_TAG = "FREE";
 	

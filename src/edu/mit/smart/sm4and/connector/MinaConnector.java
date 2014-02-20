@@ -168,8 +168,10 @@ public class MinaConnector extends Connector {
     	ArrayList<Message> messages = broker.getParser().parse(data);
     	for (Message message : messages) {
     		//Double-check
-    		if (!message.destId.equals("0") && !broker.getUniqueId().equals(message.destId)) { 
-    			throw new LoggingRuntimeException("Agent destination ID mismatch; expected: " + broker.getUniqueId() + "; was: " + message.destId); 
+    		if (!message.destId.equals("0") && !broker.getUniqueId().equals(message.destId)) {
+    			if (!Globals.SM_RERUN_FULL_TRACE) {
+    				throw new LoggingRuntimeException("Agent destination ID mismatch; expected: " + broker.getUniqueId() + "; was: " + message.destId);
+    			}
     		}
     		
     		//Get an appropriate response handler.
