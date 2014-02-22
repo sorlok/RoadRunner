@@ -8,8 +8,8 @@ public class Globals {
 	private static final int HRelay = 6799;
 	
 	//public static final String SM_HOST = "10.0.0.1"; //Note that 127.0.0.1 won't work; Android assigns this to the phone.
-	public static final String SM_HOST = "128.30.87.128"; //Desktop
-	public static final int SM_PORT = HRelay;
+	public static final String SM_HOST = "192.168.0.102";
+	public static final int SM_PORT = HDirect;
 	
 	
 	public static final int SM_TIMEOUT = 0;  //0=infinite
@@ -61,10 +61,10 @@ public class Globals {
 	public static final boolean SM_LOG_TRACE_ALL_MESSAGES = false;
 	
 	/** Used to run a trace, stored in Automation.java */
-	public static final boolean SM_RERUN_FULL_TRACE = true;
+	public static final boolean SM_RERUN_FULL_TRACE = false;
 	
 	/** If non-empty, send a 512byte packet every tick to a port on this address. */
-	public static final String SM_RERUN_UDP_SERVER = "128.30.66.123"; //H5
+	public static final String SM_RERUN_UDP_SERVER = ""; //H5
 	public static final int SM_RERUN_TRAFFIC_MULTIPLIER = 1; //Multiply data sent each time tick.
 	public static final String[] SM_RERUN_PORTS = {
 		"6800", "6801", "6802", "6803", "6804", "6805", "6806", "6807", "6808", "6809",
