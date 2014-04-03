@@ -8,7 +8,7 @@ public class Globals {
 	private static final int HRelay = 6799;
 	
 	//public static final String SM_HOST = "10.0.0.1"; //Note that 127.0.0.1 won't work; Android assigns this to the phone.
-	public static final String SM_HOST = "192.168.0.102";
+	public static final String SM_HOST = "128.30.87.128";
 	public static final int SM_PORT = HDirect;
 	
 	

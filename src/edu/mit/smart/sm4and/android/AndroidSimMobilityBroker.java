@@ -13,14 +13,12 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.PriorityQueue;
-import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import android.os.AsyncTask;
 import android.os.Handler;
-import android.text.TextUtils.StringSplitter;
 import edu.mit.csail.jasongao.roadrunner.*;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.PathSetter;
@@ -35,18 +33,17 @@ import edu.mit.smart.sm4and.connector.MinaConnector;
 import edu.mit.smart.sm4and.handler.AbstractMessageHandler;
 import edu.mit.smart.sm4and.handler.LocationHandler;
 import edu.mit.smart.sm4and.handler.MessageHandlerFactory;
-import edu.mit.smart.sm4and.handler.MulticastHandler;
+import edu.mit.smart.sm4and.handler.OpaqueReceiveHandler;
 import edu.mit.smart.sm4and.handler.ReadyHandler;
 import edu.mit.smart.sm4and.handler.ReadyToReceiveHandler;
 import edu.mit.smart.sm4and.handler.TimeHandler;
-import edu.mit.smart.sm4and.handler.UnicastHandler;
 import edu.mit.smart.sm4and.handler.WhoAreYouHandler;
 import edu.mit.smart.sm4and.message.DefaultMessageTypes.LocationMessage;
-import edu.mit.smart.sm4and.message.DefaultMessageTypes.MulticastMessage;
+import edu.mit.smart.sm4and.message.DefaultMessageTypes.OpaqueReceiveMessage;
+import edu.mit.smart.sm4and.message.DefaultMessageTypes.OpaqueSendMessage;
 import edu.mit.smart.sm4and.message.DefaultMessageTypes.ReadyMessage;
 import edu.mit.smart.sm4and.message.DefaultMessageTypes.ReadyToReceiveMessage;
 import edu.mit.smart.sm4and.message.DefaultMessageTypes.TimeMessage;
-import edu.mit.smart.sm4and.message.DefaultMessageTypes.UnicastMessage;
 import edu.mit.smart.sm4and.message.DefaultMessageTypes.WhoAreYouMessage;
 import edu.mit.smart.sm4and.json.ByteArraySerialization;
 import edu.mit.smart.sm4and.json.JsonMessageParser;
@@ -148,8 +145,8 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 		res.addDefaultHandler(Message.Type.TIME_DATA, new TimeHandler(new TimeAdvancer()), this);
 		res.addDefaultHandler(Message.Type.READY, new ReadyHandler(), this);
 		res.addDefaultHandler(Message.Type.LOCATION_DATA, new LocationHandler(locSpoof), this);
-		res.addDefaultHandler(Message.Type.MULTICAST, new MulticastHandler(new MultiCastReceiver()), this);
-		res.addDefaultHandler(Message.Type.UNICAST, new UnicastHandler(), this);
+		res.addDefaultHandler(Message.Type.OPAQUE_RECEIVE, new OpaqueReceiveHandler(new OpaqueMsgReceiver()), this);
+		//res.addDefaultHandler(Message.Type.UNICAST, new UnicastHandler(), this);
 		res.addDefaultHandler(Message.Type.READY_TO_RECEIVE, new ReadyToReceiveHandler(clientId), this);
 		return res;
 	}
@@ -160,8 +157,8 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 		 res.addMessagetype(Message.Type.TIME_DATA, TimeMessage.class);
 		 res.addMessagetype(Message.Type.READY, ReadyMessage.class);
 		 res.addMessagetype(Message.Type.LOCATION_DATA, LocationMessage.class);
-		 res.addMessagetype(Message.Type.MULTICAST, MulticastMessage.class);
-		 res.addMessagetype(Message.Type.UNICAST, UnicastMessage.class);
+		 res.addMessagetype(Message.Type.OPAQUE_RECEIVE, OpaqueReceiveMessage.class);
+		 //res.addMessagetype(Message.Type.UNICAST, UnicastMessage.class);
 		 res.addMessagetype(Message.Type.READY_TO_RECEIVE, ReadyToReceiveMessage.class);
 		 return res;
 	}
@@ -337,10 +334,10 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 	}
 	
 	
-	public class MultiCastReceiver {
-		public void receive(String id, String base64Data) {
+	public class OpaqueMsgReceiver {
+		public void receive(String fromId, String base64Data) {
 			//Ignore messages sent to yourself.
-			if (id.equals(uniqueId)) {
+			if (fromId.equals(uniqueId)) {
 				logger.log("Ignoring packet sent to self.");
 				return;
 			}
@@ -372,7 +369,9 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 		if (myId==null || packet==null) { throw new LoggingRuntimeException("Can't broadcast without data or an id."); }
 		
 		//Prepare the packet.
-		MulticastMessage obj = new MulticastMessage(uniqueId, ByteArraySerialization.Serialize(packet));
+		OpaqueSendMessage obj = new OpaqueSendMessage(uniqueId, ByteArraySerialization.Serialize(packet));
+		obj.broadcast = true;
+		obj.fromId = uniqueId;
 		
 		//Save it for later.
 		conn.addMessage(obj);

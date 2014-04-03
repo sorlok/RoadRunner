@@ -11,17 +11,37 @@ package edu.mit.smart.sm4and.message;
  * Private no-args constructors are provided for Gson
  */
 public class DefaultMessageTypes {
-	/** A multicast message. Contains an opaque block of Base64-encoded data. */
-	public static class MulticastMessage extends Message { 
-		public MulticastMessage(String uniqueId, String mcData) { 
-			super(Type.MULTICAST, uniqueId);
-			this.MULTICAST_DATA = mcData;
+	/** An OpaqueSend message. Contains an opaque block of Base64-encoded data. */
+	public static class OpaqueSendMessage extends Message { 
+		public OpaqueSendMessage(String uniqueId, String data) { 
+			super(Type.OPAQUE_SEND, uniqueId);
+			this.data = data;
 		}
-		public String MULTICAST_DATA;
+		
+		public String fromId;
+		public String toId;
+		public String data;
+		public boolean broadcast;
 		
 		//This constructor is only used by GSON
 		@SuppressWarnings("unused")
-		private MulticastMessage() { this("0", ""); }
+		private OpaqueSendMessage() { this("0", ""); }
+	}
+	
+	/** An OpaqueReceive message. Contains an opaque block of Base64-encoded data. */
+	public static class OpaqueReceiveMessage extends Message { 
+		public OpaqueReceiveMessage(String uniqueId, String data) {
+			super(Type.OPAQUE_RECEIVE, uniqueId);
+			this.data = data;
+		}
+		
+		public String fromId;
+		public String toId;
+		public String data;
+		
+		//This constructor is only used by GSON
+		@SuppressWarnings("unused")
+		private OpaqueReceiveMessage() { this("0", ""); }
 	}
 
 	/** A message from the server indicating that the client may proceed. */
@@ -71,19 +91,7 @@ public class DefaultMessageTypes {
 		@SuppressWarnings("unused")
 		private TimeMessage() { this("0", 0, 0); }
 	}
-	
-	/** A unicast message. Contains an opaque block of Base64-encoded data. */
-	public static class UnicastMessage extends Message { 
-		public UnicastMessage(String uniqueId, String ucData) {
-			super(Type.UNICAST, uniqueId);
-			this.UNICAST_DATA = ucData;
-		}
-		public String UNICAST_DATA;
-		
-		//This constructor is only used by GSON
-		@SuppressWarnings("unused")
-		private UnicastMessage() { this("0", ""); }
-	}
+
 	
 	/** A message from the server requesting that the client identify itself. */
 	public static class WhoAreYouMessage extends Message {

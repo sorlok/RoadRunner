@@ -31,14 +31,16 @@ public class Message {
 		public static final String READY = "READY";
 		public static final String LOCATION_DATA = "LOCATION_DATA";
 		public static final String READY_TO_RECEIVE = "READY_TO_RECEIVE";
+		public static final String OPAQUE_RECEIVE = "OPAQUE_RECEIVE";
 
-        //Not sure; might be both.
-		public static final String MULTICAST = "MULTICAST";
-		public static final String UNICAST = "UNICAST";
+        //Deprecated
+		//public static final String MULTICAST = "MULTICAST";
+		//public static final String UNICAST = "UNICAST";
         
         //To server
 		public static final String WHOAMI = "WHOAMI";
 		public static final String CLIENT_MESSAGES_DONE = "CLIENT_MESSAGES_DONE";
+		public static final String OPAQUE_SEND = "OPAQUE_SEND";
 		public static final String REMOTE_LOG = "REMOTE_LOG";
 	}
 
