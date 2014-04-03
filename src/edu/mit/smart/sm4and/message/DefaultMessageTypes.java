@@ -112,13 +112,13 @@ public class DefaultMessageTypes {
 			super(Type.WHOAMI, uniqueId);
 			this.REQUIRED_SERVICES = requiredServices;
 			this.token = token;
+			this.type = "android";
 			
 			//These are duplicated, but necessary for now.
 			this.ID = this.SENDER;
-			this.TYPE = this.SENDER_TYPE;
 		}
 	    public String ID;
-	    public String TYPE;
+	    public String type;
 	    public String[] REQUIRED_SERVICES;
 	    public String token;
 	    
