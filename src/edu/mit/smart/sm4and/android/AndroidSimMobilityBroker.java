@@ -35,16 +35,14 @@ import edu.mit.smart.sm4and.handler.LocationHandler;
 import edu.mit.smart.sm4and.handler.MessageHandlerFactory;
 import edu.mit.smart.sm4and.handler.OpaqueReceiveHandler;
 import edu.mit.smart.sm4and.handler.ReadyHandler;
-import edu.mit.smart.sm4and.handler.ReadyToReceiveHandler;
 import edu.mit.smart.sm4and.handler.TimeHandler;
 import edu.mit.smart.sm4and.handler.WhoAreYouHandler;
+import edu.mit.smart.sm4and.message.DefaultMessageTypes.IdAckMessage;
+import edu.mit.smart.sm4and.message.DefaultMessageTypes.IdRequestMessage;
 import edu.mit.smart.sm4and.message.DefaultMessageTypes.LocationMessage;
 import edu.mit.smart.sm4and.message.DefaultMessageTypes.OpaqueReceiveMessage;
 import edu.mit.smart.sm4and.message.DefaultMessageTypes.OpaqueSendMessage;
-import edu.mit.smart.sm4and.message.DefaultMessageTypes.ReadyMessage;
-import edu.mit.smart.sm4and.message.DefaultMessageTypes.ReadyToReceiveMessage;
-import edu.mit.smart.sm4and.message.DefaultMessageTypes.TimeMessage;
-import edu.mit.smart.sm4and.message.DefaultMessageTypes.WhoAreYouMessage;
+import edu.mit.smart.sm4and.message.DefaultMessageTypes.TickedSimMobMessage;
 import edu.mit.smart.sm4and.json.ByteArraySerialization;
 import edu.mit.smart.sm4and.json.JsonMessageParser;
 import edu.mit.smart.sm4and.message.Message;
@@ -141,25 +139,25 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 	protected MessageHandlerFactory makeAndroidHandlerFactory(String clientId, LocationSpoofer locSpoof) {
 		//Set up our list of default handlers.
 		MessageHandlerFactory res = new MessageHandlerFactory();
-		res.addDefaultHandler(Message.Type.WHOAREYOU, new WhoAreYouHandler(clientId), this);
-		res.addDefaultHandler(Message.Type.TIME_DATA, new TimeHandler(new TimeAdvancer()), this);
-		res.addDefaultHandler(Message.Type.READY, new ReadyHandler(), this);
-		res.addDefaultHandler(Message.Type.LOCATION_DATA, new LocationHandler(locSpoof), this);
-		res.addDefaultHandler(Message.Type.OPAQUE_RECEIVE, new OpaqueReceiveHandler(new OpaqueMsgReceiver()), this);
+		res.addDefaultHandler(Message.Type.id_request, new WhoAreYouHandler(clientId), this);
+		res.addDefaultHandler(Message.Type.ticked_simmob, new TimeHandler(clientId, new TimeAdvancer()), this);
+		res.addDefaultHandler(Message.Type.id_ack, new ReadyHandler(), this);
+		res.addDefaultHandler(Message.Type.location, new LocationHandler(locSpoof), this);
+		res.addDefaultHandler(Message.Type.opaque_receive, new OpaqueReceiveHandler(new OpaqueMsgReceiver()), this);
 		//res.addDefaultHandler(Message.Type.UNICAST, new UnicastHandler(), this);
-		res.addDefaultHandler(Message.Type.READY_TO_RECEIVE, new ReadyToReceiveHandler(clientId), this);
+		//res.addDefaultHandler(Message.Type.READY_TO_RECEIVE, new ReadyToReceiveHandler(clientId), this);
 		return res;
 	}
 	
 	protected MessageParser makeJsonMessageParser() {
 		 MessageParser res = new JsonMessageParser();
-		 res.addMessagetype(Message.Type.WHOAREYOU, WhoAreYouMessage.class);
-		 res.addMessagetype(Message.Type.TIME_DATA, TimeMessage.class);
-		 res.addMessagetype(Message.Type.READY, ReadyMessage.class);
-		 res.addMessagetype(Message.Type.LOCATION_DATA, LocationMessage.class);
-		 res.addMessagetype(Message.Type.OPAQUE_RECEIVE, OpaqueReceiveMessage.class);
+		 res.addMessagetype(Message.Type.id_request, IdRequestMessage.class);
+		 res.addMessagetype(Message.Type.ticked_simmob, TickedSimMobMessage.class);
+		 res.addMessagetype(Message.Type.id_ack, IdAckMessage.class);
+		 res.addMessagetype(Message.Type.location, LocationMessage.class);
+		 res.addMessagetype(Message.Type.opaque_receive, OpaqueReceiveMessage.class);
 		 //res.addMessagetype(Message.Type.UNICAST, UnicastMessage.class);
-		 res.addMessagetype(Message.Type.READY_TO_RECEIVE, ReadyToReceiveMessage.class);
+		 //res.addMessagetype(Message.Type.READY_TO_RECEIVE, ReadyToReceiveMessage.class);
 		 return res;
 	}
 	
@@ -369,9 +367,10 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 		if (myId==null || packet==null) { throw new LoggingRuntimeException("Can't broadcast without data or an id."); }
 		
 		//Prepare the packet.
-		OpaqueSendMessage obj = new OpaqueSendMessage(uniqueId, ByteArraySerialization.Serialize(packet));
+		OpaqueSendMessage obj = new OpaqueSendMessage();
+		obj.data = ByteArraySerialization.Serialize(packet);
 		obj.broadcast = true;
-		obj.fromId = uniqueId;
+		obj.from_id = uniqueId;
 		
 		//Save it for later.
 		conn.addMessage(obj);

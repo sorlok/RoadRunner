@@ -21,6 +21,13 @@ import edu.mit.csail.jasongao.roadrunner.util.LoggingRuntimeException;
  * @author Vahid
  */
 public abstract class MessageParser {
+	//Represents an entire message set, plus header information.
+	public static class MessageBundle {
+		public String sendId = "";
+		public String destId = "";
+		public ArrayList<Message> messages = new ArrayList<Message>();
+	}
+	
 	//Types of Messages we expect to parse.
 	protected Hashtable<String, Class<? extends Message>> messageTypes = new Hashtable<String, Class<? extends Message>>();
 
@@ -42,12 +49,12 @@ public abstract class MessageParser {
 	 * @param src The input String.
 	 * @return The Message it corresponds to.
 	 */
-	public abstract ArrayList<Message> parse(String src);
+	public abstract MessageBundle parse(String src);
 	
 	/**
 	 * Serializes a message into a String format familiar to the server.
 	 * @param msg The message to serialize.
 	 * @return A string representation of that message.
 	 */
-	public abstract String serialize(ArrayList<Message> messages);
+	public abstract String serialize(MessageBundle messages);
 }

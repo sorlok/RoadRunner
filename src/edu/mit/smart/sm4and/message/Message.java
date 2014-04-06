@@ -11,44 +11,38 @@ package edu.mit.smart.sm4and.message;
  */
 public class Message {
 	//Set by Gson:
-	protected String MESSAGE_TYPE;
-    public String SENDER;       //Sender ID
-    public String SENDER_TYPE;  //Almost always "SIMMOBILITY"
-    public String destId; //This is stored at the PACKET_HEADER level, but is copied over by the message parser. 
+	protected String msg_type; 
     
     //Sub-classes should call this.
-	protected Message(String msgType, String sender) {
-		this.MESSAGE_TYPE = msgType;
-		this.SENDER = sender;
-		this.SENDER_TYPE = "ANDROID_EMULATOR";
+	protected Message(String msgType) {
+		this.msg_type = msgType;
 	}
 	
 	//Types of messages.
 	public static class Type {
     	//From server.
-		public static final String WHOAREYOU = "WHOAREYOU";
-		public static final String TIME_DATA = "TIME_DATA";
-		public static final String READY = "READY";
-		public static final String LOCATION_DATA = "LOCATION_DATA";
-		public static final String READY_TO_RECEIVE = "READY_TO_RECEIVE";
-		public static final String OPAQUE_RECEIVE = "OPAQUE_RECEIVE";
-
+		public static final String id_request = "id_request";
+		public static final String id_ack = "id_ack";
+		public static final String ticked_simmob = "ticked_simmob";
+		public static final String location = "location";
+		public static final String opaque_receive = "opaque_receive";
+        
+        //To server
+		public static final String id_response = "id_response";
+		public static final String ticked_client = "ticked_client";
+		public static final String opaque_send = "opaque_send";
+		public static final String remote_log = "remote_log";
+		
         //Deprecated
 		//public static final String MULTICAST = "MULTICAST";
 		//public static final String UNICAST = "UNICAST";
-        
-        //To server
-		public static final String WHOAMI = "WHOAMI";
-		public static final String CLIENT_MESSAGES_DONE = "CLIENT_MESSAGES_DONE";
-		public static final String OPAQUE_SEND = "OPAQUE_SEND";
-		public static final String REMOTE_LOG = "REMOTE_LOG";
 	}
 
     public String getMessageType() {
-        return MESSAGE_TYPE;
+        return msg_type;
     }
     
 	//Only GSON should call this.
     @SuppressWarnings("unused")
-	private Message() { this("UNDEFINED", "0"); }
+	private Message() { this("UNDEFINED"); }
 }

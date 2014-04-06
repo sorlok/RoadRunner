@@ -14,6 +14,7 @@ import edu.mit.smart.sm4and.handler.AbstractMessageHandler;
 import edu.mit.smart.sm4and.handler.MessageHandlerFactory;
 import edu.mit.smart.sm4and.json.JsonMessageParser;
 import edu.mit.smart.sm4and.message.Message;
+import edu.mit.smart.sm4and.message.MessageParser.MessageBundle;
 
 import org.apache.mina.core.future.ConnectFuture;
 import org.apache.mina.core.service.IoConnector;
@@ -21,6 +22,8 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.codec.textline.TextLineCodecFactory;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
+
+import android.os.Bundle;
 
 import edu.mit.csail.jasongao.roadrunner.Globals;
 import edu.mit.csail.jasongao.roadrunner.util.LoggingRuntimeException;
@@ -164,16 +167,16 @@ public class MinaConnector extends Connector {
     		broker.ReflectToServer("RECIEVE: " + escape_invalid_json(JsonMessageParser.FilterJson(data)));
     	}
     	
-    	//Just pass off each message to "handle()"
-    	ArrayList<Message> messages = broker.getParser().parse(data);
-    	for (Message message : messages) {
-    		//Double-check
-    		if (!message.destId.equals("0") && !broker.getUniqueId().equals(message.destId)) {
-    			if (!Globals.SM_RERUN_FULL_TRACE) {
-    				throw new LoggingRuntimeException("Agent destination ID mismatch; expected: " + broker.getUniqueId() + "; was: " + message.destId);
-    			}
-    		}
-    		
+    	//Double-check
+    	MessageBundle incoming = broker.getParser().parse(data);
+		if (!incoming.destId.equals("0") && !broker.getUniqueId().equals(incoming.destId)) {
+			if (!Globals.SM_RERUN_FULL_TRACE) {
+				throw new LoggingRuntimeException("Agent destination ID mismatch; expected: " + broker.getUniqueId() + "; was: " + incoming.destId);
+			}
+		}
+    	
+		//Just pass off each message to "handle()"
+    	for (Message message : incoming.messages) {    		
     		//Get an appropriate response handler.
     		AbstractMessageHandler handler = handlerFactory.create(message.getMessageType());
     		

@@ -10,8 +10,9 @@ import edu.mit.csail.jasongao.roadrunner.Globals;
 import edu.mit.smart.sm4and.connector.Connector;
 import edu.mit.smart.sm4and.connector.MinaConnector;
 import edu.mit.smart.sm4and.json.JsonMessageParser;
-import edu.mit.smart.sm4and.message.DefaultMessageTypes.WhoAmIResponse;
-import edu.mit.smart.sm4and.message.DefaultMessageTypes.WhoAreYouMessage;
+import edu.mit.smart.sm4and.message.DefaultMessageTypes.IdRequestMessage;
+import edu.mit.smart.sm4and.message.DefaultMessageTypes.IdResponse;
+import edu.mit.smart.sm4and.message.MessageParser.MessageBundle;
 import edu.mit.smart.sm4and.message.Message;
 import edu.mit.smart.sm4and.message.MessageParser;
 import edu.mit.smart.sm4and.message.RemoteLogMessage;
@@ -32,18 +33,28 @@ public class WhoAreYouHandler extends AbstractMessageHandler {
     @Override
     public void handle(Message message, Connector connector, MessageParser parser) {
     	//Pass back the token as-is.
-    	WhoAreYouMessage whoMsg = (WhoAreYouMessage)message;
+    	IdRequestMessage whoMsg = (IdRequestMessage)message;
     	
         //Prepare a response.
-        connector.addMessage(new WhoAmIResponse(clientID, new String[]{"SIMMOB_SRV_TIME","SIMMOB_SRV_LOCATION","SIMMOB_SRV_REGIONS_AND_PATH"}, whoMsg.token));
+    	IdResponse res = new IdResponse();
+    	res.id = clientID;
+    	res.token = whoMsg.token;
+    	res.type = "android";
+    	res.services = new String[]{"srv_location","srv_regions_and_path"};
+        connector.addMessage(res);
         
         //This has to be done here.
-        ArrayList<Message> messages = connector.getAndClearMessages();
+        MessageBundle out = new MessageBundle();
+        out.sendId = clientID;
+        out.destId = "0";
+        out.messages = connector.getAndClearMessages();
         if (Globals.SM_LOG_TRACE_ALL_MESSAGES) {
-        	messages.add(new RemoteLogMessage(clientID, "SEND: " + MinaConnector.escape_invalid_json(JsonMessageParser.FilterJson(parser.serialize(messages)))));
+        	RemoteLogMessage log = new RemoteLogMessage();
+        	log.log_message = "SEND: " + MinaConnector.escape_invalid_json(JsonMessageParser.FilterJson(parser.serialize(out)));
+        	out.messages.add(log);
         }
         
         //The "WhoAmIResponse" is unique in that it *always* triggers a send.
-        connector.sendAll(parser.serialize(messages));
+        connector.sendAll(parser.serialize(out));
     }
 }

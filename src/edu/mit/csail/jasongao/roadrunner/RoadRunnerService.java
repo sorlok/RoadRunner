@@ -698,7 +698,9 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		if (minDist<Globals.SM_REROUTE_DISTANCE) {
 			//Request a re-route from the server.
 			String blRegion = nextRes.regionId;
-			simmob.forwardMessageToServer(new RerouteRequest(mIdStr, blRegion));
+			RerouteRequest rr = new RerouteRequest();
+			rr.blacklist_region = blRegion;
+			simmob.forwardMessageToServer(rr);
 			
 			//Log
 			log("No token; requesting that the server re-route around region: " + blRegion);
@@ -1069,7 +1071,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			);
 			
 			//We also need a custom handler for the "WHOAREYOU" message type; this is when we will start our recurring tasks.
-			simmob.addCustomMessageHandler(edu.mit.smart.sm4and.message.Message.Type.WHOAREYOU, new AbstractMessageHandler() {
+			simmob.addCustomMessageHandler(edu.mit.smart.sm4and.message.Message.Type.id_request, new AbstractMessageHandler() {
 				@Override
 				public void handle(edu.mit.smart.sm4and.message.Message message, Connector connector, MessageParser parser) {
 					//TODO: This should occur in the same place in RoadRunner.

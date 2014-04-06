@@ -8,14 +8,9 @@ import edu.mit.smart.sm4and.message.Message;
 
 /** Simple remote-Log message. */
 public class RemoteLogMessage extends Message {	
-	public RemoteLogMessage(String uniqueId, String log_message) { 
-		super(Type.REMOTE_LOG, uniqueId);
-		this.log_message = log_message;
+	public RemoteLogMessage() { 
+		super(Type.remote_log);
 	}
 	
     public String log_message;
-    
-	//This constructor is only used by GSON
-	@SuppressWarnings("unused")
-	private RemoteLogMessage() { this("0", ""); }
 }   

@@ -24,7 +24,7 @@ import edu.mit.smart.sm4and.message.MessageParser;
  * @author Pedro Gandola
  * @author Vahid
  */
-public class JsonMessageParser extends MessageParser {
+public class JsonMessageParser extends MessageParser {	
     //Convert a "MultiCast" into "MultiCastMessage.class"
     private Class<? extends Message> GetClassFromType(String msgType) {
     	//Sanity check; the switch will explode otherwise.
@@ -63,7 +63,7 @@ public class JsonMessageParser extends MessageParser {
 	}
 	
     @Override
-    public ArrayList<Message> parse(String src) {
+    public MessageBundle parse(String src) {
     	//For some reason, a few Apache Mina implementations include lots of garbage between
     	// the trailing right-brace and the newline. This is obnoxious for a number of reasons,
     	// but primarily in that it breaks Gson parsing. We solve this by manually scanning
@@ -79,27 +79,25 @@ public class JsonMessageParser extends MessageParser {
         JsonObject root = (JsonObject)parser.parse(src);
                 
         //Ensure we have a few mandatory properties.
-        JsonObject head = root.getAsJsonObject("PACKET_HEADER");
-        JsonArray data = root.getAsJsonArray("DATA");
+        JsonObject head = root.getAsJsonObject("header");
+        JsonArray data = root.getAsJsonArray("messages");
         if (head==null) { throw new LoggingRuntimeException("Packet arrived with no header."); }
-        if (data==null) { throw new LoggingRuntimeException("Packet arrived with no data."); }
+        if (data==null) { throw new LoggingRuntimeException("Packet arrived with no messages."); }
                 
         //Dispatch parsing.
-        ArrayList<Message> res = parseCustomMessageFormat(head, data);
+        MessageBundle res = parseCustomMessageFormat(head, data);
         return res;
     }
     
-    private ArrayList<Message> parseCustomMessageFormat(JsonObject head, JsonArray data) {
-    	//Ensure our message count lines up.
-    	int count = head.get("NOF_MESSAGES").getAsInt();
-    	if (data.size() != count) { throw new LoggingRuntimeException("Header/body size mismatch."); }
-    	
-    	//Ensure this message was meant for us.
-    	String destId = head.get("DEST_AGENT").getAsString();
+    private MessageBundle parseCustomMessageFormat(JsonObject head, JsonArray data) {
+    	//Set sender/dest properties.
+    	if (!(head.has("send_client") && head.has("dest_client"))) { throw new LoggingRuntimeException("Header missing fields."); }
+    	MessageBundle res = new MessageBundle();
+    	res.sendId = head.get("send_client").getAsString();
+    	res.destId = head.get("dest_client").getAsString();
 
     	//Iterate through each DATA element and add an appropriate Message type to the result list.
     	Gson gson = new Gson();
-    	ArrayList<Message> res = new ArrayList<Message>();
         for (JsonElement msg : data) {
         	//First, parse it as a generic "message" object.
         	Message rawObject = gson.fromJson(msg, Message.class);
@@ -109,12 +107,11 @@ public class JsonMessageParser extends MessageParser {
         	Message specificObject = null;
         	try {
         		specificObject = gson.fromJson(msg, msgClass); //This line is failing for the new message type.
-        		specificObject.destId = destId;
         	} catch (JsonSyntaxException ex) {
         		ex.printStackTrace();
         		throw new LoggingRuntimeException(ex);
         	}
-        	res.add(specificObject);
+        	res.messages.add(specificObject);
         }
         
         //Done
@@ -122,18 +119,19 @@ public class JsonMessageParser extends MessageParser {
     }
     
     @Override
-    public String serialize(ArrayList<Message> messages) {
+    public String serialize(MessageBundle bundle) {
     	//Do it manually:
     	JsonObject packet = new JsonObject();
-    	serializeHeader(packet, messages.size());
-    	serializeData(packet, messages);
+    	serializeHeader(packet, bundle.sendId, bundle.destId);
+    	serializeData(packet, bundle.messages);
     	return packet.toString();
     }
     
-    private void serializeHeader(JsonObject res, int numMessages) {
+    private void serializeHeader(JsonObject res, String sendId, String destId) {
         JsonObject header = new JsonObject();
-        header.addProperty("NOF_MESSAGES", String.valueOf(numMessages));
-        res.add("PACKET_HEADER", header);
+        header.addProperty("send_client", sendId);
+        header.addProperty("dest_client", destId);
+        res.add("header", header);
     }
     
     private void serializeData(JsonObject res, ArrayList<Message> messages) {
