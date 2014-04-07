@@ -18,7 +18,7 @@ public class DefaultMessageTypes {
 		}
 		
 		public String from_id;
-		public String[] to_ids;
+		public String[] to_ids = new String[]{};
 		public String data;
 		public boolean broadcast;
 	}
@@ -76,7 +76,7 @@ public class DefaultMessageTypes {
 	    public String id;
 	    public String type;
 	    public String token;
-	    public String[] services;
+	    public String[] services = new String[]{};
 	}
 	
 	/** A location update message. Uses projected (x,y) coordinates, not Latitude/Longitude. */

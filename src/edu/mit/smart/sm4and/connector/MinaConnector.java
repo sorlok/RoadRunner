@@ -135,6 +135,7 @@ public class MinaConnector extends Connector {
         		System.out.println("Outgoing data: ***" + str + "***");
         	}
         	session.write(str);
+
         } else {
         	StringBuilder sb = new StringBuilder("Can't send data to server:");
         	sb.append("  connected=").append(connected);
@@ -158,7 +159,7 @@ public class MinaConnector extends Connector {
     
     
     @Override
-    public void handleMessage(String data) {    	
+    public void handleMessage(String data) {
     	//Trim the first 8 bytes.
     	data = data.substring(8);
     	
