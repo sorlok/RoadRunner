@@ -73,7 +73,7 @@ public class JsonMessageParser extends MessageParser {
     	if (Globals.SM_VERBOSE_TRACE) {
     		System.out.println("in JsonMessageParser.create-> "+ src);
     	}
-        
+    	
         //Parse the message into a generic Json object.
         JsonParser parser = new JsonParser();
         JsonObject root = (JsonObject)parser.parse(src);
@@ -140,7 +140,7 @@ public class JsonMessageParser extends MessageParser {
     	for (Message msg : messages) {
     		data.add(gson.toJsonTree(msg));
     	}
-        res.add("DATA", data);
+        res.add("messages", data);
     }
     
     
