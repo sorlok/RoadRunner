@@ -14,8 +14,8 @@ public class RegionMessages  {
 	/** A simpler version of a Region, used for serialization. */
 	public static class SimpleRegion {
 		public static class SimpleLocation {
-			public double longitude;
-			public double latitude;
+			public double lng;
+			public double lat;
 		}
 		
 		public String id;
@@ -41,8 +41,8 @@ public class RegionMessages  {
 		public SendRegionResponse() { 
 			super(MessageType);
 		}
-	    public SimpleRegion[] all_regions;
-	    public String[] region_path;
+	    public SimpleRegion[] regions;
+	    public String[] path;
 	} 
 
 }

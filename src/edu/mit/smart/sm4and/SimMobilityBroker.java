@@ -116,7 +116,7 @@ public abstract class SimMobilityBroker {
     public static void ReflectToServer(Connector connector, String clientID, String msg) {
     	//Append a response.
     	RemoteLogMessage log = new RemoteLogMessage();
-    	log.log_message = msg;
+    	log.log_msg = msg;
         connector.addMessage(log);
     }
 

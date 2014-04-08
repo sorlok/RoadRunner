@@ -50,7 +50,7 @@ public class WhoAreYouHandler extends AbstractMessageHandler {
         out.messages = connector.getAndClearMessages();
         if (Globals.SM_LOG_TRACE_ALL_MESSAGES) {
         	RemoteLogMessage log = new RemoteLogMessage();
-        	log.log_message = "SEND: " + MinaConnector.escape_invalid_json(JsonMessageParser.FilterJson(parser.serialize(out)[1]));
+        	log.log_msg = "SEND: " + MinaConnector.escape_invalid_json(JsonMessageParser.FilterJson(parser.serialize(out)[1]));
         	out.messages.add(log);
         }
         

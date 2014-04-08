@@ -12,5 +12,5 @@ public class RemoteLogMessage extends Message {
 		super(Type.remote_log);
 	}
 	
-    public String log_message;
+    public String log_msg;
 }   

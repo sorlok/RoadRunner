@@ -35,16 +35,16 @@ public class RegionAndPathHandler extends AbstractMessageHandler {
 	@Override
 	public void handle(Message message, Connector connector, MessageParser parser) {
         SendRegionResponse regionMsg = (SendRegionResponse)message;
-        
+
         //Parts of this may be null
         logAndReflectToServer(connector, regionMsg);
         
         //Respond
-        if (regionMsg.all_regions!=null) {
-        	regSetter.setRegions(constructRegions(regionMsg.all_regions));
+        if (regionMsg.regions!=null) {
+        	regSetter.setRegions(constructRegions(regionMsg.regions));
         }
-        if (regionMsg.region_path!=null) {
-        	pathSetter.setPath(constructPath(regionMsg.region_path), generateGratisTokens(regionMsg.region_path));
+        if (regionMsg.path!=null) {
+        	pathSetter.setPath(constructPath(regionMsg.path), generateGratisTokens(regionMsg.path));
         }
 	}
 	
@@ -55,7 +55,7 @@ public class RegionAndPathHandler extends AbstractMessageHandler {
         for (SimpleRegion sr : regions) {
         	Region rg = new Region(sr.id);
         	for (SimpleLocation sloc : sr.vertices) {
-        		rg.addVertex(sloc.latitude, sloc.longitude);
+        		rg.addVertex(sloc.lat, sloc.lng);
         	}
         	res.put(rg.id, rg);
         }
@@ -112,13 +112,13 @@ public class RegionAndPathHandler extends AbstractMessageHandler {
 	
     //Log locally (and remotely) that the Region/Path set was received.
     private void logAndReflectToServer(Connector connector, SendRegionResponse regionMsg) {
-        if (regionMsg.all_regions!=null) {
-        	String msg = "Client received Region set from server [" + regionMsg.all_regions.length + "]";
+        if (regionMsg.regions!=null) {
+        	String msg = "Client received Region set from server [" + regionMsg.regions.length + "]";
         	System.out.println(msg);
         	broker.ReflectToServer(msg);
         }
-        if (regionMsg.region_path!=null) {
-        	String msg = "Client received a new Path from server [" + regionMsg.region_path.length + "]";
+        if (regionMsg.path!=null) {
+        	String msg = "Client received a new Path from server [" + regionMsg.path.length + "]";
         	System.out.println(msg);
         	broker.ReflectToServer(msg);
         }
