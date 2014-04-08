@@ -5,6 +5,7 @@
 package edu.mit.smart.sm4and.json;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -81,7 +82,25 @@ public class JsonMessageParser extends MessageParser {
     	return Globals.SM_NEW_BUNDLE_FORMAT ? parse_v1(header, data) : parse_v0(header, data);
     }
     
+    ///Useful for some debugging operations
+    private static String print_ints(char[] data) {
+    	StringBuilder sb = new StringBuilder();
+    	sb.append("[");
+    	for (char c : data) {
+    		sb.append(((int)c));
+    		sb.append(" , ");
+    	}
+    	sb.append("]");
+    	return sb.toString();
+    }
+    
     private MessageBundle parse_v1(String header, String data) {
+    	//For debugging v1 headers:
+    	/*System.out.println("Header: " + header);
+    	System.out.println("   int: " + print_ints(header.toCharArray()));
+    	System.out.println("Data: " + data);
+    	System.out.println(" int: " + print_ints(data.toCharArray()));*/
+    	
     	//Check the static header.
     	int bundleVers = ((int)header.charAt(0)&0xFF);
     	int numMsgs = ((int)header.charAt(1)&0xFF);
@@ -113,6 +132,7 @@ public class JsonMessageParser extends MessageParser {
     		} else if (firstChar == '{') {
             	//First, parse it as a generic "message" object.
     			String msg = data.substring(i, i+len); //TODO: There might be a way to avoid substring, maybe using a string reader.
+System.out.println("DESERIALIZING: #" + msg + "#");
             	Message rawObject = gson.fromJson(msg, Message.class);
 
             	//Depending on the type, re-parse it as a sub-class.
