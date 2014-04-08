@@ -699,7 +699,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			//Request a re-route from the server.
 			String blRegion = nextRes.regionId;
 			RerouteRequest rr = new RerouteRequest();
-			rr.blacklist_region = blRegion;
+			rr.blacklisted = blRegion;
 			simmob.forwardMessageToServer(rr);
 			
 			//Log

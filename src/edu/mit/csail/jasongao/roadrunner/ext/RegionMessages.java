@@ -31,7 +31,7 @@ public class RegionMessages  {
 			super(MessageType);
 		}
 		
-		public String blacklist_region;
+		public String blacklisted;
 	}
 	
 	/** A response from the server with an attached list of Regions. */
