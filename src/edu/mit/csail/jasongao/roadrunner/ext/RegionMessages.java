@@ -25,7 +25,7 @@ public class RegionMessages  {
 	
 	/** A message from the client asking the server to re-route it. */
 	public static class RerouteRequest extends Message {
-		public static final String MessageType = "REROUTE_REQUEST";
+		public static final String MessageType = "reroute_request";
 		
 		public RerouteRequest() {
 			super(MessageType);
@@ -36,7 +36,7 @@ public class RegionMessages  {
 	
 	/** A response from the server with an attached list of Regions. */
 	public static class SendRegionResponse extends Message {
-		public static final String MessageType = "REGIONS_AND_PATH_DATA";
+		public static final String MessageType = "regions_and_path";
 		
 		public SendRegionResponse() { 
 			super(MessageType);
