@@ -12,7 +12,7 @@ public class Globals {
 	public static final int SM_PORT = HDirect;
 	
 	//Use the "v1" bundle format? This will eventually be alway-on.
-	public static final boolean SM_NEW_BUNDLE_FORMAT = false;
+	public static final boolean SM_NEW_BUNDLE_FORMAT = true;
 	
 	public static final int SM_TIMEOUT = 0;  //0=infinite
 	public static final boolean SM_AUTORUN = true; //Set to "true" to auto-run the app (good for MegaDroid)
