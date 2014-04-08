@@ -7,7 +7,6 @@ package edu.mit.smart.sm4and.connector;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 
 import edu.mit.smart.sm4and.SimMobilityBroker;
 import edu.mit.smart.sm4and.handler.AbstractMessageHandler;
@@ -22,8 +21,6 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.codec.textline.TextLineCodecFactory;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
-
-import android.os.Bundle;
 
 import edu.mit.csail.jasongao.roadrunner.Globals;
 import edu.mit.csail.jasongao.roadrunner.util.LoggingRuntimeException;
@@ -128,13 +125,12 @@ public class MinaConnector extends Connector {
     
 
     @Override
-    public void sendAll(String data) {
+    public void sendAll(String header, String data) {
         if (connected && (data!=null) && (session!=null) && session.isConnected()) {
-        	String str = String.format("%8h%s", data.toString().length()+1, data.toString());
         	if (Globals.SM_VERBOSE_TRACE) {
-        		System.out.println("Outgoing data: ***" + str + "***");
+        		System.out.println("Outgoing data: ***" + header + "***" + data + "***");
         	}
-        	session.write(str);
+        	session.write(header+data);
 
         } else {
         	StringBuilder sb = new StringBuilder("Can't send data to server:");
@@ -159,8 +155,9 @@ public class MinaConnector extends Connector {
     
     
     @Override
-    public void handleMessage(String data) {
-    	//Trim the first 8 bytes.
+    public void handleBundle(String data) {
+    	//Extract the header.
+    	String header = data.substring(0,8);
     	data = data.substring(8);
     	
     	//Remote log:
@@ -169,7 +166,7 @@ public class MinaConnector extends Connector {
     	}
     	
     	//Double-check
-    	MessageBundle incoming = broker.getParser().parse(data);
+    	MessageBundle incoming = broker.getParser().parse(header, data);
 		if (!incoming.destId.equals("0") && !broker.getUniqueId().equals(incoming.destId)) {
 			if (!Globals.SM_RERUN_FULL_TRACE) {
 				throw new LoggingRuntimeException("Agent destination ID mismatch; expected: " + broker.getUniqueId() + "; was: " + incoming.destId);

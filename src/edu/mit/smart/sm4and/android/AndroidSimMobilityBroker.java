@@ -245,7 +245,11 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 	private Runnable receiveTraceR = new Runnable() {
 		public void run() {
 			String line = Automation.receive_buffer.get(receive_counter);
-			conn.handleMessage("12345678" + line);
+			if (Globals.SM_NEW_BUNDLE_FORMAT) {
+				throw new RuntimeException("Can't RECEIVE_TRACE_R for new bundle format (not yet supported).");
+			} else {
+				conn.handleBundle("12345678" + line);
+			}
 			
 			//Send a UDP message
 			if (!Globals.SM_RERUN_UDP_SERVER.isEmpty()) {

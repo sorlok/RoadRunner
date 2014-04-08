@@ -50,11 +50,12 @@ public class WhoAreYouHandler extends AbstractMessageHandler {
         out.messages = connector.getAndClearMessages();
         if (Globals.SM_LOG_TRACE_ALL_MESSAGES) {
         	RemoteLogMessage log = new RemoteLogMessage();
-        	log.log_message = "SEND: " + MinaConnector.escape_invalid_json(JsonMessageParser.FilterJson(parser.serialize(out)));
+        	log.log_message = "SEND: " + MinaConnector.escape_invalid_json(JsonMessageParser.FilterJson(parser.serialize(out)[1]));
         	out.messages.add(log);
         }
         
         //The "WhoAmIResponse" is unique in that it *always* triggers a send.
-        connector.sendAll(parser.serialize(out));
+        String[] ser = parser.serialize(out);
+        connector.sendAll(ser[0], ser[1]);
     }
 }

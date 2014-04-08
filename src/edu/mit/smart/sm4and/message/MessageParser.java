@@ -46,15 +46,16 @@ public abstract class MessageParser {
 	
 	/**
 	 * Turns a String into an array of Messages, which is independent of encoding.
-	 * @param src The input String.
+	 * @param header The 8-byte fixed-size header.
+	 * @param messages The varying-length header + messages.
 	 * @return The Message it corresponds to.
 	 */
-	public abstract MessageBundle parse(String src);
+	public abstract MessageBundle parse(String header, String messages);
 	
 	/**
 	 * Serializes a message into a String format familiar to the server.
 	 * @param msg The message to serialize.
-	 * @return A string representation of that message.
+	 * @return A string array of length 2 (always), with res[0] being the fixed-length header and res[1] being the data section. 
 	 */
-	public abstract String serialize(MessageBundle messages);
+	public abstract String[] serialize(MessageBundle messages);
 }

@@ -68,7 +68,7 @@ public class MinaIoHandler implements IoHandler {
     	if (Globals.SM_VERBOSE_TRACE) {
     		logger.info("(MinaHandler) received[" + o.toString() + "]");
     	}
-    	parent.handleMessage(o.toString());
+    	parent.handleBundle(o.toString());
     }
 
     @Override

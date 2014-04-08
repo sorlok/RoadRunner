@@ -54,13 +54,13 @@ public abstract class Connector {
      * Sends the given object.
      * @param data The message you want to send.
      */
-    public abstract void sendAll(String data);
+    public abstract void sendAll(String header, String data);
     
     /**
-     * Handle a message sent from the server.
-     * @param data The message that was received.
+     * Handle a bundle of messages sent from the server.
+     * @param data The full bundle string (fixed+varying headers, +messages)
      */
-    public abstract void handleMessage(String data);
+    public abstract void handleBundle(String data);
     
     private ArrayList<Message> messages = new ArrayList<Message>();
 }
