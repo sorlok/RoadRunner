@@ -44,7 +44,6 @@ import edu.mit.smart.sm4and.message.DefaultMessageTypes.OpaqueReceiveMessage;
 import edu.mit.smart.sm4and.message.DefaultMessageTypes.OpaqueSendMessage;
 import edu.mit.smart.sm4and.message.DefaultMessageTypes.TickedSimMobMessage;
 import edu.mit.smart.sm4and.json.ByteArraySerialization;
-import edu.mit.smart.sm4and.json.JsonMessageParser;
 import edu.mit.smart.sm4and.message.Message;
 import edu.mit.smart.sm4and.message.MessageParser;
 
@@ -150,7 +149,7 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 	}
 	
 	protected MessageParser makeJsonMessageParser() {
-		 MessageParser res = new JsonMessageParser();
+		 MessageParser res = new MessageParser();
 		 res.addMessagetype(Message.Type.id_request, IdRequestMessage.class);
 		 res.addMessagetype(Message.Type.ticked_simmob, TickedSimMobMessage.class);
 		 res.addMessagetype(Message.Type.id_ack, IdAckMessage.class);
@@ -208,7 +207,7 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 		
 		//Connect our socket.
 		//NOTE: Currently, this task will *only* end if the session is closed. 
-		SimMobServerConnectTask task = new SimMobServerConnectTask(new OnConnectAction(), this.handlerFactory, logger);
+		SimMobServerConnectTask task = new SimMobServerConnectTask(new OnConnectAction(), this.handlerFactory, messageParser, logger);
 		task.execute(this.conn);
 		this.activated = true;
 		
@@ -244,11 +243,13 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 	
 	private Runnable receiveTraceR = new Runnable() {
 		public void run() {
+			@SuppressWarnings("unused")
 			String line = Automation.receive_buffer.get(receive_counter);
 			if (Globals.SM_NEW_BUNDLE_FORMAT) {
 				throw new RuntimeException("Can't RECEIVE_TRACE_R for new bundle format (not yet supported).");
 			} else {
-				conn.handleBundle("12345678" + line);
+				if (1<2) throw new RuntimeException("Can't RECEIVE_TRACE_R for old bundle format (breaking changes).");
+				//conn.handleBundle("12345678" + line);
 			}
 			
 			//Send a UDP message

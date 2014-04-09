@@ -8,7 +8,6 @@ import edu.mit.csail.jasongao.roadrunner.Globals;
 import edu.mit.smart.sm4and.android.AndroidSimMobilityBroker.TimeAdvancer;
 import edu.mit.smart.sm4and.connector.Connector;
 import edu.mit.smart.sm4and.connector.MinaConnector;
-import edu.mit.smart.sm4and.json.JsonMessageParser;
 import edu.mit.smart.sm4and.message.DefaultMessageTypes.TickedSimMobMessage;
 import edu.mit.smart.sm4and.message.DefaultMessageTypes.TickedClientResponse;
 import edu.mit.smart.sm4and.message.MessageParser.MessageBundle;
@@ -45,13 +44,13 @@ public class TimeHandler extends AbstractMessageHandler {
         out.destId = "0";
         out.messages = connector.getAndClearMessages();
         if (Globals.SM_LOG_TRACE_ALL_MESSAGES) {
+        	//TODO: It's not clear how this would work with v1 messages; maybe save the original string somewhere?
         	RemoteLogMessage log = new RemoteLogMessage();
-        	log.log_msg = "SEND: " + MinaConnector.escape_invalid_json(JsonMessageParser.FilterJson(parser.serialize(out)[1]));
+        	log.log_msg = "SEND: " + MinaConnector.escape_invalid_json("(todo)");
         	out.messages.add(log);
         }
         
         //This means we're done; instruct the connector to send all remaining messages.
-        String[] ser = parser.serialize(out);
-        connector.sendAll(ser[0], ser[1]);
+        connector.sendAll(out);
     }
 }

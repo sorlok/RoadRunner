@@ -14,6 +14,7 @@ import edu.mit.csail.jasongao.roadrunner.util.LoggerI;
 import edu.mit.csail.jasongao.roadrunner.util.LoggingRuntimeException;
 import edu.mit.smart.sm4and.connector.Connector;
 import edu.mit.smart.sm4and.handler.MessageHandlerFactory;
+import edu.mit.smart.sm4and.message.MessageParser;
 
 /**
  * Helper class for connecting to the Sim Mobility server.
@@ -32,11 +33,13 @@ public class SimMobServerConnectTask extends AsyncTask<Connector, Void, Boolean>
 	private Exception errorEx;
 	private PostExecuteAction onComplete;
 	private LoggerI logger;
+	MessageParser parser;
 
 	
-	public SimMobServerConnectTask(PostExecuteAction onComplete, MessageHandlerFactory handlerFactory, LoggerI logger) {
+	public SimMobServerConnectTask(PostExecuteAction onComplete, MessageHandlerFactory handlerFactory, MessageParser parser,  LoggerI logger) {
 		this.onComplete = onComplete;
 		this.logger = logger;
+		this.parser = parser;
 	}
 	
 	protected void onPreExecute() {
@@ -47,7 +50,7 @@ public class SimMobServerConnectTask extends AsyncTask<Connector, Void, Boolean>
 		try {
 			logger.log("Attempting to connect to MINA server on " + Globals.SM_HOST + ":" + Globals.SM_PORT);
 			if (!Globals.SM_RERUN_FULL_TRACE) {
-				mnConnect[0].connect(Globals.SM_HOST, Globals.SM_PORT);
+				mnConnect[0].connect(parser, Globals.SM_HOST, Globals.SM_PORT);
 			}
 		} catch (Exception ex) {
 			logger.log(ex.toString());

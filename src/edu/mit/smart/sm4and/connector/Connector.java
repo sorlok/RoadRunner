@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import edu.mit.smart.sm4and.message.Message;
+import edu.mit.smart.sm4and.message.MessageParser;
+import edu.mit.smart.sm4and.message.MessageParser.MessageBundle;
 
 /**
  * Any connector implementation can handle server connections. 
@@ -27,7 +29,7 @@ public abstract class Connector {
      * 
      * Throws an exception if the connection could not be made.
      */
-    public abstract void connect(String host, int port) throws IOException;
+    public abstract void connect(MessageParser parser, String host, int port) throws IOException;
     
     /**
      * Disconnects from the server.
@@ -54,13 +56,13 @@ public abstract class Connector {
      * Sends the given object.
      * @param data The message you want to send.
      */
-    public abstract void sendAll(String header, String data);
+    public abstract void sendAll(MessageBundle bundle);
     
     /**
      * Handle a bundle of messages sent from the server.
      * @param data The full bundle string (fixed+varying headers, +messages)
      */
-    public abstract void handleBundle(String data);
+    public abstract void handleBundle(MessageBundle bundle);
     
     private ArrayList<Message> messages = new ArrayList<Message>();
 }

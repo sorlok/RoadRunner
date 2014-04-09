@@ -11,8 +11,8 @@ import java.nio.charset.Charset;
 import edu.mit.smart.sm4and.SimMobilityBroker;
 import edu.mit.smart.sm4and.handler.AbstractMessageHandler;
 import edu.mit.smart.sm4and.handler.MessageHandlerFactory;
-import edu.mit.smart.sm4and.json.JsonMessageParser;
 import edu.mit.smart.sm4and.message.Message;
+import edu.mit.smart.sm4and.message.MessageParser;
 import edu.mit.smart.sm4and.message.MessageParser.MessageBundle;
 
 import org.apache.mina.core.future.ConnectFuture;
@@ -64,7 +64,7 @@ public class MinaConnector extends Connector {
      * This function will also start processing messages. 
      */
     @Override
-    public void connect(String host, int port) throws IOException {
+    public void connect(MessageParser parser, String host, int port) throws IOException {
     	if (connected) { return; }
     	
     	//Reset the session and connector if they are in use.
@@ -84,12 +84,13 @@ public class MinaConnector extends Connector {
         
         //Create a UTF-8 decoder, make sure that all buffers are the right size.
         //NOTE: it seems that TextLineCodecFactory's's lengthis all that matters. ~Seth
-        TextLineCodecFactory utf8Filter = new TextLineCodecFactory(Charset.forName("UTF-8"));
-        utf8Filter.setDecoderMaxLineLength(BUFFER_SIZE);
+        //TextLineCodecFactory utf8Filter = new TextLineCodecFactory(Charset.forName("UTF-8"));
+        //utf8Filter.setDecoderMaxLineLength(BUFFER_SIZE);
         connector.getSessionConfig().setMinReadBufferSize(BUFFER_SIZE);
         
         //Add this codec to the filter chain.
-        connector.getFilterChain().addLast("codec", new ProtocolCodecFilter(utf8Filter));
+        //connector.getFilterChain().addLast("codec", new ProtocolCodecFilter(utf8Filter));
+        connector.getFilterChain().addLast("protocol", new ProtocolCodecFilter(new MinaProtocols(parser)));
         
         //Connect to the server and wait forever until it makes contact.
         ConnectFuture future = connector.connect(new InetSocketAddress(host, port));
@@ -125,17 +126,18 @@ public class MinaConnector extends Connector {
     
 
     @Override
-    public void sendAll(String header, String data) {
-        if (connected && (data!=null) && (session!=null) && session.isConnected()) {
+    public void sendAll(MessageBundle bundle) {
+        if (connected && (bundle!=null) && (session!=null) && session.isConnected()) {
         	if (Globals.SM_VERBOSE_TRACE) {
-        		System.out.println("Outgoing data: ***" + header + "***" + data + "***");
+        		//TODO: Trace later (inside MinaProtocol?)
+        		System.out.println("Outgoing data: ***" + "***"); 
         	}
-        	session.write(header+data);
+        	session.write(bundle);
 
         } else {
         	StringBuilder sb = new StringBuilder("Can't send data to server:");
         	sb.append("  connected=").append(connected);
-        	sb.append("  data=").append(data!=null ? data : "<NULL>");
+        	sb.append("  data=").append(bundle!=null ? "<non-null>" : "<NULL>");
         	sb.append("  session=").append(session!=null ? session.isConnected() : "<NULL>");
         	System.out.println(sb.toString());
         }
@@ -155,26 +157,22 @@ public class MinaConnector extends Connector {
     
     
     @Override
-    public void handleBundle(String data) {    	
-    	//Extract the header.
-    	String header = data.substring(0,8);
-    	data = data.substring(8);
-    	
+    public void handleBundle(MessageBundle bundle) {    	
     	//Remote log:
-    	if (Globals.SM_LOG_TRACE_ALL_MESSAGES) {	
-    		broker.ReflectToServer("RECIEVE: " + escape_invalid_json(JsonMessageParser.FilterJson(data)));
+    	if (Globals.SM_LOG_TRACE_ALL_MESSAGES) {
+    		//TODO: Perhaps trace later? It's unclear how to do this with Bundle v1 format.
+    		broker.ReflectToServer("RECIEVE: " + escape_invalid_json("(todo)"));
     	}
     	
     	//Double-check
-    	MessageBundle incoming = broker.getParser().parse(header, data);
-		if (!incoming.destId.equals("0") && !broker.getUniqueId().equals(incoming.destId)) {
+		if (!bundle.destId.equals("0") && !broker.getUniqueId().equals(bundle.destId)) {
 			if (!Globals.SM_RERUN_FULL_TRACE) {
-				throw new LoggingRuntimeException("Agent destination ID mismatch; expected: " + broker.getUniqueId() + "; was: " + incoming.destId);
+				throw new LoggingRuntimeException("Agent destination ID mismatch; expected: " + broker.getUniqueId() + "; was: " + bundle.destId);
 			}
 		}
     	
 		//Just pass off each message to "handle()"
-    	for (Message message : incoming.messages) {    		
+    	for (Message message : bundle.messages) {    		
     		//Get an appropriate response handler.
     		AbstractMessageHandler handler = handlerFactory.create(message.getMessageType());
     		

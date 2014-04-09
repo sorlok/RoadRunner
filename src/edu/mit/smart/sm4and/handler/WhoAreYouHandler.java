@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import edu.mit.csail.jasongao.roadrunner.Globals;
 import edu.mit.smart.sm4and.connector.Connector;
 import edu.mit.smart.sm4and.connector.MinaConnector;
-import edu.mit.smart.sm4and.json.JsonMessageParser;
 import edu.mit.smart.sm4and.message.DefaultMessageTypes.IdRequestMessage;
 import edu.mit.smart.sm4and.message.DefaultMessageTypes.IdResponse;
 import edu.mit.smart.sm4and.message.MessageParser.MessageBundle;
@@ -49,13 +48,13 @@ public class WhoAreYouHandler extends AbstractMessageHandler {
         out.destId = "0";
         out.messages = connector.getAndClearMessages();
         if (Globals.SM_LOG_TRACE_ALL_MESSAGES) {
+        	//TODO: It's not clear how this would work with v1 messages; maybe save the original string somewhere?
         	RemoteLogMessage log = new RemoteLogMessage();
-        	log.log_msg = "SEND: " + MinaConnector.escape_invalid_json(JsonMessageParser.FilterJson(parser.serialize(out)[1]));
+        	log.log_msg = "SEND: " + MinaConnector.escape_invalid_json("(todo)");
         	out.messages.add(log);
         }
         
         //The "WhoAmIResponse" is unique in that it *always* triggers a send.
-        String[] ser = parser.serialize(out);
-        connector.sendAll(ser[0], ser[1]);
+        connector.sendAll(out);
     }
 }

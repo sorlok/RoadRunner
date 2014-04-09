@@ -9,6 +9,7 @@ import org.apache.mina.core.session.*;
 
 import edu.mit.csail.jasongao.roadrunner.Globals;
 import edu.mit.csail.jasongao.roadrunner.util.LoggingRuntimeException;
+import edu.mit.smart.sm4and.message.MessageParser.MessageBundle;
 
 import java.util.logging.Logger;
 
@@ -68,7 +69,7 @@ public class MinaIoHandler implements IoHandler {
     	if (Globals.SM_VERBOSE_TRACE) {
     		logger.info("(MinaHandler) received[" + o.toString() + "]");
     	}
-    	parent.handleBundle(o.toString());
+    	parent.handleBundle((MessageBundle)o);
     }
 
     @Override

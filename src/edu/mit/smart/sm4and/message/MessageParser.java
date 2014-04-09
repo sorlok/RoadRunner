@@ -20,7 +20,7 @@ import edu.mit.csail.jasongao.roadrunner.util.LoggingRuntimeException;
  * @author Pedro Gandola
  * @author Vahid
  */
-public abstract class MessageParser {
+public class MessageParser {
 	//Represents an entire message set, plus header information.
 	public static class MessageBundle {
 		public String sendId = "";
@@ -43,6 +43,42 @@ public abstract class MessageParser {
 		messageTypes.put(msgType, msgClass);
 	}
 
+    //Convert a "MultiCast" into "MultiCastMessage.class"
+    public Class<? extends Message> GetClassFromType(String msgType) {
+    	//Sanity check; the switch will explode otherwise.
+    	if (msgType==null) {
+    		throw new LoggingRuntimeException("Message.GetClassFromType() - Can't switch on a null Message type.");
+    	}
+    	
+    	//Return the registered type.
+    	if (messageTypes.containsKey(msgType)) {
+    		return messageTypes.get(msgType);
+    	} else {
+   			throw new LoggingRuntimeException("JsonMessageParser.GetClassFromType() - Unknown message type: " + msgType.toString());
+    	}
+    }
+    
+	public static String FilterJson(String src) {
+    	final String msg = src;
+        int lastBracket = -1;
+        int numLeft = 0;
+        for (int i=0; i<msg.length(); i++) {
+        	if (msg.charAt(i)=='{') {
+        		numLeft++;
+        	} else if (msg.charAt(i)=='}') {
+        		numLeft--;
+        		if (numLeft==0) {
+        			lastBracket = i;
+        			break; 
+        		}
+        	}
+        }
+        if (numLeft!=0 || lastBracket==-1) { 
+        	throw new LoggingRuntimeException("Bad json-formatted message string; left and right bracket counts don't add up."); 
+        }
+        return msg.substring(0, lastBracket+1);
+	}
+	
 	
 	/**
 	 * Turns a String into an array of Messages, which is independent of encoding.
@@ -50,12 +86,12 @@ public abstract class MessageParser {
 	 * @param messages The varying-length header + messages.
 	 * @return The Message it corresponds to.
 	 */
-	public abstract MessageBundle parse(String header, String messages);
+	//public abstract MessageBundle parse(String header, String messages);
 	
 	/**
 	 * Serializes a message into a String format familiar to the server.
 	 * @param msg The message to serialize.
 	 * @return A string array of length 2 (always), with res[0] being the fixed-length header and res[1] being the data section. 
 	 */
-	public abstract String[] serialize(MessageBundle messages);
+	//public abstract String[] serialize(MessageBundle messages);
 }
