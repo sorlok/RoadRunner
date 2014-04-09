@@ -146,7 +146,7 @@ public class MinaProtocols implements ProtocolCodecFactory {
 		int sendIdLen = 0;
 		int destIdLen = 0;
     	
-        protected boolean doDecode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
+        protected boolean doDecode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {        	
         	//Are we reading the header?
         	if (currHeader==null) {
         		//Read the header.
@@ -190,6 +190,9 @@ public class MinaProtocols implements ProtocolCodecFactory {
         	if (res==null) {
         		throw new LoggingRuntimeException("Couldn't deserialize MessageBundle");
         	}
+        	
+        	//Expect to read header next.
+        	currHeader = null;
         	
         	//Done, signal success.
             out.write(res);
@@ -241,23 +244,22 @@ public class MinaProtocols implements ProtocolCodecFactory {
         	//Iterate through each message and add an appropriate Message type to the result list.
         	Gson gson = new Gson();
         	for (int len : msgLengths) {
-        		//Peek the next character.
-        		data.mark(-1);
-        		int firstChar = data.read()&0xFF;
-        		data.reset();
+        		//Read all bytes.
+        		byte[] msg = readBytes(data, len);
+        		int firstChar = ((int)msg[0])&0xFF;
         		
         		if (firstChar == 0xBB) {
         			throw new LoggingRuntimeException("Binary message format not yet supported.");
-        		} else if (firstChar == '{') {
+        		} else if (firstChar == (int)'{') {
                 	//First, parse it as a generic "message" object.
-        			String msg = new String(readBytes(data, len));
-                	Message rawObject = gson.fromJson(msg, Message.class);
+        			String msgStr = new String(msg);
+                	Message rawObject = gson.fromJson(msgStr, Message.class);
 
                 	//Depending on the type, re-parse it as a sub-class.
                 	Class<? extends Message> msgClass = rootParser.GetClassFromType(rawObject.getMessageType());
                 	Message specificObject = null;
                 	try {
-                		specificObject = gson.fromJson(msg, msgClass); //This line is failing for the new message type.
+                		specificObject = gson.fromJson(msgStr, msgClass); //This line is failing for the new message type.
                 	} catch (JsonSyntaxException ex) {
                 		ex.printStackTrace();
                 		throw new LoggingRuntimeException(ex);

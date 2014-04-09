@@ -931,9 +931,9 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 					}
 					
 					sent++;
-					log_nodisplay(String.format(
+					/*log_nodisplay(String.format(
 							"sent %d byte adhoc packet type %d", data.length,
-							adhocPacket.type));
+							adhocPacket.type));*/
 					
 				} catch (Exception e) {
 					log("error sending adhoc announcement:" + e.getMessage());
