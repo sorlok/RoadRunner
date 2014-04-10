@@ -68,6 +68,8 @@ public class MinaProtocols implements ProtocolCodecFactory {
         		ByteArrayOutputStream msgs = new ByteArrayOutputStream();
         		
             	Gson gson = new Gson();
+            	vary.write(bundle.sendId.getBytes());
+            	vary.write(bundle.destId.getBytes());
             	for (Message msg : bundle.messages) {
             		String msgStr = gson.toJsonTree(msg).toString();
             		vary.write((msgStr.length()>>16)&0xFF);
@@ -75,8 +77,6 @@ public class MinaProtocols implements ProtocolCodecFactory {
             		vary.write(msgStr.length()&0xFF);
             		msgs.write(msgStr.getBytes());
             	}
-            	vary.write(bundle.sendId.getBytes());
-            	vary.write(bundle.destId.getBytes());
             	vary.write(msgs.toByteArray());
             	data = vary.toByteArray();
         	} else {
@@ -90,9 +90,9 @@ public class MinaProtocols implements ProtocolCodecFactory {
         	ByteArrayOutputStream head = new ByteArrayOutputStream();
         	if (Globals.SM_NEW_BUNDLE_FORMAT) {
         		head.write(1);
-        		head.write(bundle.messages.size());
         		head.write(bundle.sendId.length());
         		head.write(bundle.destId.length());
+        		head.write(bundle.messages.size());
         		head.write((data.length>>24)&0xFF);
         		head.write((data.length>>16)&0xFF);
         		head.write((data.length>>8)&0xFF);
@@ -160,9 +160,9 @@ public class MinaProtocols implements ProtocolCodecFactory {
         			if (currHeader[0] != 1) { throw new LoggingRuntimeException("Error: header version 1 expected."); }
         			
         			//Retrieve lengths.
-        			numMsgs = currHeader[1];
-        			sendIdLen = currHeader[2];
-        			destIdLen = currHeader[3];
+        			sendIdLen = currHeader[1];
+        			destIdLen = currHeader[2];
+        			numMsgs = currHeader[3];
         			dataSize = ((((int)currHeader[4])&0xFF)<<24) | ((((int)currHeader[5])&0xFF)<<16) | ((((int)currHeader[6])&0xFF)<<8) | (((int)currHeader[7])&0xFF);
         		} else {
         			//8-byte "text" hex string.
@@ -230,16 +230,16 @@ public class MinaProtocols implements ProtocolCodecFactory {
         	System.out.println("Data: " + data);
         	System.out.println(" int: " + print_ints(data.toCharArray()));*/
         	
+        	//Extract send/dest IDs.
+        	MessageBundle res = new MessageBundle();
+        	res.sendId = new String(readBytes(data, sendIdLen));
+        	res.destId = new String(readBytes(data, destIdLen));
+        	
         	//Extract message lengths. Start tracking the current offset.
         	ArrayList<Integer> msgLengths = new ArrayList<Integer>();
         	for (int n=0; n<numMsgs; n++) {
         		msgLengths.add(((data.read()&0xFF)<<16) | ((data.read()&0xFF)<<8) | (data.read()&0xFF));
         	}
-        	
-        	//Extract send/dest IDs.
-        	MessageBundle res = new MessageBundle();
-        	res.sendId = new String(readBytes(data, sendIdLen));
-        	res.destId = new String(readBytes(data, destIdLen));
         	
         	//Iterate through each message and add an appropriate Message type to the result list.
         	Gson gson = new Gson();
