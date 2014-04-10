@@ -179,6 +179,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	public class RegionSetter  {
 		public void setRegions(Hashtable<String, Region> regions) {
 	        if (regions!=null) { 
+	        	log("Region set received from server.");
 	        	RoadRunnerService.this.regions = regions; 
 	        }
 		}
