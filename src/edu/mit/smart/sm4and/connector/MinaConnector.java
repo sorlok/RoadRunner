@@ -20,6 +20,7 @@ import org.apache.mina.core.service.IoConnector;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.codec.textline.TextLineCodecFactory;
+import org.apache.mina.transport.socket.SocketSessionConfig;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
 import edu.mit.csail.jasongao.roadrunner.Globals;
@@ -80,6 +81,7 @@ public class MinaConnector extends Connector {
         //Initialize the connector object, set its handler.
         connector = new NioSocketConnector();
         connector.getSessionConfig().setUseReadOperation(true);
+        ((SocketSessionConfig)connector.getSessionConfig()).setTcpNoDelay(false); //Turn off Nagle's algorithm.
         connector.setHandler(new MinaIoHandler(this, LOG));
         
         //Create a UTF-8 decoder, make sure that all buffers are the right size.
