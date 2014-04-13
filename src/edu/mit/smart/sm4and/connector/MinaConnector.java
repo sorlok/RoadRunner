@@ -67,6 +67,7 @@ public class MinaConnector extends Connector {
     @Override
     public void connect(MessageParser parser, String host, int port) throws IOException {
     	if (connected) { return; }
+        connected = true;
     	
     	//Reset the session and connector if they are in use.
         if (session!=null && session.isConnected()) {
@@ -106,9 +107,6 @@ public class MinaConnector extends Connector {
         //Set some properties of the session.
         session = future.getSession();
         session.getConfig().setUseReadOperation(true);
-        
-        //If we've reached this point, we're connected.
-        connected = true;
     }
 
     @Override

@@ -146,7 +146,7 @@ public class MinaProtocols implements ProtocolCodecFactory {
 		int sendIdLen = 0;
 		int destIdLen = 0;
     	
-        protected boolean doDecode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {        	
+        protected boolean doDecode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
         	//Are we reading the header?
         	if (currHeader==null) {
         		//Read the header.
@@ -177,7 +177,7 @@ public class MinaProtocols implements ProtocolCodecFactory {
         	if (in.remaining() < dataSize) { return false; }
         	currData = new byte[dataSize];
         	in.get(currData);
-        	
+
         	//Turn this into a MessageBundle
         	MessageBundle res = null;
         	if (Globals.SM_NEW_BUNDLE_FORMAT) {
@@ -190,7 +190,7 @@ public class MinaProtocols implements ProtocolCodecFactory {
         	if (res==null) {
         		throw new LoggingRuntimeException("Couldn't deserialize MessageBundle");
         	}
-        	
+        	       	
         	//Expect to read header next.
         	currHeader = null;
         	
