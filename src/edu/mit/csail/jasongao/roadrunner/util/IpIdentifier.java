@@ -15,28 +15,22 @@ public class IpIdentifier {
 	 * @param addr The Inet4Address to use as input. If null, a random address will be generated.
 	 * @return The identifier.  
 	 */
-	public static final long GenerateIdFromInet(Inet4Address addr)  {
-		byte[] bytes = null;
-		
-		//Get/fake the address as an array of bytes.
+	public static final byte[] GenerateIdFromInet(Inet4Address addr)  {
+		//If we have the address, just return it.
 		if (addr!=null) {
-			bytes = addr.getAddress();
-		} else {
-			bytes = new byte[4];
-			Rand.nextBytes(bytes);
+			return addr.getAddress();
 		}
 		
-		//Try to make something semi-recognizable:
-		return  ToU(bytes[0])*1000000000
-			  + ToU(bytes[1])*1000000
-			  + ToU(bytes[2])*1000
-			  + ToU(bytes[3]);
+		//Otherwise, just fake it.
+		byte[] bytes = new byte[4];
+		Rand.nextBytes(bytes);
+		return bytes;
 	}
 	
 	/**
 	 * Helper method: convert a byte to an "unsigned" int.
 	 */
-	private static final long ToU(byte b) {
+	private static final int ToU(byte b) {
 		return ((int)b)&0xFF;
 	}
 }

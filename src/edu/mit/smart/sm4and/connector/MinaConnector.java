@@ -85,7 +85,7 @@ public class MinaConnector extends Connector {
         connector.setHandler(new MinaIoHandler(this, LOG));
         
         //Create a UTF-8 decoder, make sure that all buffers are the right size.
-        //NOTE: it seems that TextLineCodecFactory's's lengthis all that matters. ~Seth
+        //NOTE: it seems that TextLineCodecFactory's's length is all that matters. ~Seth
         //TextLineCodecFactory utf8Filter = new TextLineCodecFactory(Charset.forName("UTF-8"));
         //utf8Filter.setDecoderMaxLineLength(BUFFER_SIZE);
         connector.getSessionConfig().setMinReadBufferSize(BUFFER_SIZE);
