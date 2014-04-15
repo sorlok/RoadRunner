@@ -167,7 +167,7 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 	/**
 	 * Initialize the Broker. Can be called multiple times, until "Connect" is called.
 	 */
-	public void initialize(String uniqueId, Handler myHandler, LoggerI logger, LocationSpoofer locspoof, PathSetter pathSet) {
+	public void initialize(String uniqueId, long uniqueIdLong, Handler myHandler, LoggerI logger, LocationSpoofer locspoof, PathSetter pathSet) {
 		if (this.activated) {
 			throw new LoggingRuntimeException("Can't re-initialize; SimMobilityBroker has already been activated.");
 		}
@@ -179,6 +179,7 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 		
 		//Check that we have a unique ID.
 		this.uniqueId = uniqueId;
+		this.uniqueIdLong = this.uniqueIdLong;
 		if (uniqueId==null) { throw new LoggingRuntimeException("Unique Id cannot be null."); }
 		
 		this.handlerFactory = makeAndroidHandlerFactory(uniqueId, locspoof);

@@ -1069,7 +1069,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			retrieveUniqueId();
 			
 			//Initialize.
-			simmob.initialize(myIdExternal, myHandler, this, new LocationSpoofer(), new PathSetter());
+			simmob.initialize(myIdExternal, myIdInternal, myHandler, this, new LocationSpoofer(), new PathSetter());
 			
 			//Register our "Regions and Paths" handler, which is specific to Road Runner.
 			simmob.addCustomMessageType(

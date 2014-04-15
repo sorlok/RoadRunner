@@ -59,6 +59,12 @@ public abstract class SimMobilityBroker {
 		return uniqueId; 
 	}
 	
+	//Same, but for the long value.
+	protected long uniqueIdLong;
+	public long getUniqueIdLong() {
+		return uniqueIdLong;
+	}
+	
 	
 	/**
 	 * Register a custom message type and corresponding callback action.  
@@ -81,7 +87,7 @@ public abstract class SimMobilityBroker {
 	/**
 	 * Initialize the Broker. Can be called multiple times, until "Connect" is called.
 	 */
-	public abstract void initialize(String uniqueId, Handler myHandler, LoggerI logger, LocationSpoofer locspoof, PathSetter pathSet);
+	public abstract void initialize(String uniqueId, long uniqueIdLong, Handler myHandler, LoggerI logger, LocationSpoofer locspoof, PathSetter pathSet);
 	
 	
 	//Replaces post() and postDelayed(). Uses the handler passed in to Broker::initialize()
