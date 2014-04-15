@@ -35,6 +35,14 @@ public class RegionAndPathHandler extends AbstractMessageHandler {
 	@Override
 	public void handle(Message message, Connector connector, MessageParser parser) {
         SendRegionResponse regionMsg = (SendRegionResponse)message;
+        
+        //Null == empty
+        if (regionMsg.regions==null || regionMsg.regions.length==0) {
+        	regionMsg.regions = null;
+        }
+        if (regionMsg.path==null || regionMsg.path.length==0) {
+        	regionMsg.path = null;
+        }
 
         //Parts of this may be null
         logAndReflectToServer(connector, regionMsg);
