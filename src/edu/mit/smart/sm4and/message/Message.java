@@ -32,6 +32,8 @@ public class Message {
 		public static final String ticked_client = "ticked_client";
 		public static final String opaque_send = "opaque_send";
 		public static final String remote_log = "remote_log";
+		public static final String tcp_connect = "tcp_connect";
+		public static final String tcp_disconnect = "tcp_disconnect";
 		
         //Deprecated
 		//public static final String MULTICAST = "MULTICAST";

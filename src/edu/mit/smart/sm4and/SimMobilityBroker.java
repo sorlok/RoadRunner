@@ -11,6 +11,7 @@ import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.PathSetter;
 import edu.mit.csail.jasongao.roadrunner.util.LoggerI;
 import edu.mit.smart.sm4and.android.AndroidSimMobilityBroker;
+import edu.mit.smart.sm4and.android.TcpFacsimile;
 import edu.mit.smart.sm4and.connector.Connector;
 import edu.mit.smart.sm4and.handler.AbstractMessageHandler;
 import edu.mit.smart.sm4and.message.Message;
@@ -94,6 +95,11 @@ public abstract class SimMobilityBroker {
 	
 	//Handle a Message as received from MINA.
 	public abstract void handleMessage(AbstractMessageHandler handler, Message message);
+
+	
+	//Mimic TCP
+	public abstract TcpFacsimile connectTcp(String host, int port, int timeout);
+	public abstract void disconnectTcp(TcpFacsimile socket);
 	
 	
 	/**

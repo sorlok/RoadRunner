@@ -89,4 +89,22 @@ public class DefaultMessageTypes {
 		public int x;
 		public int y;
 	}
+	
+	/** Request a new connection to a cloud server. */
+	public static class TcpConnectMessage extends Message { 
+		public TcpConnectMessage() {
+			super(Type.tcp_connect);
+		}
+		public String host;
+		public int port;
+	}
+	
+	/** Request a new connection to a cloud server. */
+	public static class TcpDisconnectMessage extends Message { 
+		public TcpDisconnectMessage() {
+			super(Type.tcp_disconnect);
+		}
+		public String host;
+		public int port;
+	}
 }

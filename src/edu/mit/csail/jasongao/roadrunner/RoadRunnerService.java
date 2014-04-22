@@ -393,8 +393,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 				InputStream in = s.getInputStream();
 				OutputStream out = s.getOutputStream();
 
-				BufferedReader reader = new BufferedReader(
-						new InputStreamReader(in));
+				BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 				Writer writer = new OutputStreamWriter(out);
 
 				String response;
@@ -485,17 +484,17 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			long stopTime = getTime();
 
 			if (req.type == ResRequest.RES_GET) {
-				log(String
-						.format("GET request for %s on %s network access completed in %d ms",
-								req.regionId, mHost, stopTime - startTime));
+				log(String.format("GET request for %s on %s network access completed in %d ms",
+					req.regionId, mHost, stopTime - startTime)
+				);
 			} else if (req.type == ResRequest.RES_PUT) {
-				log(String
-						.format("PUT request for %s on %s network access completed in %d ms",
-								req.regionId, mHost, stopTime - startTime));
+				log(String.format("PUT request for %s on %s network access completed in %d ms",
+					req.regionId, mHost, stopTime - startTime)
+				);
 			} else {
-				log(String
-						.format("OTHER request for %s on %s network access completed in %d ms",
-								req.regionId, mHost, stopTime - startTime));
+				log(String.format("OTHER request for %s on %s network access completed in %d ms",
+					req.regionId, mHost, stopTime - startTime)
+				);
 			}
 
 			// Update last cellular access
@@ -513,32 +512,24 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 				/* GET SUCCESSFUL */
 				if (req.done) {
 					req.completed = getTime();
-					log(String.format(
-							"GET request for %s completed after %d ms",
-							req.regionId, req.completed - req.created));
+					log(String.format("GET request for %s completed after %d ms", req.regionId, req.completed - req.created));
 					/* Use reservation if we don't have it, otherwise extras */
 					if (!reservationsInUse.containsKey(req.regionId)) {
 						reservationsInUse.put(req.regionId, req);
-						log(String.format("Added to reservationsInUse: %s",
-								reservationsInUse));
+						log(String.format("Added to reservationsInUse: %s", reservationsInUse));
 					} else {
-						req.hardDeadline = req.completed
-								+ Globals.REQUEST_DIRECT_PUT_DEADLINE_FROM_NOW;
+						req.hardDeadline = req.completed + Globals.REQUEST_DIRECT_PUT_DEADLINE_FROM_NOW;
 						offers.add(req);
 						log(String.format("Added to offers: %s", req.regionId));
 					}
 				}
 				/* GET FAILED */
 				else {
-					log(String
-							.format("GET request on %s failed, adding back to pending queue.",
-									req.regionId));
+					log(String.format("GET request on %s failed, adding back to pending queue.", req.regionId));
 					// reset deadlines
 					long now = getTime();
-					req.softDeadline = now
-							+ Globals.REQUEST_RELAY_GET_DEADLINE_FROM_NOW;
-					req.hardDeadline = now
-							+ Globals.REQUEST_DIRECT_GET_DEADLINE_FROM_NOW;
+					req.softDeadline = now + Globals.REQUEST_RELAY_GET_DEADLINE_FROM_NOW;
+					req.hardDeadline = now + Globals.REQUEST_DIRECT_GET_DEADLINE_FROM_NOW;
 					getsPending.add(req);
 				}
 			}
@@ -547,19 +538,14 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 				/* PUT SUCCESSFUL */
 				if (req.done) {
 					req.completed = getTime();
-					log(String.format(
-							"PUT request for %s completed after %d ms",
-							req.regionId, req.completed - req.created));
+					log(String.format("PUT request for %s completed after %d ms", req.regionId, req.completed - req.created));
 				}
 				/* PUT FAILED */
 				else {
-					log(String.format(
-							"PUT request on %s failed, adding back to offers.",
-							req.regionId));
+					log(String.format("PUT request on %s failed, adding back to offers.", req.regionId));
 					// Reset request time and type
 					long now = getTime();
-					req.hardDeadline = now
-							+ Globals.REQUEST_DIRECT_PUT_DEADLINE_FROM_NOW;
+					req.hardDeadline = now + Globals.REQUEST_DIRECT_PUT_DEADLINE_FROM_NOW;
 					req.type = ResRequest.RES_GET;
 					offers.add(req);
 				}

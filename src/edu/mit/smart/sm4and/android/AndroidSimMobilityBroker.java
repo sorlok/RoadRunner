@@ -12,6 +12,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Hashtable;
 import java.util.PriorityQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -43,6 +44,8 @@ import edu.mit.smart.sm4and.message.DefaultMessageTypes.LocationMessage;
 import edu.mit.smart.sm4and.message.DefaultMessageTypes.OpaqueReceiveMessage;
 import edu.mit.smart.sm4and.message.DefaultMessageTypes.OpaqueSendMessage;
 import edu.mit.smart.sm4and.message.DefaultMessageTypes.TickedSimMobMessage;
+import edu.mit.smart.sm4and.message.DefaultMessageTypes.TcpConnectMessage;
+import edu.mit.smart.sm4and.message.DefaultMessageTypes.TcpDisconnectMessage;
 import edu.mit.smart.sm4and.json.ByteArraySerialization;
 import edu.mit.smart.sm4and.message.Message;
 import edu.mit.smart.sm4and.message.MessageParser;
@@ -66,6 +69,9 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 	protected Handler myHandler;
 	protected LoggerI logger;
 	protected LocationSpoofer locspoof;
+	
+	//Known cloud facsimiles by ID (id = host:port)
+	protected Hashtable<String, TcpFacsimile> cloudConnections = new Hashtable<String, TcpFacsimile>();
 	
 	//For automation
 	protected int receive_counter;
@@ -194,6 +200,51 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 		//We want to process this on the main thread, as we may want to interact with the user.
 		//Thus, we post it to the message queue.
 		myHandler.post(new HandleOnMainThread(handler, message, conn, messageParser));
+	}
+	
+	
+	public TcpFacsimile connectTcp(String host, int port, int timeout) {
+		if (true) {
+			throw new LoggingRuntimeException("TCP connection stuff needs to be posted (or somehow thread-safe), since it's run on another thread.");
+		}
+		
+		
+		//Save the details of this facsimile.
+		String key = host + ":" + port;
+		TcpFacsimile res = new TcpFacsimile(this, host, port);
+		if (cloudConnections.contains(key)) {
+			throw new LoggingRuntimeException("Tcp cloud connection already exists on: " + key);
+		}
+		cloudConnections.put(key, res);
+		
+		//Send a connect message to the server.
+		TcpConnectMessage msg = new TcpConnectMessage();
+		msg.host = host;
+		msg.port = port;
+		forwardMessageToServer(msg);
+		
+		//Return the facsimile.
+		return res;
+	}
+	
+	
+	public void disconnectTcp(TcpFacsimile socket) {
+		if (true) {
+			throw new LoggingRuntimeException("TCP connection stuff needs to be posted (or somehow thread-safe), since it's run on another thread.");
+		}
+		
+		//Remove it.
+		String key = socket.getHost() + ":" + socket.getPort();
+		if (!cloudConnections.contains(key)) {
+			throw new LoggingRuntimeException("Tcp cloud connection can't be deleted; doesn't exist: " + key);
+		}
+		cloudConnections.remove(key);
+		
+		//Inform Sim Mobility that we are done.
+		TcpDisconnectMessage msg = new TcpDisconnectMessage();
+		msg.host = socket.getHost();
+		msg.port = socket.getPort();
+		forwardMessageToServer(msg);
 	}
 	
 	
