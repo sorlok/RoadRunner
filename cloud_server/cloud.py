@@ -94,7 +94,6 @@ class Client(LineReceiver):
 				self.sendLine(tokenString)
 				if sigString:
 					self.sendLine(sigString)
-				self.sendLine("")
 				
 				# count number of tokens issued
 				self.regions[regionId] = self.regions[regionId] + 1
@@ -130,6 +129,9 @@ class Client(LineReceiver):
 		
 		else:
 			print(str(now()) + "\t" + "UNKNOWN %s" % (line))
+
+		#End every communication with an extra blank line.
+		self.sendLine("")
 		
 		print(str(now()) + "\t" + "STATE: %s" % (self.regions))
 		
