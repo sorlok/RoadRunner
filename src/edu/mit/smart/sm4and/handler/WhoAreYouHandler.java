@@ -4,8 +4,6 @@
 
 package edu.mit.smart.sm4and.handler;
 
-import java.util.ArrayList;
-
 import edu.mit.csail.jasongao.roadrunner.Globals;
 import edu.mit.smart.sm4and.connector.Connector;
 import edu.mit.smart.sm4and.connector.MinaConnector;

@@ -29,7 +29,7 @@ public class AdhocPacket implements Serializable {
 	/** End token transfer attributes */
 
 	public long timestamp;
-	public long src, dst = -1;
+	public String srcRR, destRR = "";
 	public long nonce;
 
 	private transient Location loc;
@@ -42,9 +42,9 @@ public class AdhocPacket implements Serializable {
 
 	public int length; // length of serialized packet in bytes
 
-	public AdhocPacket(long src_, Location loc) {
+	public AdhocPacket(String src, Location loc) {
 		timestamp = System.currentTimeMillis();
-		src = src_;
+		srcRR = src;
 		if (loc != null) {
 			lng = loc.getLongitude();
 			lat = loc.getLatitude();
@@ -85,6 +85,6 @@ public class AdhocPacket implements Serializable {
 	public String toString() {
 		return String
 				.format("AdhocPacket[src=%d, lng=%f, lat=%f, spd=%f, bearing=%f, offers=%s, length=%dbytes]",
-						src, lng, lat, speed, bearing, tokensOffered, length);
+						srcRR, lng, lat, speed, bearing, tokensOffered, length);
 	}
 }

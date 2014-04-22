@@ -26,11 +26,4 @@ public class IpIdentifier {
 		Rand.nextBytes(bytes);
 		return bytes;
 	}
-	
-	/**
-	 * Helper method: convert a byte to an "unsigned" int.
-	 */
-	private static final int ToU(byte b) {
-		return ((int)b)&0xFF;
-	}
 }

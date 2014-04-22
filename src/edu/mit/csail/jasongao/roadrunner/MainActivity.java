@@ -25,6 +25,7 @@ import android.speech.tts.TextToSpeech.OnInitListener;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -354,6 +355,9 @@ public class MainActivity extends Activity implements OnInitListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		//Keep the screen always on (full brightness).
+	    getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		// UI
 		setContentView(R.layout.main);
@@ -411,12 +415,10 @@ public class MainActivity extends Activity implements OnInitListener {
 			// One of many other states, but we can neither read nor write
 		}
 
-		// Get a wakelock to keep everything running
-		PowerManager pm = (PowerManager) getApplicationContext()
-				.getSystemService(Context.POWER_SERVICE);
-		wl = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK
-				| PowerManager.ON_AFTER_RELEASE, TAG);
-		wl.acquire();
+		//NOTE: This shouldn't be needed; the screen will stay on for as long as the main RoadRunner screen is visible.
+		/*PowerManager pm = (PowerManager) getApplicationContext().getSystemService(Context.POWER_SERVICE);
+		wl = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE, TAG);
+		wl.acquire();*/
 
 		mTts = new TextToSpeech(this, this);
 		mTts.setLanguage(Locale.US);

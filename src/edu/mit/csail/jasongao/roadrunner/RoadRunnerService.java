@@ -99,7 +99,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 
 	/** TODO Nonces for idempotent UDP tokens */
 	private int nonce = 0;
-	private HashMap<Long, HashSet<Long>> noncesHeard;
+	private HashMap<String, HashSet<Long>> noncesHeard;
 
 	private boolean adhocEnabled = false;
 	private boolean onDemand = false;
@@ -121,7 +121,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	
 	//This device's ID; these values must remain in sync.
 	byte[] myIdRaw;      //The ID as a sequence of 4 bytes.
-	long myIdInternal;   //How this device communicates its ID to other RR agents in opaque messages.
+//	long myIdInternal;   //How this device communicates its ID to other RR agents in opaque messages.
 	String myIdExternal; //How this device communicates its ID to Sim Mobility.
 	
 	//The last Region we've requested a reroute around (to avoid spamming the server).
@@ -235,7 +235,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 				AdhocPacket other = (AdhocPacket) msg.obj;
 				
 				// filter out messages not addressed to us or broadcast
-				if (other.dst != -1 && other.dst != myIdInternal) {
+				if (other.destRR.isEmpty() || !other.destRR.equals(myIdExternal)) {
 					break;
 				}
 				
@@ -255,8 +255,8 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 					// Someone wants a token from us; give them it if possible
 					ResRequest req = queuePoll(offers, other.region);
 					if (req != null) {
-						AdhocPacket p = new AdhocPacket(myIdInternal, mLoc);
-						p.dst = other.src;
+						AdhocPacket p = new AdhocPacket(myIdExternal, mLoc);
+						p.destRR = other.srcRR;
 						p.type = AdhocPacket.TOKEN_SEND;
 						p.tokenString = req.tokenString;
 						p.region = req.regionId;
@@ -265,9 +265,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 						p.expires = req.expires;
 
 						// Idempotently send over UDP a few times
-						log(String
-								.format("Responding to GET request from %d with an offered reservation. Over UDP.",
-										other.src));
+						log(String.format("Responding to GET request from %d with an offered reservation. Over UDP.", other.srcRR));
 						p.nonce = nonce++;
 						new SendPacketsTask().execute(p, p, p);
 					}
@@ -275,20 +273,18 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 				} else if (other.type == AdhocPacket.TOKEN_SEND) {
 					long udpStopTime = System.currentTimeMillis();
 					// Check if already received this packet copy
-					if (!noncesHeard.containsKey(other.src)) {
-						noncesHeard.put(other.src, new HashSet<Long>());
+					if (!noncesHeard.containsKey(other.srcRR)) {
+						noncesHeard.put(other.srcRR, new HashSet<Long>());
 					}
 
-					if (noncesHeard.get(other.src).contains(other.nonce)) {
+					if (noncesHeard.get(other.srcRR).contains(other.nonce)) {
 						// Already heard this packet, so ignore
 						log("Nonce seen before, ignoring duplicate token sent.");
 						break;
 					} else {
 						long udpLatency = udpStopTime - udpStartTime;
-						log(String
-								.format("Nonce NOT seen before, receiving token sent, UDP token transfer round-trip latency %d ms",
-										udpLatency));
-						noncesHeard.get(other.src).add(other.nonce);
+						log(String.format("Nonce NOT seen before, receiving token sent, UDP token transfer round-trip latency %d ms",udpLatency));
+						noncesHeard.get(other.srcRR).add(other.nonce);
 					}
 
 					// Other car sent a token to us
@@ -314,7 +310,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 									req.regionId));
 						}
 					} else {
-						req = new ResRequest(myIdInternal, ResRequest.RES_GET, other.region);
+						req = new ResRequest(myIdExternal, ResRequest.RES_GET, other.region);
 						req.done = true;
 						req.completed = getTime();
 						req.tokenString = other.tokenString;
@@ -326,9 +322,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 								+ Globals.REQUEST_DIRECT_PUT_DEADLINE_FROM_NOW;
 						offers.add(req);
 
-						log(String.format(
-								"%s sent unwanted token for %s Over UDP",
-								other.src, req.regionId));
+						log(String.format("%s sent unwanted token for %s Over UDP", other.srcRR, req.regionId));
 
 						log(String.format("Added to offers: %s", req.regionId));
 					}
@@ -341,28 +335,22 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 						if (other.tokensOffered.contains(req.regionId)) {
 							if (Globals.ADHOC_UDP_ONLY) { // UDP pathway
 								// Send a TOKEN_REQUEST
-								AdhocPacket p = new AdhocPacket(myIdInternal, mLoc);
+								AdhocPacket p = new AdhocPacket(myIdExternal, mLoc);
 								p.type = AdhocPacket.TOKEN_REQUEST;
 								p.region = req.regionId;
-								log(String
-										.format("Other vehicle %d offers %s, I want %s, GET %s Over UDP",
-												other.src, other.tokensOffered,
-												queueKeySet(getsPending),
-												req.regionId));
+								log(String.format("Other vehicle %d offers %s, I want %s, GET %s Over UDP",
+									other.srcRR, other.tokensOffered, queueKeySet(getsPending), req.regionId)
+								);
 
 								udpStartTime = System.currentTimeMillis();
 								new SendPacketsTask().execute(p);
 							} else { // TCP pathway
-
-								log(String
-										.format("Other vehicle %d offers %s, I want %s, GET %s",
-												other.src, other.tokensOffered,
-												queueKeySet(getsPending),
-												req.regionId));
+								log(String.format("Other vehicle %d offers %s, I want %s, GET %s",
+									other.srcRR, other.tokensOffered, queueKeySet(getsPending), req.regionId)
+								);
 
 								it.remove(); // ConcurrentModificationException?
-								new ResRequestTask().execute(req, "192.168.42."
-										+ other.src);
+								new ResRequestTask().execute(req, "192.168.42." + other.srcRR);
 							}
 
 						}
@@ -372,12 +360,11 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 						else if (Globals.RELAY_ENABLED
 								&& other.dataActivity != TelephonyManager.DATA_ACTIVITY_DORMANT
 								&& req.softDeadline < now) {
-							log(String
-									.format("Request soft deadline %d expired, relaying through vehicle %d to cloud: %s",
-											req.softDeadline, other.src, req));
+							log(String.format("Request soft deadline %d expired, relaying through vehicle %d to cloud: %s",
+								req.softDeadline, other.srcRR, req)
+							);
 							getsPending.remove(req);
-							new ResRequestTask().execute(req, "192.168.42."
-									+ other.src);
+							new ResRequestTask().execute(req, "192.168.42." + other.srcRR);
 						}
 					}
 				}
@@ -401,8 +388,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 
 			Socket s = new Socket();
 			try {
-				s.connect(new InetSocketAddress(mHost, Globals.CLOUD_PORT),
-						Globals.CLOUD_SOCKET_TIMEOUT);
+				s.connect(new InetSocketAddress(mHost, Globals.CLOUD_PORT), Globals.CLOUD_SOCKET_TIMEOUT);
 
 				InputStream in = s.getInputStream();
 				OutputStream out = s.getOutputStream();
@@ -416,14 +402,19 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 				// Dispatch request correctly
 				switch (req.type) {
 				case ResRequest.RES_GET:
-					writer.write(String.format("GET %d %s\r\n", myIdInternal, req.regionId));
+					writer.write(String.format("GET %s %s\r\n", myIdExternal, req.regionId));
 					writer.flush();
 
 					response = reader.readLine();
 					log("Response: " + response);
 					if ("GET 200 OK".equals(response)) {
 						req.tokenString = reader.readLine();
-						req.signature = reader.readLine();
+						if (Globals.CLOUD_MESSAGES_SIGNEd) {
+							req.signature = reader.readLine();
+							if (req.signature.isEmpty()) {
+								throw new LoggingRuntimeException("Attempted to read signature from cloud, but received empty line.");
+							}
+						}
 						String[] parts = req.tokenString.split(" ");
 						req.issued = Long.parseLong(parts[1]);
 						req.expires = Long.parseLong(parts[2]);
@@ -446,7 +437,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 					}
 					break;
 				case ResRequest.RES_PUT:
-					writer.write(String.format("PUT %d %s\r\n", myIdInternal, req.regionId));
+					writer.write(String.format("PUT %s %s\r\n", myIdExternal, req.regionId));
 					writer.flush();
 
 					response = reader.readLine();
@@ -459,11 +450,17 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 					}
 					break;
 				case ResRequest.DEBUG_RESET:
-					writer.write(String.format("DEBUG-RESET %d %s\r\n", myIdInternal, req.regionId));
+					writer.write(String.format("DEBUG-RESET %s %s\r\n", myIdExternal, req.regionId));
 					writer.flush();
 					log("Response: " + reader.readLine());
 					req.done = true;
 					break;
+				}
+				
+				//Always read an empty line after a request.
+				String empty = reader.readLine();
+				if (!empty.isEmpty()) {
+					throw new LoggingRuntimeException("Error: expected empty line from cloud server after message..");
 				}
 
 			} catch (Exception e) {
@@ -738,7 +735,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			//log("ad-hoc announcement sending..."); //Too wordy
 		}
 		
-		AdhocPacket p = new AdhocPacket(myIdInternal, mLoc);
+		AdhocPacket p = new AdhocPacket(myIdExternal, mLoc);
 
 		// AdhocPacket the state of our data link
 		if (this.lastDataActivity + Globals.LAST_DATA_ACTIVITY_THRESHOLD < System
@@ -842,22 +839,22 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 
 	public void resetCloud() {
 		log(String.format("Sending ResRequest for DEBUG-RESET"));
-		ResRequest r1 = new ResRequest(myIdInternal, ResRequest.DEBUG_RESET, "Vassar-1");
+		ResRequest r1 = new ResRequest(myIdExternal, ResRequest.DEBUG_RESET, "Vassar-1");
 		new ResRequestTask().execute(r1, Globals.CLOUD_HOST);
 	}
 
 	/*** DEBUG make a fake request to test token transfers */
 	public void makeReservationRouteStata() {
 		log(String.format("Making DEBUG ResRequest for Stata-1"));
-		makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Stata-1"));
+		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Stata-1"));
 	}
 
 	/*** DEBUG make a fake offer to test token transfers */
 	public void makeOfferRouteStata() {
 		log(String.format("Making DEBUG Offer for Vassar-1"));
 		
-		ResRequest res = new ResRequest(myIdInternal, ResRequest.RES_GET, "Stata-1");
-		res = new ResRequest(myIdInternal, ResRequest.RES_GET, "Stata-1");
+		ResRequest res = new ResRequest(myIdExternal, ResRequest.RES_GET, "Stata-1");
+		res = new ResRequest(myIdExternal, ResRequest.RES_GET, "Stata-1");
 		res.done = true;
 		res.completed = getTime();
 		res.tokenString = "DEBUG";
@@ -873,31 +870,31 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 
 	public void makeReservationRouteA() {
 		log(String.format("Making ResRequests for route A"));
-		makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Vassar-1"));
-		makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Main-1"));
-		makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Main-2"));
-		makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Main-3"));
-		makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Windsor-1"));
-		makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Mass-1"));
-		makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Mass-2"));
+		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Vassar-1"));
+		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Main-1"));
+		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Main-2"));
+		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Main-3"));
+		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Windsor-1"));
+		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Mass-1"));
+		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Mass-2"));
 	}
 
 	public void makeReservationRouteB() {
 		log(String.format("Making ResRequests for route B"));
-		makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Albany-1"));
-		makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Albany-2"));
-		makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Vassar-1"));
-		makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Main-3"));
-		makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Mass-2"));
+		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Albany-1"));
+		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Albany-2"));
+		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Vassar-1"));
+		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Main-3"));
+		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Mass-2"));
 	}
 
 	public void makeReservationRouteC() {
-		makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Albany-1"));
-		makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Portland-1"));
-		makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Main-2"));
-		makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Vassar-1"));
-		makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Main-3"));
-		makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Mass-2"));
+		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Albany-1"));
+		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Portland-1"));
+		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Main-2"));
+		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Vassar-1"));
+		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Main-3"));
+		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Mass-2"));
 		log(String.format("Adding ResRequests for route C"));
 
 	}
@@ -966,10 +963,10 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	public void onCreate() {
 		super.onCreate();
 
-		// Get a wakelock to keep everything running
-		PowerManager pm = (PowerManager) getApplicationContext().getSystemService(Context.POWER_SERVICE);
+		//NOTE: A wake lock should not be required, since the MainActivity has "KEEP_SCREEN_ON" defined.
+		/*PowerManager pm = (PowerManager) getApplicationContext().getSystemService(Context.POWER_SERVICE);
 		wl = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE, TAG);
-		wl.acquire();
+		wl.acquire();*/
 
 		lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		
@@ -1024,15 +1021,14 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		}
 		
 		//Convert the byte array to an ID.
-		myIdInternal = 0;
 		myIdExternal = "";
 		for (byte b : myIdRaw) {
-			myIdInternal = 1000*myIdInternal + (((int)b)&0xFF);
+			//myIdInternal = 1000*myIdInternal + (((int)b)&0xFF);
 			myIdExternal = myIdExternal + (myIdExternal.isEmpty()?"":".") + (((int)b)&0xFF);
 		}
 		
 		//Inform the user of their ID.
-		log("myID=" + myIdExternal + " (" + myIdInternal + ")");
+		log("myID=" + myIdExternal);
 	}
 	
 
@@ -1061,7 +1057,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		this.getsPending = new ConcurrentLinkedQueue<ResRequest>();
 		this.offers = new ConcurrentLinkedQueue<ResRequest>();
 		this.penalties = new ConcurrentLinkedQueue<ResRequest>();
-		this.noncesHeard = new HashMap<Long, HashSet<Long>>();
+		this.noncesHeard = new HashMap<String, HashSet<Long>>();
 		
 		//Connect to the Sim Mobility server.
 		if (Globals.SIM_MOBILITY) {
@@ -1069,7 +1065,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			retrieveUniqueId();
 			
 			//Initialize.
-			simmob.initialize(myIdExternal, myIdInternal, myHandler, this, new LocationSpoofer(), new PathSetter());
+			simmob.initialize(myIdExternal, myHandler, this, new LocationSpoofer(), new PathSetter());
 			
 			//Register our "Regions and Paths" handler, which is specific to Road Runner.
 			simmob.addCustomMessageType(
@@ -1129,7 +1125,6 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			}
 		} else {
 			myIdRaw = new byte[]{(byte)255}; // cloud-only doesn't need unique IDs
-			myIdInternal = 255;
 			myIdExternal = "255";
 		}
 
@@ -1320,10 +1315,8 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 				log("ERROR getting reservation from penalty store, NULL.");
 			}
 		} else {
-			log(String
-					.format("Moved from %s to %s, no reservation, PENALTY reservation created.",
-							oldRegion, newRegion));
-			ResRequest penaltyRes = new ResRequest(myIdInternal, ResRequest.PENALTY, newRegion);
+			log(String.format("Moved from %s to %s, no reservation, PENALTY reservation created.", oldRegion, newRegion));
+			ResRequest penaltyRes = new ResRequest(myIdExternal, ResRequest.PENALTY, newRegion);
 			this.reservationsInUse.put(newRegion, penaltyRes);
 		}
 
@@ -1386,7 +1379,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			log("Cleared old pending GETs in FREE.");
 			getsPending.clear();
 			// Add request to pending queue
-			ResRequest r1 = new ResRequest(myIdInternal, ResRequest.RES_GET, "Stata-1");
+			ResRequest r1 = new ResRequest(myIdExternal, ResRequest.RES_GET, "Stata-1");
 			log(String.format("Adding new pending request for %s.", r1.regionId));
 			// send directly to cloud
 			new ResRequestTask().execute(r1, Globals.CLOUD_HOST);
@@ -1403,18 +1396,18 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 				if ("Mass-1".equals(newRegion)) {
 					log("Cleared old pending GETs.");
 					getsPending.clear();
-					makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Windsor-1"));
+					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Windsor-1"));
 				} else if ("Main-1".equals(newRegion)
 						&& !canDriveOn("Windsor-1")) {
 					log("Cleared old pending GETs.");
 					getsPending.clear();
-					makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Albany-1"));
-					makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Albany-2"));
+					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Albany-1"));
+					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Albany-2"));
 				} else if ("Main-2".equals(newRegion)
 						&& !canDriveOn("Albany-1")) {
 					log("Cleared old pending GETs.");
 					getsPending.clear();
-					makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Vassar-1"));
+					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Vassar-1"));
 				}
 				// extra logic for clearing old GETs.
 				else if ("Mass-2".equals(newRegion)
@@ -1426,18 +1419,18 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 				if ("Main-1".equals(newRegion)) {
 					log("Cleared old pending GETs.");
 					getsPending.clear();
-					makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Windsor-1"));
+					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Windsor-1"));
 				} else if ("Mass-1".equals(newRegion)
 						&& !canDriveOn("Windsor-1")) {
 					log("Cleared old pending GETs.");
 					getsPending.clear();
-					makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Albany-1"));
-					makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Albany-2"));
+					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Albany-1"));
+					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Albany-2"));
 				} else if ("Mass-2".equals(newRegion)
 						&& !canDriveOn("Albany-1")) {
 					log("Cleared old pending GETs.");
 					getsPending.clear();
-					makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Vassar-1"));
+					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Vassar-1"));
 				}
 				// extra logic
 				else if ("Main-2".equals(newRegion)
@@ -1452,19 +1445,19 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			if (!directionCcw) { // Main-Vassar-Mass
 				if ("Main-1".equals(newRegion)) {
 					log("PRERESERVE: Making reservations while in Main-1.");
-					makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Windsor-1"));
-					makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Albany-1"));
-					makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Albany-2"));
-					makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Vassar-1"));
+					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Windsor-1"));
+					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Albany-1"));
+					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Albany-2"));
+					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Vassar-1"));
 					say("Please slow down for 1 minute.");
 				}
 			} else { // Mass-Vassar-Main
 				if ("Mass-1".equals(newRegion)) {
 					log("PRERESERVE: Making reservations while in Mass-1.");
-					makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Windsor-1"));
-					makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Albany-1"));
-					makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Albany-2"));
-					makeRequest(new ResRequest(myIdInternal, ResRequest.RES_GET, "Vassar-1"));
+					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Windsor-1"));
+					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Albany-1"));
+					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Albany-2"));
+					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Vassar-1"));
 					say("Please slow down for 1 minute.");
 				}
 			}

@@ -4,7 +4,9 @@ public class Globals {
 	/** Enable communication via Sim Mobility, including time-step synchronization. */
 	public static final boolean SIM_MOBILITY = true;
 	
+	@SuppressWarnings("unused")
 	private static final int HDirect = 6745;
+	
 	private static final int HRelay = 6799;
 	
 	//public static final String SM_HOST = "10.0.0.1"; //Note that 127.0.0.1 won't work; Android assigns this to the phone.
@@ -75,6 +77,9 @@ public class Globals {
 	
 	/** What string constitutes a "free" region. */
 	public static final String FREE_REGION_TAG = "FREE";
+	
+	/** Whether or not to expect signed packets from the cloud server. */
+	public static final boolean CLOUD_MESSAGES_SIGNEd = false;
 	
 	/** Adhoc wireless communication parameters */
 	public static final long ADHOC_ANNOUNCE_PERIOD = 2000 * 1;

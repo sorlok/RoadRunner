@@ -77,7 +77,7 @@ public class RegionAndPathHandler extends AbstractMessageHandler {
 	
 		ArrayList<ResRequest> res = new ArrayList<ResRequest>();
 		for (int i=0; i<pathIds.length; i++) {
-			res.add(new ResRequest(broker.getUniqueIdLong(), ResRequest.RES_GET, pathIds[i]));
+			res.add(new ResRequest(broker.getUniqueId(), ResRequest.RES_GET, pathIds[i]));
 		}
 		
 		return res;
@@ -97,7 +97,7 @@ public class RegionAndPathHandler extends AbstractMessageHandler {
 		double prob = probs[(pathIds.length-1)<probs.length ? (pathIds.length-1) : probs.length-1];
 		for (int i=0; i<pathIds.length; i++) {
 			if (broker.getRand().nextDouble() <= prob) {
-				res.add(new ResRequest(broker.getUniqueIdLong(), ResRequest.RES_GET, pathIds[i]));
+				res.add(new ResRequest(broker.getUniqueId(), ResRequest.RES_GET, pathIds[i]));
 			}
 		}
 		

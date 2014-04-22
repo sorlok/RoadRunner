@@ -6,7 +6,6 @@ package edu.mit.smart.sm4and.connector;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.charset.Charset;
 
 import edu.mit.smart.sm4and.SimMobilityBroker;
 import edu.mit.smart.sm4and.handler.AbstractMessageHandler;
@@ -19,7 +18,6 @@ import org.apache.mina.core.future.ConnectFuture;
 import org.apache.mina.core.service.IoConnector;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
-import org.apache.mina.filter.codec.textline.TextLineCodecFactory;
 import org.apache.mina.transport.socket.SocketSessionConfig;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
