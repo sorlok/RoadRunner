@@ -204,18 +204,17 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 	
 	
 	public TcpFacsimile connectTcp(String host, int port, int timeout) {
-		if (true) {
-			throw new LoggingRuntimeException("TCP connection stuff needs to be posted (or somehow thread-safe), since it's run on another thread.");
-		}
-		
-		
 		//Save the details of this facsimile.
 		String key = host + ":" + port;
 		TcpFacsimile res = new TcpFacsimile(this, host, port);
-		if (cloudConnections.contains(key)) {
-			throw new LoggingRuntimeException("Tcp cloud connection already exists on: " + key);
+		
+		//Synchronization: multiple threads can call connectTcp at once (multiple ResRequests).
+		synchronized (cloudConnections) {
+			if (cloudConnections.contains(key)) {
+				throw new LoggingRuntimeException("Tcp cloud connection already exists on: " + key);
+			}
+			cloudConnections.put(key, res);
 		}
-		cloudConnections.put(key, res);
 		
 		//Send a connect message to the server.
 		TcpConnectMessage msg = new TcpConnectMessage();
@@ -229,16 +228,15 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 	
 	
 	public void disconnectTcp(TcpFacsimile socket) {
-		if (true) {
-			throw new LoggingRuntimeException("TCP connection stuff needs to be posted (or somehow thread-safe), since it's run on another thread.");
-		}
-		
 		//Remove it.
 		String key = socket.getHost() + ":" + socket.getPort();
-		if (!cloudConnections.contains(key)) {
-			throw new LoggingRuntimeException("Tcp cloud connection can't be deleted; doesn't exist: " + key);
+		//Synchronization: multiple threads can call disconnectTcp at once (multiple ResRequests).
+		synchronized (cloudConnections) {
+			if (!cloudConnections.contains(key)) {
+				throw new LoggingRuntimeException("Tcp cloud connection can't be deleted; doesn't exist: " + key);
+			}
+			cloudConnections.remove(key);
 		}
-		cloudConnections.remove(key);
 		
 		//Inform Sim Mobility that we are done.
 		TcpDisconnectMessage msg = new TcpDisconnectMessage();

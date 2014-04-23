@@ -40,13 +40,15 @@ public abstract class Connector {
     
     /**
      * Add a message to the queue (send later)
+     * Synchronized: our TCP threads can send messages in parallel with our MessageHandlers (invoked by the MINA thread).
      */
-    public void addMessage(Message msg) { messages.add(msg); }
+    public synchronized void addMessage(Message msg) { messages.add(msg); }
     
     /**
      * Retrieve and clear all messages.
+     * Synchronized: our TCP threads can send messages in parallel with our MessageHandlers (invoked by the MINA thread).
      */
-    public ArrayList<Message> getAndClearMessages() {
+    public synchronized ArrayList<Message> getAndClearMessages() {
     	ArrayList<Message> res = messages;
     	messages = new ArrayList<Message>();
     	return res;

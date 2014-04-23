@@ -51,10 +51,6 @@ public class TcpFacsimile {
 			line = line + "\n";
 		}
 		
-		if (true) {
-			throw new LoggingRuntimeException("TCP connection stuff needs to be posted (or somehow thread-safe), since it's run on another thread.");
-		}
-		
 		//Encode, send it.
 		OpaqueSendMessage msg = new OpaqueSendMessage();
 		msg.from_id = broker.getUniqueId();
