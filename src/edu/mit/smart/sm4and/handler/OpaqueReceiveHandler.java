@@ -25,7 +25,7 @@ public class OpaqueReceiveHandler extends AbstractMessageHandler {
     public void handle(Message message, Connector connector, MessageParser parser) {
     	//Hand back to the Broker
     	OpaqueReceiveMessage recvMsg = (OpaqueReceiveMessage)message;
-        mcProcess.receive(recvMsg.from_id, recvMsg.data);
+        mcProcess.receive(recvMsg.from_id, recvMsg.to_id, recvMsg.data);
     }
     
 }

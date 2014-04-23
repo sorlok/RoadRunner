@@ -4,6 +4,9 @@
 
 package edu.mit.smart.sm4and.android;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+
 import edu.mit.csail.jasongao.roadrunner.util.LoggingRuntimeException;
 import edu.mit.smart.sm4and.SimMobilityBroker;
 import edu.mit.smart.sm4and.connector.Connector;
@@ -23,6 +26,9 @@ public class TcpFacsimile {
 	private String host;
 	private int port;
 	
+	//Incoming data, pushed by the server.
+	private LinkedList<String> incoming = new LinkedList<String>();
+	
 	/*pakage-private*/ TcpFacsimile(SimMobilityBroker broker, String host, int port) {
 		this.broker = broker;
 		this.host = host;
@@ -37,13 +43,20 @@ public class TcpFacsimile {
 		return port;
 	}
 	
-	public String readLine() {
-		if (true) {
-			throw new LoggingRuntimeException("TCP connection stuff needs to be posted (or somehow thread-safe), since it's run on another thread.");
-		}
+	//Called by outsiders to add an item to the read thread.
+	public synchronized void addIncomingLine(String line) {
+		incoming.add(line);
+		notifyAll();
+	}
+	
+	public synchronized String readLine() {
+		try {
+			while (incoming.isEmpty()) {
+				this.wait();
+			}
+		} catch (InterruptedException ex) {}
 		
-		//TODO
-		return "";
+		return incoming.remove(0);
 	}
 	
 	public void writeLine(String line) {

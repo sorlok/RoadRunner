@@ -225,7 +225,7 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 		//Return the facsimile.
 		return res;
 	}
-	
+
 	
 	public void disconnectTcp(TcpFacsimile socket) {
 		//Remove it.
@@ -387,7 +387,7 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 	
 	
 	public class OpaqueMsgReceiver {
-		public void receive(String fromId, String base64Data) {
+		public void receive(String fromId, String toId, String base64Data) {
 			//Ignore messages sent to yourself.
 			if (fromId.equals(uniqueId)) {
 				logger.log("Ignoring packet sent to self.");
@@ -396,8 +396,25 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 			
 			//Extract the packet.
 			byte[] packet = ByteArraySerialization.Deserialize(base64Data);
-			AdhocPacket p = AdhocPacketThread.ReadPacket(logger, packet, packet.length);
 			
+			//Is this from the cloud?
+			TcpFacsimile cloud = null;
+			synchronized (cloudConnections) {
+				cloud = cloudConnections.get(fromId);
+			}
+			if (cloud!=null) {
+				//Split this message into lines.
+				String pack = new String(packet);
+				String[] lines = pack.split("\n", pack.length()); //length() argument needed for trailing empty lines.
+				for (String line : lines) {
+					cloud.addIncomingLine(line);
+				}
+				return;
+			}
+			
+			//Else, it's from another client. Turn it into a packet.
+			AdhocPacket p = AdhocPacketThread.ReadPacket(logger, packet, packet.length);
+				
 			//Send it to Road Runner's message loop as a ADHOC_PACKET_RECV.
 			myHandler.obtainMessage(RoadRunnerService.ADHOC_PACKET_RECV, p).sendToTarget();
 		}
