@@ -36,6 +36,7 @@ import edu.mit.csail.jasongao.roadrunner.util.LinkViability;
 import edu.mit.csail.jasongao.roadrunner.util.LoggerI;
 import edu.mit.csail.jasongao.roadrunner.util.LoggingRuntimeException;
 import edu.mit.smart.sm4and.SimMobilityBroker;
+import edu.mit.smart.sm4and.android.TcpFacsimile;
 import edu.mit.smart.sm4and.connector.Connector;
 import edu.mit.smart.sm4and.handler.AbstractMessageHandler;
 import edu.mit.smart.sm4and.message.MessageParser;
@@ -386,30 +387,63 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 
 			long startTime = getTime();
 
-			Socket s = new Socket();
+			//Used in non-emulated mode:
+			Socket s = null;
+			BufferedReader reader = null;
+			Writer writer = null;
+			
+			//Used in emulated mode.
+			TcpFacsimile tcpF = null;
+			
+			//The actual connection loop.
 			try {
-				s.connect(new InetSocketAddress(mHost, Globals.CLOUD_PORT), Globals.CLOUD_SOCKET_TIMEOUT);
+				//TODO: This is messy; perhaps we can encapsulate the *real* connection in the facsimile, to use if SimMobility is disabled?
+				if (Globals.SIM_MOBILITY) {
+					tcpF = simmob.connectTcp(mHost, Globals.CLOUD_PORT, Globals.CLOUD_SOCKET_TIMEOUT);
+				} else {
+					s = new Socket();
+					s.connect(new InetSocketAddress(mHost, Globals.CLOUD_PORT), Globals.CLOUD_SOCKET_TIMEOUT);
+					InputStream in = s.getInputStream();
+					OutputStream out = s.getOutputStream();
 
-				InputStream in = s.getInputStream();
-				OutputStream out = s.getOutputStream();
-
-				BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-				Writer writer = new OutputStreamWriter(out);
+					reader = new BufferedReader(new InputStreamReader(in));
+					writer = new OutputStreamWriter(out);
+				}
 
 				String response;
+				String request;
 
 				// Dispatch request correctly
 				switch (req.type) {
 				case ResRequest.RES_GET:
-					writer.write(String.format("GET %s %s\r\n", myIdExternal, req.regionId));
-					writer.flush();
+					request = String.format("GET %s %s\r\n", myIdExternal, req.regionId);
+					if (Globals.SIM_MOBILITY) {
+						tcpF.writeLine(request);
+					} else {
+						writer.write(request);
+						writer.flush();
+					}
 
-					response = reader.readLine();
+					if (Globals.SIM_MOBILITY) {
+						response = tcpF.readLine();
+					} else {
+						response = reader.readLine();
+					}
+					
 					log("Response: " + response);
 					if ("GET 200 OK".equals(response)) {
-						req.tokenString = reader.readLine();
+						
+						if (Globals.SIM_MOBILITY) {
+							req.tokenString = tcpF.readLine();
+						} else {
+							req.tokenString = reader.readLine();
+						}
 						if (Globals.CLOUD_MESSAGES_SIGNEd) {
-							req.signature = reader.readLine();
+							if (Globals.SIM_MOBILITY) {
+								req.signature = tcpF.readLine();
+							} else {
+								req.signature = reader.readLine();
+							}
 							if (req.signature.isEmpty()) {
 								throw new LoggingRuntimeException("Attempted to read signature from cloud, but received empty line.");
 							}
@@ -436,10 +470,19 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 					}
 					break;
 				case ResRequest.RES_PUT:
-					writer.write(String.format("PUT %s %s\r\n", myIdExternal, req.regionId));
-					writer.flush();
+					request = String.format("PUT %s %s\r\n", myIdExternal, req.regionId);
+					if (Globals.SIM_MOBILITY) {
+						tcpF.writeLine(request);
+					} else {
+						writer.write(request);
+						writer.flush();
+					}
 
-					response = reader.readLine();
+					if (Globals.SIM_MOBILITY) {
+						response = tcpF.readLine();
+					} else { 
+						response = reader.readLine();
+					}
 					log("Response: " + response);
 					if ("PUT 200 OK".equals(response)) {
 						req.done = true;
@@ -449,35 +492,52 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 					}
 					break;
 				case ResRequest.DEBUG_RESET:
-					writer.write(String.format("DEBUG-RESET %s %s\r\n", myIdExternal, req.regionId));
-					writer.flush();
-					log("Response: " + reader.readLine());
+					request = String.format("DEBUG-RESET %s %s\r\n", myIdExternal, req.regionId);
+					if (Globals.SIM_MOBILITY) {
+						tcpF.writeLine(request);
+					} else {
+						writer.write(request);
+						writer.flush();
+					}
+					if (Globals.SIM_MOBILITY) {
+						log("Response: " + tcpF.readLine());
+					} else {
+						log("Response: " + reader.readLine());
+					}
 					req.done = true;
 					break;
 				}
 				
 				//Always read an empty line after a request.
-				String empty = reader.readLine();
-				if (!empty.isEmpty()) {
+				if (Globals.SIM_MOBILITY) {
+					response = tcpF.readLine();
+				} else {
+					response = reader.readLine();
+				}
+				if (!response.isEmpty()) {
 					throw new LoggingRuntimeException("Error: expected empty line from cloud server after message..");
 				}
 
 			} catch (Exception e) {
 				log("Unexpected exception: " + e.toString());
 			} finally {
-				try {
-					s.shutdownOutput();
-				} catch (Exception e) {
-				}
-
-				try {
-					s.shutdownInput();
-				} catch (Exception e) {
-				}
-
-				try {
-					s.close();
-				} catch (Exception e) {
+				if (Globals.SIM_MOBILITY) {
+					simmob.disconnectTcp(tcpF);
+				} else {
+					try {
+						s.shutdownOutput();
+					} catch (Exception e) {
+					}
+	
+					try {
+						s.shutdownInput();
+					} catch (Exception e) {
+					}
+	
+					try {
+						s.close();
+					} catch (Exception e) {
+					}
 				}
 			}
 
