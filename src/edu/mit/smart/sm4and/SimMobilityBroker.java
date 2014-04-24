@@ -4,6 +4,7 @@
 
 package edu.mit.smart.sm4and;
 
+import java.io.IOException;
 import java.util.Random;
 
 import android.os.Handler;
@@ -97,8 +98,8 @@ public abstract class SimMobilityBroker {
 	public abstract void handleMessage(AbstractMessageHandler handler, Message message);
 
 	
-	//Mimic TCP
-	public abstract TcpFacsimile connectTcp(String host, int port, int timeout);
+	//Mimic TCP. If "fakeSocket" is false, it will actually connect.
+	public abstract TcpFacsimile connectTcp(boolean fakeSocket, String host, int port, int timeout) throws IOException;
 	public abstract void disconnectTcp(TcpFacsimile socket);
 	
 	

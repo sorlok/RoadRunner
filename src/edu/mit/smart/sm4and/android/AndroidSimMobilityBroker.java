@@ -203,10 +203,11 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 	}
 	
 	
-	public TcpFacsimile connectTcp(String host, int port, int timeout) {
+	public TcpFacsimile connectTcp(boolean fakeSocket, String host, int port, int timeout) throws IOException {
 		//Save the details of this facsimile.
 		String key = host + ":" + port;
-		TcpFacsimile res = new TcpFacsimile(this, host, port);
+		TcpFacsimile res = new TcpFacsimile(fakeSocket, this, host, port, timeout);
+		res.connect();
 		
 		//Synchronization: multiple threads can call connectTcp at once (multiple ResRequests).
 		synchronized (cloudConnections) {
@@ -237,6 +238,9 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 			}
 			cloudConnections.remove(key);
 		}
+		
+		//Shut down the actual socket (non-fake)
+		socket.disconnect();
 		
 		//Inform Sim Mobility that we are done.
 		TcpDisconnectMessage msg = new TcpDisconnectMessage();

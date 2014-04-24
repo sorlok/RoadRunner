@@ -386,29 +386,13 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			String mHost = (String) params[1];
 
 			long startTime = getTime();
-
-			//Used in non-emulated mode:
-			Socket s = null;
-			BufferedReader reader = null;
-			Writer writer = null;
 			
-			//Used in emulated mode.
+			//Used to dispatch to either a real socket or to the Sim Mobility broker.
 			TcpFacsimile tcpF = null;
 			
 			//The actual connection loop.
 			try {
-				//TODO: This is messy; perhaps we can encapsulate the *real* connection in the facsimile, to use if SimMobility is disabled?
-				if (Globals.SIM_MOBILITY) {
-					tcpF = simmob.connectTcp(mHost, Globals.CLOUD_PORT, Globals.CLOUD_SOCKET_TIMEOUT);
-				} else {
-					s = new Socket();
-					s.connect(new InetSocketAddress(mHost, Globals.CLOUD_PORT), Globals.CLOUD_SOCKET_TIMEOUT);
-					InputStream in = s.getInputStream();
-					OutputStream out = s.getOutputStream();
-
-					reader = new BufferedReader(new InputStreamReader(in));
-					writer = new OutputStreamWriter(out);
-				}
+				tcpF = simmob.connectTcp(Globals.SIM_MOBILITY, mHost, Globals.CLOUD_PORT, Globals.CLOUD_SOCKET_TIMEOUT);
 
 				String response;
 				String request;
@@ -417,33 +401,15 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 				switch (req.type) {
 				case ResRequest.RES_GET:
 					request = String.format("GET %s %s\r\n", myIdExternal, req.regionId);
-					if (Globals.SIM_MOBILITY) {
-						tcpF.writeLine(request);
-					} else {
-						writer.write(request);
-						writer.flush();
-					}
-
-					if (Globals.SIM_MOBILITY) {
-						response = tcpF.readLine();
-					} else {
-						response = reader.readLine();
-					}
+					tcpF.writeLine(request);
+					response = tcpF.readLine();
 					
 					log("Response: " + response);
 					if ("GET 200 OK".equals(response)) {
 						
-						if (Globals.SIM_MOBILITY) {
-							req.tokenString = tcpF.readLine();
-						} else {
-							req.tokenString = reader.readLine();
-						}
+						req.tokenString = tcpF.readLine();
 						if (Globals.CLOUD_MESSAGES_SIGNEd) {
-							if (Globals.SIM_MOBILITY) {
-								req.signature = tcpF.readLine();
-							} else {
-								req.signature = reader.readLine();
-							}
+							req.signature = tcpF.readLine();
 							if (req.signature.isEmpty()) {
 								throw new LoggingRuntimeException("Attempted to read signature from cloud, but received empty line.");
 							}
@@ -471,18 +437,9 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 					break;
 				case ResRequest.RES_PUT:
 					request = String.format("PUT %s %s\r\n", myIdExternal, req.regionId);
-					if (Globals.SIM_MOBILITY) {
-						tcpF.writeLine(request);
-					} else {
-						writer.write(request);
-						writer.flush();
-					}
+					tcpF.writeLine(request);
 
-					if (Globals.SIM_MOBILITY) {
-						response = tcpF.readLine();
-					} else { 
-						response = reader.readLine();
-					}
+					response = tcpF.readLine();
 					log("Response: " + response);
 					if ("PUT 200 OK".equals(response)) {
 						req.done = true;
@@ -493,27 +450,14 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 					break;
 				case ResRequest.DEBUG_RESET:
 					request = String.format("DEBUG-RESET %s %s\r\n", myIdExternal, req.regionId);
-					if (Globals.SIM_MOBILITY) {
-						tcpF.writeLine(request);
-					} else {
-						writer.write(request);
-						writer.flush();
-					}
-					if (Globals.SIM_MOBILITY) {
-						log("Response: " + tcpF.readLine());
-					} else {
-						log("Response: " + reader.readLine());
-					}
+					tcpF.writeLine(request);
+					log("Response: " + tcpF.readLine());
 					req.done = true;
 					break;
 				}
 				
 				//Always read an empty line after a request.
-				if (Globals.SIM_MOBILITY) {
-					response = tcpF.readLine();
-				} else {
-					response = reader.readLine();
-				}
+				response = tcpF.readLine();
 				if (!response.isEmpty()) {
 					throw new LoggingRuntimeException("Error: expected empty line from cloud server after message..");
 				}
@@ -521,24 +465,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 			} catch (Exception e) {
 				log("Unexpected exception: " + e.toString());
 			} finally {
-				if (Globals.SIM_MOBILITY) {
-					simmob.disconnectTcp(tcpF);
-				} else {
-					try {
-						s.shutdownOutput();
-					} catch (Exception e) {
-					}
-	
-					try {
-						s.shutdownInput();
-					} catch (Exception e) {
-					}
-	
-					try {
-						s.close();
-					} catch (Exception e) {
-					}
-				}
+				simmob.disconnectTcp(tcpF);
 			}
 
 			long stopTime = getTime();
