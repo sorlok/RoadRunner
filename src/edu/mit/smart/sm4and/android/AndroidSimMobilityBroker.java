@@ -443,6 +443,7 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 		
 		//Prepare the packet.
 		OpaqueSendMessage obj = new OpaqueSendMessage();
+		obj.format = OpaqueSendMessage.Format;
 		obj.data = ByteArraySerialization.Serialize(packet);
 		obj.broadcast = true;
 		obj.from_id = uniqueId;

@@ -4,9 +4,11 @@
 
 package edu.mit.smart.sm4and.handler;
 
+import edu.mit.csail.jasongao.roadrunner.util.LoggingRuntimeException;
 import edu.mit.smart.sm4and.android.AndroidSimMobilityBroker.OpaqueMsgReceiver;
 import edu.mit.smart.sm4and.connector.Connector;
 import edu.mit.smart.sm4and.message.DefaultMessageTypes.OpaqueReceiveMessage;
+import edu.mit.smart.sm4and.message.DefaultMessageTypes.OpaqueSendMessage;
 import edu.mit.smart.sm4and.message.Message;
 import edu.mit.smart.sm4and.message.MessageParser;
 
@@ -25,6 +27,10 @@ public class OpaqueReceiveHandler extends AbstractMessageHandler {
     public void handle(Message message, Connector connector, MessageParser parser) {
     	//Hand back to the Broker
     	OpaqueReceiveMessage recvMsg = (OpaqueReceiveMessage)message;
+    	if (!recvMsg.format.equals(OpaqueSendMessage.Format)) {
+    		throw new LoggingRuntimeException("Received message in unexpected format: " + recvMsg.format);
+    	}
+    	
         mcProcess.receive(recvMsg.from_id, recvMsg.to_id, recvMsg.data);
     }
     

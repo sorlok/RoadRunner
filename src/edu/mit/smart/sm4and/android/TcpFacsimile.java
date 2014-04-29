@@ -121,6 +121,7 @@ public class TcpFacsimile {
 			//Encode, send it.
 			OpaqueSendMessage msg = new OpaqueSendMessage();
 			msg.from_id = broker.getUniqueId();
+			msg.format = OpaqueSendMessage.Format;
 			msg.to_ids = new String[]{host+":"+port};
 			msg.broadcast = false;
 			msg.data = ByteArraySerialization.Serialize(line.getBytes());

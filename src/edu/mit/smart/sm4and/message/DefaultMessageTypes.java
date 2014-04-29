@@ -12,13 +12,16 @@ package edu.mit.smart.sm4and.message;
  */
 public class DefaultMessageTypes {
 	/** An OpaqueSend message. Contains an opaque block of Base64-encoded data. */
-	public static class OpaqueSendMessage extends Message { 
+	public static class OpaqueSendMessage extends Message {
+		public static final String Format = "base64escape";
+		
 		public OpaqueSendMessage() { 
 			super(Type.opaque_send);
 		}
 		
 		public String from_id;
 		public String[] to_ids = new String[]{};
+		public String format;
 		public String data;
 		public boolean broadcast;
 	}
@@ -31,6 +34,7 @@ public class DefaultMessageTypes {
 		
 		public String from_id;
 		public String to_id;
+		public String format;
 		public String data;
 	}
 
