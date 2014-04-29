@@ -1,11 +1,16 @@
 package edu.mit.csail.jasongao.roadrunner;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
@@ -14,6 +19,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -36,6 +43,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocalBinder;
+import edu.mit.smart.sm4and.json.ByteArraySerialization;
 import android.graphics.PorterDuff;
 
 public class MainActivity extends Activity implements OnInitListener {
@@ -349,12 +357,16 @@ public class MainActivity extends Activity implements OnInitListener {
 	/***********************************************
 	 * Android lifecycle
 	 ***********************************************/
-
+	
 	/** Called when the activity is first created. */
 	@SuppressWarnings("unused")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		if (1==0) {
+			test_all_base64();
+		}
 		
 		//Keep the screen always on (full brightness).
 	    getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -668,5 +680,98 @@ public class MainActivity extends Activity implements OnInitListener {
 			}
 		}
 	};
+	
+	
+	/********************************************************************
+	 * These methods are used to test building up a base64 encoding; their output
+	 * is meant to be pasted into the Base64EscapedUnitTests in SimMobility.
+	 ********************************************************************/
+	private static class Res {
+		String str;
+		int len;
+	}
+	private Res esc(String item) {
+		return esc(item.getBytes());
+	}
+	private Res esc(byte[] item) {
+		StringBuilder sb = new StringBuilder();
+		int len = 0;
+		for (int i=0; i<item.length; i++) {
+			byte c = item[i];
+			if (c=='\n') {
+				sb.append("\\n");
+				len += 1;
+			} else if (c=='\\') {
+				sb.append("\\");
+				len += 1;
+			} else if (c<32 || c>125) {
+				String digit = Integer.toHexString(((int)c)&0xFF);
+				if (digit.length()==1) {
+					digit = "0" + digit;
+				}
+				sb.append("\"\"\\x").append(digit).append("\"\"");
+				len += 1;
+			} else {
+				sb.append((char)c);
+				len++;
+			}
+		}
+		Res r = new Res();
+		r.str = sb.toString();
+		r.len = len;
+		return r;
+	}
+	private void TEST(String item) {
+		TEST(item.getBytes());
+	}
+	private void TEST(byte[] item) {
+		String res = ByteArraySerialization.Serialize(item);
+		Res r = esc(item);
+		Log.d("TEST", "\"" + res + "\", std::string(\"" + r.str + "\", " + r.len + ")");
+	}
+	private void TEST(AdhocPacket packet) {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		try {
+			ObjectOutput out = new ObjectOutputStream(bos);
+			out.writeObject(packet);
+			out.close();
+			byte[] data = bos.toByteArray();
+			TEST(data);
+		} catch (Exception ex) {}
+	}
+	private void test_all_base64() {
+		TEST("");
+		TEST("a");
+		TEST("abcdef");
+		TEST("abcdefg");
+		TEST("abcdefgh");
+		TEST("abcdefghi");
+		TEST("Q\nE\nD");
+		TEST("Q\nE\nD\n");
+		
+		AdhocPacket adhocPacket = new AdhocPacket("my-source", null);
+		TEST(adhocPacket);
+		Location l = new Location("testing");
+		adhocPacket = new AdhocPacket("my-source", l);
+		TEST(adhocPacket);
+		l.setLatitude(1.005);
+		adhocPacket = new AdhocPacket("my-source", l);
+		TEST(adhocPacket);
+		l.setLongitude(73.26);
+		adhocPacket = new AdhocPacket("my-source", l);
+		TEST(adhocPacket);
+		l.setSpeed(35.6F);
+		adhocPacket = new AdhocPacket("my-source", l);
+		TEST(adhocPacket);
+		adhocPacket.dataActivity = 100;
+		TEST(adhocPacket);
+		adhocPacket.tokensOffered = new HashSet<String>();
+		TEST(adhocPacket);
+		adhocPacket.tokensOffered.add("hi");
+		TEST(adhocPacket);
+		adhocPacket.tokensOffered.add("there");
+		TEST(adhocPacket);
+		TEST(adhocPacket);
+	}
 
 }
