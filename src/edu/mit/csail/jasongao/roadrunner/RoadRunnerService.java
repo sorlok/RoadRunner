@@ -2,16 +2,9 @@ package edu.mit.csail.jasongao.roadrunner;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.net.Inet4Address;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -58,6 +51,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.speech.tts.TextToSpeech;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 public class RoadRunnerService extends Service implements LocationListener, LoggerI {
 	public static final String TAG = "RoadRunnerService";
@@ -382,6 +376,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 
 		@Override
 		protected ResRequest doInBackground(Object... params) {
+Log.d("RESREQ", "Start");
 			if (Globals.SM_DISABLE_CLOUD) { return null; }
 			
 			ResRequest req = (ResRequest) params[0];
@@ -573,7 +568,11 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 				}
 			}
 
-			myHandler.postDelayed(this, Globals.REQUEST_PENALTY_CHECK_PERIOD);
+			if (simmob.isActive()) {
+				simmob.postOnHandlerDelayed(this, Globals.REQUEST_PENALTY_CHECK_PERIOD);
+			} else {
+				myHandler.postDelayed(this, Globals.REQUEST_PENALTY_CHECK_PERIOD);
+			}
 		}
 	};
 
@@ -595,7 +594,11 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 				}
 			}
 
-			myHandler.postDelayed(this, Globals.REQUEST_DEADLINE_CHECK_PERIOD);
+			if (simmob.isActive()) {
+				simmob.postOnHandlerDelayed(this, Globals.REQUEST_DEADLINE_CHECK_PERIOD);
+			} else {
+				myHandler.postDelayed(this, Globals.REQUEST_DEADLINE_CHECK_PERIOD);
+			}
 		}
 	};
 
@@ -617,7 +620,11 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 				}
 			}
 
-			myHandler.postDelayed(this, Globals.REQUEST_DEADLINE_CHECK_PERIOD);
+			if (simmob.isActive()) {
+				simmob.postOnHandlerDelayed(this, Globals.REQUEST_DEADLINE_CHECK_PERIOD);
+			} else {
+				myHandler.postDelayed(this, Globals.REQUEST_DEADLINE_CHECK_PERIOD);
+			}
 		}
 	};
 	
@@ -1071,13 +1078,16 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		}
 
 		// Start recurring runnables
-		myHandler.postDelayed(cloudDirectGetRequestCheck,
-				Globals.REQUEST_DEADLINE_CHECK_PERIOD);
-		myHandler.postDelayed(cloudDirectPutRequestCheck,
-				Globals.REQUEST_DEADLINE_CHECK_PERIOD);
-		myHandler.postDelayed(penaltyCheck,
-				Globals.REQUEST_PENALTY_CHECK_PERIOD);
-
+		if (simmob.isActive()) {
+			simmob.postOnHandlerDelayed(cloudDirectGetRequestCheck, Globals.REQUEST_DEADLINE_CHECK_PERIOD);
+			simmob.postOnHandlerDelayed(cloudDirectPutRequestCheck, Globals.REQUEST_DEADLINE_CHECK_PERIOD);
+			simmob.postOnHandlerDelayed(penaltyCheck, Globals.REQUEST_PENALTY_CHECK_PERIOD);
+		} else {
+			myHandler.postDelayed(cloudDirectGetRequestCheck, Globals.REQUEST_DEADLINE_CHECK_PERIOD);
+			myHandler.postDelayed(cloudDirectPutRequestCheck, Globals.REQUEST_DEADLINE_CHECK_PERIOD);
+			myHandler.postDelayed(penaltyCheck, Globals.REQUEST_PENALTY_CHECK_PERIOD);
+		}
+		
 		if (this.adhocEnabled) {
 			// Start the adhoc UDP announcement thread
 			log("Starting adhoc announce thread...");
@@ -1165,7 +1175,11 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 	 ***********************************************/
 
 	public long getTime() {
-		return MainActivity.getTime();
+		if (Globals.SIM_MOBILITY) {
+			return simmob.getCurrTimeMs() + MainActivity.clockOffset;
+		} else {
+			return System.currentTimeMillis() + MainActivity.clockOffset;
+		}
 	}
 	
 	

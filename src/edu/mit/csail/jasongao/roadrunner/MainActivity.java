@@ -115,7 +115,7 @@ public class MainActivity extends Activity implements OnInitListener {
 	}
 
 	public void log_selectable(String line, boolean display) {
-		line = String.format("%d: %s", getTime(), line);
+		line = String.format("%d: %s", System.currentTimeMillis(), line);
 		Log.i(TAG, line);
 		if (display) {
 			receivedMessages.add((String) line);
@@ -123,10 +123,6 @@ public class MainActivity extends Activity implements OnInitListener {
 		if (logWriter != null) {
 			logWriter.println((String) line);
 		}
-	}
-
-	public static long getTime() {
-		return System.currentTimeMillis() + MainActivity.clockOffset;
 	}
 
 	public void say(String msg) {
@@ -228,11 +224,8 @@ public class MainActivity extends Activity implements OnInitListener {
 		case 0:
 			experimentNumber++; // bootstrap because endR doesn't run
 			// wait until start time
-			long timeUntilStart = Globals.START_TIME
-					- System.currentTimeMillis();
-			log(String.format("%d - %d = %d msecs until the start time.",
-					Globals.START_TIME, System.currentTimeMillis(),
-					timeUntilStart));
+			long timeUntilStart = Globals.START_TIME - System.currentTimeMillis();
+			log(String.format("%d - %d = %d msecs until the start time.", Globals.START_TIME, System.currentTimeMillis(), timeUntilStart));
 			myHandler.postDelayed(resetServerR, timeUntilStart);
 			say(String.format("Synchronizing in %d minutes and %d seconds",
 					(int) (timeUntilStart / 1000 / 60), (int) ((timeUntilStart / 1000) % 60)));
@@ -620,7 +613,7 @@ public class MainActivity extends Activity implements OnInitListener {
 
 				if (Globals.EXPT_DEBUG) {
 					Globals.EXPT_LENGTH = 30 * 1000;
-					Globals.START_TIME = getTime() + 10*1000;
+					Globals.START_TIME = System.currentTimeMillis() + 10*1000;
 				}
 
 				log(String.format("Globals.EXPT_LENGTH = %d",

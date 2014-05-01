@@ -11,7 +11,7 @@ public class Globals {
 	
 	//public static final String SM_HOST = "10.0.0.1"; //Note that 127.0.0.1 won't work; Android assigns this to the phone.
 	public static final String SM_HOST = "192.168.0.103";
-	public static final int SM_PORT = HRelay;
+	public static final int SM_PORT = HDirect;
 	
 	//Use the "v1" bundle format? This will eventually be alway-on.
 	public static final boolean SM_NEW_BUNDLE_FORMAT = true;
