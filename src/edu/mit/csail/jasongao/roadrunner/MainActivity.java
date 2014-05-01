@@ -377,17 +377,16 @@ public class MainActivity extends Activity implements OnInitListener {
 		// Toggle for DSRC vs Adhoc
 		CheckBox ifaceCheckBox = (CheckBox) findViewById(R.id.iface_checkbox);
 		ifaceCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			public void onCheckedChanged(CompoundButton buttonView,
-					boolean isDSRC) {
+			public void onCheckedChanged(CompoundButton buttonView, boolean isDSRC) {
 				Globals.ADHOC_IFACE_NAME = isDSRC ? "usb0" : "eth0";
 				Globals.ADHOC_SEND_PORT = isDSRC ? 4200 : 4200;
 				Globals.ADHOC_RECV_PORT = isDSRC ? 5001 : 4200;
 				Globals.CLOUD_PORT = isDSRC ? 50000 : 50001;
-				log(String
-						.format("selected interface %s, send port %d, recv port %d, cloud port %d",
-								Globals.ADHOC_IFACE_NAME,
-								Globals.ADHOC_SEND_PORT,
-								Globals.ADHOC_RECV_PORT, Globals.CLOUD_PORT));
+				log(String.format("selected interface %s, send port %d, recv port %d, cloud port %d",
+					Globals.ADHOC_IFACE_NAME,
+					Globals.ADHOC_SEND_PORT,
+					Globals.ADHOC_RECV_PORT, Globals.CLOUD_PORT)
+				);
 			}
 		});
 
@@ -411,9 +410,7 @@ public class MainActivity extends Activity implements OnInitListener {
 		String state = Environment.getExternalStorageState();
 		if (Environment.MEDIA_MOUNTED.equals(state)) {
 			// We can read and write the media
-			logFile = new File(Environment.getExternalStorageDirectory(),
-					String.format("roadrunner/roadrunner-%d.txt",
-							System.currentTimeMillis()));
+			logFile = new File(Environment.getExternalStorageDirectory(), String.format("roadrunner/roadrunner-%d.txt", System.currentTimeMillis()));
 			try {
 				logWriter = new PrintWriter(logFile);
 				log("Opened log file for writing");
@@ -492,8 +489,7 @@ public class MainActivity extends Activity implements OnInitListener {
 			((Button) findViewById(R.id.connect_button))
 					.setText("Unbind Service");
 
-			Toast.makeText(getApplicationContext(), "Service connected.",
-					Toast.LENGTH_LONG).show();
+			Toast.makeText(getApplicationContext(), "Service connected.", Toast.LENGTH_LONG).show();
 			
 			//One more thing..
 			//mService.setUniqueId(Secure.getString(getContentResolver(), Secure.ANDROID_ID));
@@ -502,8 +498,7 @@ public class MainActivity extends Activity implements OnInitListener {
 			CheckBox adhocCheckBox = (CheckBox) findViewById(R.id.adhoc_checkbox);
 			CheckBox ondemandCheckBox = (CheckBox) findViewById(R.id.ondemand_checkbox);
 			CheckBox dirCheckBox = (CheckBox) findViewById(R.id.direction_checkbox);
-			mService.start(mTts, adhocCheckBox.isChecked(),
-					ondemandCheckBox.isChecked(), dirCheckBox.isChecked());
+			mService.start(mTts, adhocCheckBox.isChecked(), ondemandCheckBox.isChecked(), dirCheckBox.isChecked());
 		}
 
 		/** If service disconnects -unexpectedly- / crashes */
@@ -529,11 +524,9 @@ public class MainActivity extends Activity implements OnInitListener {
 			mService.stop();
 			unbindService(mServiceConnection);
 			mBound = false;
-			((Button) findViewById(R.id.connect_button))
-					.setText("Bind Service");
+			((Button) findViewById(R.id.connect_button)) .setText("Bind Service");
 
-			Toast.makeText(getApplicationContext(), "Service disconnected.",
-					Toast.LENGTH_LONG).show();
+			Toast.makeText(getApplicationContext(), "Service disconnected.", Toast.LENGTH_LONG).show();
 		}
 	}
 
@@ -562,8 +555,7 @@ public class MainActivity extends Activity implements OnInitListener {
 
 		process.waitFor();
 
-		BufferedReader br = new BufferedReader(new InputStreamReader(
-				process.getInputStream()));
+		BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
 		process.waitFor();
 		StringBuffer sb = new StringBuffer();
 		String line;
@@ -600,8 +592,7 @@ public class MainActivity extends Activity implements OnInitListener {
 					 * cmds.add("/data/adhoc/iwconfig " +
 					 * Globals.ADHOC_IFACE_NAME + " essid 'roadres'");
 					 */
-					cmds.add("/system/bin/ifconfig " + Globals.ADHOC_IFACE_NAME
-							+ " " + ipv4AddressTV.getText().toString() + " up");
+					cmds.add("/system/bin/ifconfig " + Globals.ADHOC_IFACE_NAME + " " + ipv4AddressTV.getText().toString() + " up");
 				}
 
 				try {
@@ -638,8 +629,7 @@ public class MainActivity extends Activity implements OnInitListener {
 				if (!experimentsRunning) {
 					experimentsRunning = true;
 					myHandler.post(startExperimentR);
-					((Button) findViewById(R.id.start_stop_button))
-							.setText("STOP experiments");
+					((Button) findViewById(R.id.start_stop_button)).setText("STOP experiments");
 				} else {
 					experimentsRunning = false;
 					// myHandler.post(endExperimentR);

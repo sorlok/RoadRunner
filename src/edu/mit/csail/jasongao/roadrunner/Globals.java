@@ -49,6 +49,9 @@ public class Globals {
 	/** At what distance (or less) do we re-route if we are unable to find a token. */
 	public static final double SM_REROUTE_DISTANCE = 250; //meters
 	
+	/*** If true, disable all cloud communication through the TcpFacsimile */
+	public static final boolean SM_DISABLE_CLOUD = false;
+	
 	/** 
 	 * What percentage of our required tokens are initially (randomly) filled?
 	 * Each index represents the odds of getting a token for Region lists of that size. 

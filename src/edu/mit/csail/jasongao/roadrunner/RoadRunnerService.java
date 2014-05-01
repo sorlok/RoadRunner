@@ -382,6 +382,8 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 
 		@Override
 		protected ResRequest doInBackground(Object... params) {
+			if (Globals.SM_DISABLE_CLOUD) { return null; }
+			
 			ResRequest req = (ResRequest) params[0];
 			String mHost = (String) params[1];
 
@@ -494,6 +496,9 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 		}
 
 		protected void onPostExecute(ResRequest req) {
+			//Null response?
+			if (req==null) { return; }
+			
 			/* GET */
 			if (req.type == ResRequest.RES_GET) {
 				/* GET SUCCESSFUL */
