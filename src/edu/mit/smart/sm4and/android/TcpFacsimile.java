@@ -16,6 +16,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+import android.util.Log;
+
 import edu.mit.csail.jasongao.roadrunner.Globals;
 import edu.mit.csail.jasongao.roadrunner.util.LoggingRuntimeException;
 import edu.mit.smart.sm4and.SimMobilityBroker;

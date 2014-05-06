@@ -305,7 +305,7 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 									req.regionId));
 						}
 					} else {
-						req = new ResRequest(myIdExternal, ResRequest.RES_GET, other.region);
+						req = new ResRequest(RoadRunnerService.this, myIdExternal, ResRequest.RES_GET, other.region);
 						req.done = true;
 						req.completed = getTime();
 						req.tokenString = other.tokenString;
@@ -376,7 +376,6 @@ public class RoadRunnerService extends Service implements LocationListener, Logg
 
 		@Override
 		protected ResRequest doInBackground(Object... params) {
-Log.d("RESREQ", "Start");
 			if (Globals.SM_DISABLE_CLOUD) { return null; }
 			
 			ResRequest req = (ResRequest) params[0];
@@ -824,22 +823,22 @@ Log.d("RESREQ", "Start");
 
 	public void resetCloud() {
 		log(String.format("Sending ResRequest for DEBUG-RESET"));
-		ResRequest r1 = new ResRequest(myIdExternal, ResRequest.DEBUG_RESET, "Vassar-1");
+		ResRequest r1 = new ResRequest(this, myIdExternal, ResRequest.DEBUG_RESET, "Vassar-1");
 		new ResRequestTask().execute(r1, Globals.CLOUD_HOST);
 	}
 
 	/*** DEBUG make a fake request to test token transfers */
 	public void makeReservationRouteStata() {
 		log(String.format("Making DEBUG ResRequest for Stata-1"));
-		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Stata-1"));
+		makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Stata-1"));
 	}
 
 	/*** DEBUG make a fake offer to test token transfers */
 	public void makeOfferRouteStata() {
 		log(String.format("Making DEBUG Offer for Vassar-1"));
 		
-		ResRequest res = new ResRequest(myIdExternal, ResRequest.RES_GET, "Stata-1");
-		res = new ResRequest(myIdExternal, ResRequest.RES_GET, "Stata-1");
+		ResRequest res = new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Stata-1");
+		res = new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Stata-1");
 		res.done = true;
 		res.completed = getTime();
 		res.tokenString = "DEBUG";
@@ -855,31 +854,31 @@ Log.d("RESREQ", "Start");
 
 	public void makeReservationRouteA() {
 		log(String.format("Making ResRequests for route A"));
-		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Vassar-1"));
-		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Main-1"));
-		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Main-2"));
-		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Main-3"));
-		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Windsor-1"));
-		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Mass-1"));
-		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Mass-2"));
+		makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Vassar-1"));
+		makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Main-1"));
+		makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Main-2"));
+		makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Main-3"));
+		makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Windsor-1"));
+		makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Mass-1"));
+		makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Mass-2"));
 	}
 
 	public void makeReservationRouteB() {
 		log(String.format("Making ResRequests for route B"));
-		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Albany-1"));
-		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Albany-2"));
-		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Vassar-1"));
-		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Main-3"));
-		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Mass-2"));
+		makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Albany-1"));
+		makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Albany-2"));
+		makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Vassar-1"));
+		makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Main-3"));
+		makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Mass-2"));
 	}
 
 	public void makeReservationRouteC() {
-		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Albany-1"));
-		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Portland-1"));
-		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Main-2"));
-		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Vassar-1"));
-		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Main-3"));
-		makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Mass-2"));
+		makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Albany-1"));
+		makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Portland-1"));
+		makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Main-2"));
+		makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Vassar-1"));
+		makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Main-3"));
+		makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Mass-2"));
 		log(String.format("Adding ResRequests for route C"));
 
 	}
@@ -1056,7 +1055,7 @@ Log.d("RESREQ", "Start");
 			simmob.addCustomMessageType(
 				RegionMessages.SendRegionResponse.MessageType,
 				RegionMessages.SendRegionResponse.class, 
-				new RegionAndPathHandler(new RegionSetter(), new PathSetter())
+				new RegionAndPathHandler(this, new RegionSetter(), new PathSetter())
 			);
 			
 			//We also need a custom handler for the "WHOAREYOU" message type; this is when we will start our recurring tasks.
@@ -1257,8 +1256,7 @@ Log.d("RESREQ", "Start");
 	}
 
 	public boolean canDriveOn(String newRegion) {
-		return queueKeySet(offers).contains(newRegion)
-				|| this.reservationsInUse.containsKey(newRegion);
+		return queueKeySet(offers).contains(newRegion) || this.reservationsInUse.containsKey(newRegion);
 	}
 
 	
@@ -1308,7 +1306,7 @@ Log.d("RESREQ", "Start");
 			}
 		} else {
 			log(String.format("Moved from %s to %s, no reservation, PENALTY reservation created.", oldRegion, newRegion));
-			ResRequest penaltyRes = new ResRequest(myIdExternal, ResRequest.PENALTY, newRegion);
+			ResRequest penaltyRes = new ResRequest(this, myIdExternal, ResRequest.PENALTY, newRegion);
 			this.reservationsInUse.put(newRegion, penaltyRes);
 		}
 
@@ -1371,7 +1369,7 @@ Log.d("RESREQ", "Start");
 			log("Cleared old pending GETs in FREE.");
 			getsPending.clear();
 			// Add request to pending queue
-			ResRequest r1 = new ResRequest(myIdExternal, ResRequest.RES_GET, "Stata-1");
+			ResRequest r1 = new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Stata-1");
 			log(String.format("Adding new pending request for %s.", r1.regionId));
 			// send directly to cloud
 			new ResRequestTask().execute(r1, Globals.CLOUD_HOST);
@@ -1388,18 +1386,18 @@ Log.d("RESREQ", "Start");
 				if ("Mass-1".equals(newRegion)) {
 					log("Cleared old pending GETs.");
 					getsPending.clear();
-					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Windsor-1"));
+					makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Windsor-1"));
 				} else if ("Main-1".equals(newRegion)
 						&& !canDriveOn("Windsor-1")) {
 					log("Cleared old pending GETs.");
 					getsPending.clear();
-					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Albany-1"));
-					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Albany-2"));
+					makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Albany-1"));
+					makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Albany-2"));
 				} else if ("Main-2".equals(newRegion)
 						&& !canDriveOn("Albany-1")) {
 					log("Cleared old pending GETs.");
 					getsPending.clear();
-					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Vassar-1"));
+					makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Vassar-1"));
 				}
 				// extra logic for clearing old GETs.
 				else if ("Mass-2".equals(newRegion)
@@ -1411,18 +1409,18 @@ Log.d("RESREQ", "Start");
 				if ("Main-1".equals(newRegion)) {
 					log("Cleared old pending GETs.");
 					getsPending.clear();
-					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Windsor-1"));
+					makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Windsor-1"));
 				} else if ("Mass-1".equals(newRegion)
 						&& !canDriveOn("Windsor-1")) {
 					log("Cleared old pending GETs.");
 					getsPending.clear();
-					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Albany-1"));
-					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Albany-2"));
+					makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Albany-1"));
+					makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Albany-2"));
 				} else if ("Mass-2".equals(newRegion)
 						&& !canDriveOn("Albany-1")) {
 					log("Cleared old pending GETs.");
 					getsPending.clear();
-					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Vassar-1"));
+					makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Vassar-1"));
 				}
 				// extra logic
 				else if ("Main-2".equals(newRegion)
@@ -1437,19 +1435,19 @@ Log.d("RESREQ", "Start");
 			if (!directionCcw) { // Main-Vassar-Mass
 				if ("Main-1".equals(newRegion)) {
 					log("PRERESERVE: Making reservations while in Main-1.");
-					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Windsor-1"));
-					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Albany-1"));
-					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Albany-2"));
-					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Vassar-1"));
+					makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Windsor-1"));
+					makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Albany-1"));
+					makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Albany-2"));
+					makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Vassar-1"));
 					say("Please slow down for 1 minute.");
 				}
 			} else { // Mass-Vassar-Main
 				if ("Mass-1".equals(newRegion)) {
 					log("PRERESERVE: Making reservations while in Mass-1.");
-					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Windsor-1"));
-					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Albany-1"));
-					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Albany-2"));
-					makeRequest(new ResRequest(myIdExternal, ResRequest.RES_GET, "Vassar-1"));
+					makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Windsor-1"));
+					makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Albany-1"));
+					makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Albany-2"));
+					makeRequest(new ResRequest(this, myIdExternal, ResRequest.RES_GET, "Vassar-1"));
 					say("Please slow down for 1 minute.");
 				}
 			}

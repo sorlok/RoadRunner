@@ -38,10 +38,15 @@ public class ResRequest implements Serializable {
 		this(Long.parseLong(srcId_), type_, regionId_);
 	}*/
 
-	public ResRequest(String srcId, int type_, String regionId_) {
-		this.created = System.currentTimeMillis();
-		this.softDeadline = this.created + Globals.REQUEST_RELAY_GET_DEADLINE_FROM_NOW;
-		this.hardDeadline = this.created + Globals.REQUEST_DIRECT_GET_DEADLINE_FROM_NOW;
+	public ResRequest(RoadRunnerService service, String srcId, int type_, String regionId_) {
+		this.created = service.getTime();
+		if (Globals.SIM_MOBILITY) {
+			this.softDeadline = this.created + Globals.SM_REQUEST_RELAY_GET_DEADLINE_FROM_NOW;
+			this.hardDeadline = this.created + Globals.SM_REQUEST_DIRECT_GET_DEADLINE_FROM_NOW;
+		} else {
+			this.softDeadline = this.created + Globals.REQUEST_RELAY_GET_DEADLINE_FROM_NOW;
+			this.hardDeadline = this.created + Globals.REQUEST_DIRECT_GET_DEADLINE_FROM_NOW;
+		}
 		this.srcId = srcId;
 		this.type = type_;
 		this.regionId = regionId_;
@@ -71,8 +76,6 @@ public class ResRequest implements Serializable {
 
 	@Override
 	public String toString() {
-		return String.format(
-				"ResRequest[src=%d, regionId=%s, type=%d, done=%b]", srcId,
-				regionId, type, done);
+		return String.format("ResRequest[src=%s, regionId=%s, type=%d, done=%b]", srcId, regionId, type, done);
 	}
 }

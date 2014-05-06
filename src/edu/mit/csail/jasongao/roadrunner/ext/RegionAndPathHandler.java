@@ -6,6 +6,7 @@ import java.util.Hashtable;
 import edu.mit.csail.jasongao.roadrunner.Globals;
 import edu.mit.csail.jasongao.roadrunner.Region;
 import edu.mit.csail.jasongao.roadrunner.ResRequest;
+import edu.mit.csail.jasongao.roadrunner.RoadRunnerService;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.PathSetter;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.RegionSetter;
 import edu.mit.csail.jasongao.roadrunner.ext.RegionMessages.SendRegionResponse;
@@ -20,15 +21,17 @@ import edu.mit.smart.sm4and.message.MessageParser;
 public class RegionAndPathHandler extends AbstractMessageHandler {
 	private RegionSetter regSetter;
 	private PathSetter pathSetter;
+	private RoadRunnerService rr;
 	
 
-	public RegionAndPathHandler(RegionSetter regSetter, PathSetter pathSetter) {
+	public RegionAndPathHandler(RoadRunnerService rr, RegionSetter regSetter, PathSetter pathSetter) {
 		if (regSetter==null || pathSetter==null) {
 			throw new LoggingRuntimeException("Region and Path settings need to be non-null.");
 		}
 		
 		this.regSetter = regSetter;
 		this.pathSetter = pathSetter;
+		this.rr = rr;
 	}
 	
 	
@@ -77,7 +80,7 @@ public class RegionAndPathHandler extends AbstractMessageHandler {
 	
 		ArrayList<ResRequest> res = new ArrayList<ResRequest>();
 		for (int i=0; i<pathIds.length; i++) {
-			res.add(new ResRequest(broker.getUniqueId(), ResRequest.RES_GET, pathIds[i]));
+			res.add(new ResRequest(rr, broker.getUniqueId(), ResRequest.RES_GET, pathIds[i]));
 		}
 		
 		return res;
@@ -97,7 +100,7 @@ public class RegionAndPathHandler extends AbstractMessageHandler {
 		double prob = probs[(pathIds.length-1)<probs.length ? (pathIds.length-1) : probs.length-1];
 		for (int i=0; i<pathIds.length; i++) {
 			if (broker.getRand().nextDouble() <= prob) {
-				res.add(new ResRequest(broker.getUniqueId(), ResRequest.RES_GET, pathIds[i]));
+				res.add(new ResRequest(rr, broker.getUniqueId(), ResRequest.RES_GET, pathIds[i]));
 			}
 		}
 		

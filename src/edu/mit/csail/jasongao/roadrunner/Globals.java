@@ -10,7 +10,7 @@ public class Globals {
 	private static final int HRelay = 6799;
 	
 	//public static final String SM_HOST = "10.0.0.1"; //Note that 127.0.0.1 won't work; Android assigns this to the phone.
-	public static final String SM_HOST = "192.168.0.103";
+	public static final String SM_HOST = "128.30.87.128";
 	public static final int SM_PORT = HDirect;
 	
 	//Use the "v1" bundle format? This will eventually be alway-on.
@@ -78,6 +78,10 @@ public class Globals {
 		"6810", "6811", "6812", "6813", "6814", "6815", "6816", "6817", "6818", "6819",
 	};
 	
+	/** Request timeouts for Sim Mobility (shorter trips, so Agents need to ask more). */
+	static int SM_REQUEST_DIRECT_GET_DEADLINE_FROM_NOW = 10 * 5 * 1000;
+	static int SM_REQUEST_RELAY_GET_DEADLINE_FROM_NOW = 3000; //Deprecated?
+	
 	/** What string constitutes a "free" region. */
 	public static final String FREE_REGION_TAG = "FREE";
 	
@@ -101,7 +105,8 @@ public class Globals {
 	public static final String[] SM_IDENTIFYING_INTERFACES = {ADHOC_IFACE_NAME, "eth0", "wlan0"};
 	
 	/** Cloud parameters */
-	static final String CLOUD_HOST = "128.30.87.68";
+	static final String CLOUD_HOST = "128.30.87.128";
+	
 	static final int CLOUD_SOCKET_TIMEOUT = 3000;
 	static final byte[] CLOUD_PUBLIC_KEY = null; // TODO
 	static final byte[] MY_PRIVATE_KEY = null; // TODO
