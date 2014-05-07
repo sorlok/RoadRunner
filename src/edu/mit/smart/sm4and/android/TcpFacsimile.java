@@ -91,6 +91,10 @@ public class TcpFacsimile {
 		return port;
 	}
 	
+	public boolean isFake() {
+		return socket==null;
+	}
+	
 	//Called by outsiders to add an item to the read thread.
 	public synchronized void addIncomingLine(String line) {
 		incoming.add(line);
@@ -101,11 +105,11 @@ public class TcpFacsimile {
 		if (socket!=null) {
 			return reader.readLine();
 		} else {
-			try {
-				while (incoming.isEmpty()) {
+			while (incoming.isEmpty()) {
+				try {
 					this.wait();
-				}
-			} catch (InterruptedException ex) {}
+				} catch (InterruptedException ex) {}
+			}
 			
 			return incoming.remove(0);
 		}

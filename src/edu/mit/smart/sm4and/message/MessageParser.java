@@ -26,6 +26,18 @@ public class MessageParser {
 		public String sendId = "";
 		public String destId = "";
 		public ArrayList<Message> messages = new ArrayList<Message>();
+		
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			sb.append("MessageBundle{from=\"").append(sendId).append("\",to=\"").append(destId).append("\",messages=[");
+			for (Message msg : messages) {
+				sb.append("{");
+				sb.append("\"").append(msg.getMessageType()).append("\",");
+				sb.append("},");
+			}
+			sb.append("]}");
+			return sb.toString();
+		}
 	}
 	
 	//Types of Messages we expect to parse.

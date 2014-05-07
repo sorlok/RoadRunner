@@ -13,6 +13,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.PriorityQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -20,6 +21,7 @@ import java.util.concurrent.TimeoutException;
 
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.util.Log;
 import edu.mit.csail.jasongao.roadrunner.*;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.PathSetter;
@@ -71,7 +73,9 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 	protected LocationSpoofer locspoof;
 	
 	//Known cloud facsimiles by ID (id = host:port)
-	protected Hashtable<String, TcpFacsimile> cloudConnections = new Hashtable<String, TcpFacsimile>();
+	//Items are added to the back, and the FIRST item in the list is the currently-used connection.
+	//NOTE: We *only* store fake connections.
+	protected Hashtable<String, LinkedList<TcpFacsimile>> cloudConnections = new Hashtable<String, LinkedList<TcpFacsimile>>();
 	
 	//For automation
 	protected int receive_counter;
@@ -209,19 +213,22 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 		TcpFacsimile res = new TcpFacsimile(fakeSocket, this, host, port, timeout);
 		res.connect();
 		
-		//Synchronization: multiple threads can call connectTcp at once (multiple ResRequests).
-		synchronized (cloudConnections) {
-			if (cloudConnections.contains(key)) {
-				throw new LoggingRuntimeException("Tcp cloud connection already exists on: " + key);
+		//Certain things only happen with a fake socket.
+		if (fakeSocket) {
+			//Synchronization: multiple threads can call connectTcp at once (multiple ResRequests).
+			synchronized (cloudConnections) {
+				if (!cloudConnections.containsKey(key)) {
+					cloudConnections.put(key, new LinkedList<TcpFacsimile>());
+				}
+				cloudConnections.get(key).add(res);
 			}
-			cloudConnections.put(key, res);
+			
+			//Send a connect message to the server.
+			TcpConnectMessage msg = new TcpConnectMessage();
+			msg.host = host;
+			msg.port = port;
+			forwardMessageToServer(msg);
 		}
-		
-		//Send a connect message to the server.
-		TcpConnectMessage msg = new TcpConnectMessage();
-		msg.host = host;
-		msg.port = port;
-		forwardMessageToServer(msg);
 		
 		//Return the facsimile.
 		return res;
@@ -229,24 +236,30 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 
 	
 	public void disconnectTcp(TcpFacsimile socket) {
-		//Remove it.
-		String key = socket.getHost() + ":" + socket.getPort();
-		//Synchronization: multiple threads can call disconnectTcp at once (multiple ResRequests).
-		synchronized (cloudConnections) {
-			if (!cloudConnections.contains(key)) {
-				throw new LoggingRuntimeException("Tcp cloud connection can't be deleted; doesn't exist: " + key);
+		if (socket.isFake()) {
+			//Remove it.
+			String key = socket.getHost() + ":" + socket.getPort();
+			//Synchronization: multiple threads can call disconnectTcp at once (multiple ResRequests).
+			synchronized (cloudConnections) {
+				if (!cloudConnections.containsKey(key) || cloudConnections.get(key).isEmpty()) {
+					throw new LoggingRuntimeException("Tcp cloud connection can't be deleted; doesn't exist: \"" + key + "\"");
+				}
+				
+				//We remove the first item in the list.
+				cloudConnections.get(key).removeFirst();
 			}
-			cloudConnections.remove(key);
 		}
 		
 		//Shut down the actual socket (non-fake)
 		socket.disconnect();
 		
-		//Inform Sim Mobility that we are done.
-		TcpDisconnectMessage msg = new TcpDisconnectMessage();
-		msg.host = socket.getHost();
-		msg.port = socket.getPort();
-		forwardMessageToServer(msg);
+		if (socket.isFake()) {
+			//Inform Sim Mobility that we are done.
+			TcpDisconnectMessage msg = new TcpDisconnectMessage();
+			msg.host = socket.getHost();
+			msg.port = socket.getPort();
+			forwardMessageToServer(msg);
+		}
 	}
 	
 	
@@ -404,9 +417,12 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 			//Is this from the cloud?
 			TcpFacsimile cloud = null;
 			synchronized (cloudConnections) {
-				cloud = cloudConnections.get(fromId);
+/////////////////////////////////////////////////////////////
+// TODO: There's the risk of an un-processed line being stuck at the previous caller.
+///////////////////////////////////////////////////////////			
+				cloud = cloudConnections.get(fromId).getFirst();
 			}
-			if (cloud!=null) {
+			if (cloud!=null) {				
 				//Split this message into lines.
 				String pack = new String(packet);
 				String[] lines = pack.split("\n", pack.length()); //length() argument needed for trailing empty lines.
