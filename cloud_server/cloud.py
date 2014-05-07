@@ -68,7 +68,12 @@ class Client(LineReceiver):
 		# GET request / client wants a token
 		if parts[0] == "GET":
 			print(str(now()) + "\t" + "GET from %s for regionId(s) %s" % (self.id, regionId))
-			
+
+			#If no regionsLimit entry exists, add it with a capacity of 5 (arbitrary). 
+			#TODO: Send this information from the Sim Mobility config file.
+			if not regionId in self.regionsLimit.keys():
+				self.regionsLimit[regionId] = 5
+
 			# create region count of vehicles in region if necessary
 			if not regionId in self.regions.keys():
 				self.regions[regionId] = 0
