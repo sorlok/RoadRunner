@@ -5,18 +5,18 @@
 package edu.mit.smart.sm4and.android.tcp;
 
 import java.io.*;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.util.LinkedList;
 
 import edu.mit.smart.sm4and.SimMobilityBroker;
-import edu.mit.smart.sm4and.json.ByteArraySerialization;
-import edu.mit.smart.sm4and.message.DefaultMessageTypes.OpaqueSendMessage;
 
 /**
  * Contains a similar interest to a normal Java socket (readers/writers are enclosed).
  * Subclasses either use a socket directly or send all communications via Sim Mobility messages.
  * Use the Broker to retrieve the correct subclass easily.
+ * 
+ * WARNING: It seems that under the current Android threading mode, clients that connect() then write() then read() will
+ *          have their data processed in the right order. HOWEVER, this might also be a result of the generic nature of
+ *          our current Cloud requests (e.g., they are basically stateless). Essentially, if large deployments start 
+ *          freezing for no known reason (and cloud writing is not disabled) then you might want to check here. 
  */
 public abstract class TcpFacsimile {
 	protected SimMobilityBroker broker;
@@ -38,7 +38,7 @@ public abstract class TcpFacsimile {
 	public int getPort() {
 		return port;
 	}
-	
+
 	public abstract void connect() throws IOException;
 	
 	public abstract void disconnect();

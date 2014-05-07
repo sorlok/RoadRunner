@@ -21,7 +21,6 @@ import java.util.concurrent.TimeoutException;
 
 import android.os.AsyncTask;
 import android.os.Handler;
-import android.util.Log;
 import edu.mit.csail.jasongao.roadrunner.*;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.PathSetter;

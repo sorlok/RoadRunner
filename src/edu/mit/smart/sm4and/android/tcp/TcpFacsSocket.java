@@ -7,11 +7,8 @@ package edu.mit.smart.sm4and.android.tcp;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.LinkedList;
 
 import edu.mit.smart.sm4and.SimMobilityBroker;
-import edu.mit.smart.sm4and.json.ByteArraySerialization;
-import edu.mit.smart.sm4and.message.DefaultMessageTypes.OpaqueSendMessage;
 
 /**
  * Subclass of TcpFacsimile that sends all data through a normal Java socket.

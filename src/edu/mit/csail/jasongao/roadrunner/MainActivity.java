@@ -8,7 +8,6 @@ import java.io.InputStreamReader;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -20,7 +19,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -673,6 +671,8 @@ public class MainActivity extends Activity implements OnInitListener {
 		String str;
 		int len;
 	}
+	
+	@SuppressWarnings("unused")
 	private Res esc(String item) {
 		return esc(item.getBytes());
 	}

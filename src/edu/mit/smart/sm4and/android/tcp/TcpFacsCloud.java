@@ -4,9 +4,7 @@
 
 package edu.mit.smart.sm4and.android.tcp;
 
-import java.io.*;
-import java.net.InetSocketAddress;
-import java.net.Socket;
+import java.io.IOException;
 import java.util.LinkedList;
 
 import edu.mit.smart.sm4and.SimMobilityBroker;

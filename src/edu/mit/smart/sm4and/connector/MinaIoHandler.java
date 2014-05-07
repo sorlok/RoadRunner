@@ -7,8 +7,6 @@ package edu.mit.smart.sm4and.connector;
 import org.apache.mina.core.service.*;
 import org.apache.mina.core.session.*;
 
-import android.util.Log;
-
 import edu.mit.csail.jasongao.roadrunner.Globals;
 import edu.mit.csail.jasongao.roadrunner.util.LoggingRuntimeException;
 import edu.mit.smart.sm4and.message.MessageParser.MessageBundle;
