@@ -12,7 +12,7 @@ import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.LocationSpoofer;
 import edu.mit.csail.jasongao.roadrunner.RoadRunnerService.PathSetter;
 import edu.mit.csail.jasongao.roadrunner.util.LoggerI;
 import edu.mit.smart.sm4and.android.AndroidSimMobilityBroker;
-import edu.mit.smart.sm4and.android.TcpFacsimile;
+import edu.mit.smart.sm4and.android.tcp.TcpFacsimile;
 import edu.mit.smart.sm4and.connector.Connector;
 import edu.mit.smart.sm4and.handler.AbstractMessageHandler;
 import edu.mit.smart.sm4and.message.Message;

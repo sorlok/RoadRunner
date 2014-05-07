@@ -29,7 +29,7 @@ import edu.mit.csail.jasongao.roadrunner.util.LinkViability;
 import edu.mit.csail.jasongao.roadrunner.util.LoggerI;
 import edu.mit.csail.jasongao.roadrunner.util.LoggingRuntimeException;
 import edu.mit.smart.sm4and.SimMobilityBroker;
-import edu.mit.smart.sm4and.android.TcpFacsimile;
+import edu.mit.smart.sm4and.android.tcp.TcpFacsimile;
 import edu.mit.smart.sm4and.connector.Connector;
 import edu.mit.smart.sm4and.handler.AbstractMessageHandler;
 import edu.mit.smart.sm4and.message.MessageParser;

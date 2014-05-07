@@ -30,6 +30,9 @@ import edu.mit.csail.jasongao.roadrunner.util.LoggingRuntimeException;
 import edu.mit.smart.sm4and.SimMobilityBroker;
 import edu.mit.smart.sm4and.android.HandleOnMainThread;
 import edu.mit.smart.sm4and.android.SimMobServerConnectTask.PostExecuteAction;
+import edu.mit.smart.sm4and.android.tcp.TcpFacsCloud;
+import edu.mit.smart.sm4and.android.tcp.TcpFacsSocket;
+import edu.mit.smart.sm4and.android.tcp.TcpFacsimile;
 import edu.mit.smart.sm4and.automate.Automation;
 import edu.mit.smart.sm4and.connector.Connector;
 import edu.mit.smart.sm4and.connector.MinaConnector;
@@ -75,7 +78,7 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 	//Known cloud facsimiles by ID (id = host:port)
 	//Items are added to the back, and the FIRST item in the list is the currently-used connection.
 	//NOTE: We *only* store fake connections.
-	protected Hashtable<String, LinkedList<TcpFacsimile>> cloudConnections = new Hashtable<String, LinkedList<TcpFacsimile>>();
+	protected Hashtable<String, LinkedList<TcpFacsCloud>> cloudConnections = new Hashtable<String, LinkedList<TcpFacsCloud>>();
 	
 	//For automation
 	protected int receive_counter;
@@ -210,17 +213,17 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 	public TcpFacsimile connectTcp(boolean fakeSocket, String host, int port, int timeout) throws IOException {
 		//Save the details of this facsimile.
 		String key = host + ":" + port;
-		TcpFacsimile res = new TcpFacsimile(fakeSocket, this, host, port, timeout);
+		TcpFacsimile res = fakeSocket ? new TcpFacsCloud(this, host, port, timeout) : new TcpFacsSocket(this, host, port, timeout);
 		res.connect();
 		
 		//Certain things only happen with a fake socket.
-		if (fakeSocket) {
+		if (res instanceof TcpFacsCloud) {
 			//Synchronization: multiple threads can call connectTcp at once (multiple ResRequests).
 			synchronized (cloudConnections) {
 				if (!cloudConnections.containsKey(key)) {
-					cloudConnections.put(key, new LinkedList<TcpFacsimile>());
+					cloudConnections.put(key, new LinkedList<TcpFacsCloud>());
 				}
-				cloudConnections.get(key).add(res);
+				cloudConnections.get(key).add((TcpFacsCloud)res);
 			}
 			
 			//Send a connect message to the server.
@@ -236,7 +239,11 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 
 	
 	public void disconnectTcp(TcpFacsimile socket) {
-		if (socket.isFake()) {
+		//Shut down the actual socket regardless.
+		socket.disconnect();
+		
+		//Again, some things only happen for fake sockets.
+		if (socket instanceof TcpFacsCloud) {
 			//Remove it.
 			String key = socket.getHost() + ":" + socket.getPort();
 			//Synchronization: multiple threads can call disconnectTcp at once (multiple ResRequests).
@@ -248,12 +255,7 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 				//We remove the first item in the list.
 				cloudConnections.get(key).removeFirst();
 			}
-		}
-		
-		//Shut down the actual socket (non-fake)
-		socket.disconnect();
-		
-		if (socket.isFake()) {
+			
 			//Inform Sim Mobility that we are done.
 			TcpDisconnectMessage msg = new TcpDisconnectMessage();
 			msg.host = socket.getHost();
@@ -415,7 +417,7 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 			byte[] packet = ByteArraySerialization.Deserialize(base64Data);
 			
 			//Is this from the cloud?
-			TcpFacsimile cloud = null;
+			TcpFacsCloud cloud = null;
 			synchronized (cloudConnections) {
 /////////////////////////////////////////////////////////////
 // TODO: There's the risk of an un-processed line being stuck at the previous caller.
