@@ -109,6 +109,8 @@ public class SimMobServerConnectTask extends AsyncTask<Connector, Void, Boolean>
 					}
 					skip = false; //Skips the first line, which contains the table header.
 				}
+			} catch (Exception ex) {
+				logger.log("Can't auto-detect relay address: EXCEPTION(" + ex.getClass().getName() + "): " + ex.toString());
 			} finally {
 				process.destroy();
 			}			

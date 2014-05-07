@@ -16,7 +16,7 @@ public class Globals {
 	public static final String SM_HOST = "AUTO";
 	
 	//Whether to use the expected port for the host or the relay.
-	public static final int SM_PORT = HDirect;
+	public static final int SM_PORT = HRelay;
 	
 	//Use the "v1" bundle format? This will eventually be alway-on.
 	public static final boolean SM_NEW_BUNDLE_FORMAT = true;
