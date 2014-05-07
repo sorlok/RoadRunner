@@ -9,8 +9,13 @@ public class Globals {
 	
 	private static final int HRelay = 6799;
 	
-	//public static final String SM_HOST = "10.0.0.1"; //Note that 127.0.0.1 won't work; Android assigns this to the phone.
-	public static final String SM_HOST = "128.30.87.128";
+	//Location of the Sim Mobility relay (if HRelay) or Sim Mobility itself (if HDirect).
+	//Note that 127.0.0.1 won't work; Android assigns this to the phone.
+	//Use "AUTO" to try to guess it (works with Minimega's style of addressing)
+	//public static final String SM_HOST = "128.30.87.128";
+	public static final String SM_HOST = "AUTO";
+	
+	//Whether to use the expected port for the host or the relay.
 	public static final int SM_PORT = HDirect;
 	
 	//Use the "v1" bundle format? This will eventually be alway-on.

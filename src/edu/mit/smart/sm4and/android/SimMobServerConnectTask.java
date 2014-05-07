@@ -6,6 +6,11 @@ package edu.mit.smart.sm4and.android;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.UnknownHostException;
 
 import android.os.AsyncTask;
 
@@ -48,9 +53,16 @@ public class SimMobServerConnectTask extends AsyncTask<Connector, Void, Boolean>
 	protected Boolean doInBackground(Connector... mnConnect) {
 		if (mnConnect.length!=1) { throw new LoggingRuntimeException("Only one Connector allowed."); }
 		try {
-			logger.log("Attempting to connect to MINA server on " + Globals.SM_HOST + ":" + Globals.SM_PORT);
 			if (!Globals.SM_RERUN_FULL_TRACE) {
-				mnConnect[0].connect(parser, Globals.SM_HOST, Globals.SM_PORT);
+				//Try to detect "AUTO" hosts.
+				String host = Globals.SM_HOST.equals("AUTO") ? AutoDetectRelay() : Globals.SM_HOST;
+				if (host.isEmpty()) {
+					throw new LoggingRuntimeException("Could not auto-detect host (or empty host in Globals).");
+				}
+				
+				//Connect
+				logger.log("Attempting to connect to MINA server on " + host + ":" + Globals.SM_PORT);
+				mnConnect[0].connect(parser, host, Globals.SM_PORT);
 			}
 		} catch (Exception ex) {
 			logger.log(ex.toString());
@@ -66,5 +78,45 @@ public class SimMobServerConnectTask extends AsyncTask<Connector, Void, Boolean>
 		if (onComplete!=null) {
 			onComplete.onPostExecute(errorEx, reader, writer);
 		}
+	}
+	
+	protected final String AutoDetectRelay() {
+		String res = "";
+		try {
+			Process process = new ProcessBuilder()
+				.command("/system/bin/netstat", "-rn")
+				.redirectErrorStream(true)
+				.start();
+			
+			//Need to catch its output.
+			try {
+				@SuppressWarnings("unused")
+				OutputStream out = process.getOutputStream();
+				
+				InputStream in = process.getInputStream();
+				BufferedReader br = new BufferedReader(new InputStreamReader(in));
+				
+				//Check each line for one that matches.
+				String line;
+				boolean skip = true;
+				while ((line = br.readLine()) != null) {
+					if (!skip && res.isEmpty()) {
+						String[] items = line.trim().split(" +");
+						if (items[0].equals("tcp") && items[5].equals("ESTABLISHED")) {
+							res = items[4].split(":")[0];
+							logger.log("Auto-detected relay address: " + res);
+						}
+					}
+					skip = false; //Skips the first line, which contains the table header.
+				}
+			} finally {
+				process.destroy();
+			}			
+		} catch (UnknownHostException ex) {
+			logger.log("Can't auto-detect relay address: UNKNOWN HOST.");
+		} catch (IOException ex) {
+			logger.log("Can't auto-detect relay address: IOEXCEPT.");
+		}
+		return res;
 	}
 }
