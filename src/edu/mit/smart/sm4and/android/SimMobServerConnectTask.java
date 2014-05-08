@@ -55,25 +55,11 @@ public class SimMobServerConnectTask extends AsyncTask<Connector, Void, Boolean>
 		try {
 			if (!Globals.SM_RERUN_FULL_TRACE) {
 				//Try to detect "AUTO" hosts.
-				String host = Globals.SM_HOST.equals("AUTO") ? "" : Globals.SM_HOST;
-				
-				//netstat is sometimes slow to add the entry we're looking for, so we try multiple times.
-				int currTry = 1;
-				for(;currTry<=10&&host.isEmpty(); currTry++) {
-					host = AutoDetectRelay();
-					if (host.isEmpty()) {
-						try {
-							Thread.sleep(10*1000); //10 seconds.
-						} catch (InterruptedException ex) {}
-					} else {
-						logger.log("MINA server auto-detected after " + currTry + "tries.");
-						break;
-					}
-				}
+				String host = Globals.SM_HOST.equals("AUTO") ? AutoDetectRelay() : Globals.SM_HOST;
 				
 				//Did we find anything?
 				if (host.isEmpty()) {
-					throw new LoggingRuntimeException("Could not auto-detect host after " + currTry + " attemps (or empty host in Globals).");
+					throw new LoggingRuntimeException("Could not auto-detect host (or empty host in Globals).");
 				}
 				
 				//Connect
@@ -100,7 +86,7 @@ public class SimMobServerConnectTask extends AsyncTask<Connector, Void, Boolean>
 		String res = "";
 		try {
 			Process process = new ProcessBuilder()
-				.command("/system/bin/netstat", "-rn")
+				.command("getprop", "dhcp.eth0.gateway")
 				.redirectErrorStream(true)
 				.start();
 			
@@ -112,18 +98,12 @@ public class SimMobServerConnectTask extends AsyncTask<Connector, Void, Boolean>
 				InputStream in = process.getInputStream();
 				BufferedReader br = new BufferedReader(new InputStreamReader(in));
 				
-				//Check each line for one that matches.
+				//The first line contains our result.
 				String line;
-				boolean skip = true;
 				while ((line = br.readLine()) != null) {
-					if (!skip && res.isEmpty()) {
-						String[] items = line.trim().split(" +");
-						if (items[0].equals("tcp") && items[5].equals("ESTABLISHED")) {
-							res = items[4].split(":")[0];
-							logger.log("Auto-detected relay address: " + res);
-						}
+					if (res.isEmpty()) {
+						res = line.trim();
 					}
-					skip = false; //Skips the first line, which contains the table header.
 				}
 			} catch (Exception ex) {
 				logger.log("Can't start address auto-detection Process: EXCEPTION(" + ex.getClass().getName() + "): " + ex.toString());
