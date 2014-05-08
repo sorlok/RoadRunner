@@ -14,6 +14,8 @@ public class DefaultMessageTypes {
 	/** An OpaqueSend message. Contains an opaque block of Base64-encoded data. */
 	public static class OpaqueSendMessage extends Message {
 		public static final String Format = "base64escape";
+		public static final String TechDsrc = "dsrc";
+		public static final String TechLte = "lte";
 		
 		public OpaqueSendMessage() { 
 			super(Type.opaque_send);
@@ -22,6 +24,7 @@ public class DefaultMessageTypes {
 		public String from_id;
 		public String[] to_ids = new String[]{};
 		public String format;
+		public String tech;
 		public String data;
 		public boolean broadcast;
 	}
@@ -35,6 +38,7 @@ public class DefaultMessageTypes {
 		public String from_id;
 		public String to_id;
 		public String format;
+		public String tech;
 		public String data;
 	}
 

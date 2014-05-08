@@ -55,6 +55,7 @@ public class TcpFacsCloud extends TcpFacsimile {
 		OpaqueSendMessage msg = new OpaqueSendMessage();
 		msg.from_id = broker.getUniqueId();
 		msg.format = OpaqueSendMessage.Format;
+		msg.tech = OpaqueSendMessage.TechLte;
 		msg.to_ids = new String[]{host+":"+port};
 		msg.broadcast = false;
 		msg.data = ByteArraySerialization.Serialize(line.getBytes());

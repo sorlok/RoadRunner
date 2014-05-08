@@ -31,7 +31,14 @@ public class OpaqueReceiveHandler extends AbstractMessageHandler {
     		throw new LoggingRuntimeException("Received message in unexpected format: " + recvMsg.format);
     	}
     	
-        mcProcess.receive(recvMsg.from_id, recvMsg.to_id, recvMsg.data);
+    	boolean isCloud = false;
+    	if (recvMsg.tech.equals(OpaqueSendMessage.TechLte)) {
+    		isCloud = true;
+    	} else if (!recvMsg.tech.equals(OpaqueSendMessage.TechDsrc)) {
+    		throw new LoggingRuntimeException("Unknown message \"tech\" on incoming opaque message.");
+    	}
+    	
+        mcProcess.receive(recvMsg.from_id, recvMsg.to_id, isCloud, recvMsg.data);
     }
     
 }

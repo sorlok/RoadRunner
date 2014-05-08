@@ -405,7 +405,7 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 	
 	
 	public class OpaqueMsgReceiver {
-		public void receive(String fromId, String toId, String base64Data) {
+		public void receive(String fromId, String toId, boolean isCloud, String base64Data) {
 			//Ignore messages sent to yourself.
 			if (fromId.equals(uniqueId)) {
 				logger.log("Ignoring packet sent to self.");
@@ -416,28 +416,32 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 			byte[] packet = ByteArraySerialization.Deserialize(base64Data);
 			
 			//Is this from the cloud?
-			TcpFacsCloud cloud = null;
-			synchronized (cloudConnections) {
-/////////////////////////////////////////////////////////////
-// TODO: There's the risk of an un-processed line being stuck at the previous caller.
-///////////////////////////////////////////////////////////			
-				cloud = cloudConnections.get(fromId).getFirst();
-			}
-			if (cloud!=null) {				
+			if (isCloud) {
+				TcpFacsCloud cloud = null;
+				synchronized (cloudConnections) {
+	/////////////////////////////////////////////////////////////
+	// TODO: There's the risk of an un-processed line being stuck at the previous caller.
+//	       To solve this, we will need to send a token along with the opaque message.
+	///////////////////////////////////////////////////////////			
+					cloud = cloudConnections.get(fromId).getFirst();
+				}
+				if (cloud==null) {
+					throw new LoggingRuntimeException("Incoming message from unknown Cloud ID.");
+				}
+				
 				//Split this message into lines.
 				String pack = new String(packet);
 				String[] lines = pack.split("\n", pack.length()); //length() argument needed for trailing empty lines.
 				for (String line : lines) {
 					cloud.addIncomingLine(line);
 				}
-				return;
+			} else {
+				//Else, it's from another client. Turn it into a packet.
+				AdhocPacket p = AdhocPacketThread.ReadPacket(logger, packet, packet.length);
+					
+				//Send it to Road Runner's message loop as a ADHOC_PACKET_RECV.
+				myHandler.obtainMessage(RoadRunnerService.ADHOC_PACKET_RECV, p).sendToTarget();
 			}
-			
-			//Else, it's from another client. Turn it into a packet.
-			AdhocPacket p = AdhocPacketThread.ReadPacket(logger, packet, packet.length);
-				
-			//Send it to Road Runner's message loop as a ADHOC_PACKET_RECV.
-			myHandler.obtainMessage(RoadRunnerService.ADHOC_PACKET_RECV, p).sendToTarget();
 		}
 	}
 	
@@ -461,6 +465,7 @@ public class AndroidSimMobilityBroker extends SimMobilityBroker {
 		//Prepare the packet.
 		OpaqueSendMessage obj = new OpaqueSendMessage();
 		obj.format = OpaqueSendMessage.Format;
+		obj.tech = OpaqueSendMessage.TechDsrc;
 		obj.data = ByteArraySerialization.Serialize(packet);
 		obj.broadcast = true;
 		obj.from_id = uniqueId;
