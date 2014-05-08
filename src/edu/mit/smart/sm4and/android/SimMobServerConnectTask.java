@@ -55,9 +55,25 @@ public class SimMobServerConnectTask extends AsyncTask<Connector, Void, Boolean>
 		try {
 			if (!Globals.SM_RERUN_FULL_TRACE) {
 				//Try to detect "AUTO" hosts.
-				String host = Globals.SM_HOST.equals("AUTO") ? AutoDetectRelay() : Globals.SM_HOST;
+				String host = Globals.SM_HOST.equals("AUTO") ? "" : Globals.SM_HOST;
+				
+				//netstat is sometimes slow to add the entry we're looking for, so we try multiple times.
+				int currTry = 1;
+				for(;currTry<=10&&host.isEmpty(); currTry++) {
+					host = AutoDetectRelay();
+					if (host.isEmpty()) {
+						try {
+							Thread.sleep(10*1000); //10 seconds.
+						} catch (InterruptedException ex) {}
+					} else {
+						logger.log("MINA server auto-detected after " + currTry + "tries.");
+						break;
+					}
+				}
+				
+				//Did we find anything?
 				if (host.isEmpty()) {
-					throw new LoggingRuntimeException("Could not auto-detect host (or empty host in Globals).");
+					throw new LoggingRuntimeException("Could not auto-detect host after " + currTry + " attemps (or empty host in Globals).");
 				}
 				
 				//Connect
@@ -110,14 +126,12 @@ public class SimMobServerConnectTask extends AsyncTask<Connector, Void, Boolean>
 					skip = false; //Skips the first line, which contains the table header.
 				}
 			} catch (Exception ex) {
-				logger.log("Can't auto-detect relay address: EXCEPTION(" + ex.getClass().getName() + "): " + ex.toString());
+				logger.log("Can't start address auto-detection Process: EXCEPTION(" + ex.getClass().getName() + "): " + ex.toString());
 			} finally {
 				process.destroy();
 			}			
-		} catch (UnknownHostException ex) {
-			logger.log("Can't auto-detect relay address: UNKNOWN HOST.");
-		} catch (IOException ex) {
-			logger.log("Can't auto-detect relay address: IOEXCEPT.");
+		} catch (Exception ex) {
+			logger.log("Can't auto-detect relay address: EXCEPTION(" + ex.getClass().getName() + "): " + ex.toString());
 		}
 		return res;
 	}
