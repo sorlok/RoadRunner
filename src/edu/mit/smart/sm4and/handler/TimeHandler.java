@@ -24,6 +24,10 @@ public class TimeHandler extends AbstractMessageHandler {
 	private TimeAdvancer timeTicker;
 	private String clientID;
 	
+	//Located here for performance reasons.
+	private TickedClientResponse TickedResponse = new TickedClientResponse();
+	private MessageBundle ThisTickOut = new MessageBundle();
+	
     public TimeHandler(String clientID, TimeAdvancer timeTicker) {
     	this.timeTicker = timeTicker;
     	this.clientID = clientID;
@@ -32,25 +36,24 @@ public class TimeHandler extends AbstractMessageHandler {
     @Override
     public void handle(Message message, Connector connector, MessageParser parser) {  
         //Ensure that some amount of time has elapsed.
-    	TickedSimMobMessage timeMsg= (TickedSimMobMessage)message;
+    	TickedSimMobMessage timeMsg = (TickedSimMobMessage)message;
         timeTicker.advance(timeMsg.tick, timeMsg.elapsed);
         
     	//Send a response.
-        connector.addMessage(new TickedClientResponse());
+        connector.addMessage(TickedResponse);
         
         //Need to append the log here.
-        MessageBundle out = new MessageBundle();
-        out.sendId = clientID;
-        out.destId = "0";
-        out.messages = connector.getAndClearMessages();
+        ThisTickOut.sendId = clientID;
+        ThisTickOut.destId = "0";
+        ThisTickOut.messages = connector.getAndClearMessages();
         if (Globals.SM_LOG_TRACE_ALL_MESSAGES) {
         	//TODO: It's not clear how this would work with v1 messages; maybe save the original string somewhere?
         	RemoteLogMessage log = new RemoteLogMessage();
         	log.log_msg = "SEND: " + MinaConnector.escape_invalid_json("(todo)");
-        	out.messages.add(log);
+        	ThisTickOut.messages.add(log);
         }
         
         //This means we're done; instruct the connector to send all remaining messages.
-        connector.sendAll(out);
+        connector.sendAll(ThisTickOut);
     }
 }

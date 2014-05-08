@@ -43,6 +43,14 @@ public class MinaConnector extends Connector {
     
     private final java.util.logging.Logger LOG = java.util.logging.Logger.getLogger(getClass().getCanonicalName());
     
+    //Defined once for performance reasons. Note that, because of this you CANNOT handle messages (from Sim Mobility)
+    // on different threads (not that we ever did that in the client).
+    private static StringBuilder EscRes = new StringBuilder();
+    
+    //Defined once for performance reasons. Should have no effect on anything.
+    private Message CurrMessage;
+    private AbstractMessageHandler CurrHandler;
+    
     public void setSession(IoSession sess) {
     	session = sess;
     }
@@ -142,15 +150,15 @@ public class MinaConnector extends Connector {
     }
     
     public static String escape_invalid_json(String src) {
-    	StringBuilder res = new StringBuilder();
+    	EscRes.setLength(0);
 		for (int i=0; i<src.length(); i++) {
 			char c = src.charAt(i);
-			if (c=='&') { res.append("&&"); }
-			else if (c=='\\') { res.append("&1"); }
-			else if (c=='"') { res.append("&2"); }
-			else { res.append(c); }
+			if (c=='&') { EscRes.append("&&"); }
+			else if (c=='\\') { EscRes.append("&1"); }
+			else if (c=='"') { EscRes.append("&2"); }
+			else { EscRes.append(c); }
 		}
-		return res.toString();
+		return EscRes.toString();
     }
     
     
@@ -170,12 +178,14 @@ public class MinaConnector extends Connector {
 		}
     	
 		//Just pass off each message to "handle()"
-    	for (Message message : bundle.messages) {    		
+		for (int i=0; i<bundle.messages.size(); i++) {
+			CurrMessage = bundle.messages.get(i);
+			
     		//Get an appropriate response handler.
-    		AbstractMessageHandler handler = handlerFactory.create(message.getMessageType());
+			CurrHandler = handlerFactory.create(CurrMessage.getMessageType());
     		
     		//Ask the Broker to post this message on the main thread.
-    		broker.handleMessage(handler, message);
+    		broker.handleMessage(CurrHandler, CurrMessage);
     	}
     }
 }

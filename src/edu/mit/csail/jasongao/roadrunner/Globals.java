@@ -110,7 +110,7 @@ public class Globals {
 	public static final String[] SM_IDENTIFYING_INTERFACES = {ADHOC_IFACE_NAME, "eth0", "wlan0"};
 	
 	/** Cloud parameters */
-	static final String CLOUD_HOST = "128.30.87.128";
+	static final String CLOUD_HOST = "128.0.0.0";
 	
 	static final int CLOUD_SOCKET_TIMEOUT = 3000;
 	static final byte[] CLOUD_PUBLIC_KEY = null; // TODO

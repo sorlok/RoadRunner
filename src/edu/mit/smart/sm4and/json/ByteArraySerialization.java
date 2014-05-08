@@ -24,7 +24,7 @@ public class ByteArraySerialization {
 		//  : becomes ".2"
 		//  \n becomes ".3"
 		//(some of these are leftover from UTF-8, and won't occur in Base64)
-		StringBuilder res = new StringBuilder();
+		StringBuilder res = new StringBuilder(500);
 		for (int i=0; i<raw.length(); i++) {
 			char c = raw.charAt(i);
 			if (c=='.') { res.append(".."); }
@@ -43,7 +43,7 @@ public class ByteArraySerialization {
 	 */
 	public static byte[] Deserialize(String str) {
 		//First, remove our escape sequences.
-		StringBuilder unescaped = new StringBuilder();
+		StringBuilder unescaped = new StringBuilder(500);
 		for (int i=0; i<str.length(); i++) {
 			char c = str.charAt(i);
 			if (c=='.') {

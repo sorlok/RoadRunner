@@ -60,17 +60,13 @@ public class MessageHandlerFactory  {
 	 * @param message The message in question.
 	 * @param ID The ID of the current agent.
 	 */
-	public AbstractMessageHandler create(String msgType) {
-		//Retrieve the default and custom handlers for this type.
-		AbstractMessageHandler defHand = defaultHandlers.get(msgType);
-		AbstractMessageHandler custHand = customHandlers.get(msgType);
-		
+	public AbstractMessageHandler create(String msgType) {		
 		//At least one must be non-null. 
-		if (defHand==null && custHand==null) {
+		if (!(defaultHandlers.containsKey(msgType) || customHandlers.containsKey(msgType))) {
 			throw new LoggingRuntimeException("Unknown message type: " + msgType.toString() + "  >>NOT HANDLED.");
 		}
 		
 		//Else, one or both can be null. Let the BifurcatedMessageHandler decide.
-		return BifurcatedHandler.CreateHandler(defHand, custHand);
+		return BifurcatedHandler.CreateHandler(defaultHandlers.get(msgType), customHandlers.get(msgType));
 	}
 }
